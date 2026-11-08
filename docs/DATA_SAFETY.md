@@ -8,7 +8,7 @@ Status of the local data-safety work (the SAFE-01 slice of the safe-release plan
 
 **One model inventory.** `DataInventory` lists every `@Model` in the schema and provides counts, deletions and human labels for each. Export, backup, restore, delete-all and the tests read the same list, so a model added later cannot stay out of the data controls unnoticed.
 
-**Export format v2.** The JSON archive now carries a manifest (format version, model list, per-model counts, total, whether the journal and photos were included), a producer block (app version, build, `recordSchema: implicit-v1`) and the record types that were previously missing:
+**Export format v2.** The JSON archive now carries a manifest (format version, model list, per-model counts, total, whether the journal and photos were included), a producer block (app version, build, `recordSchema: cultivation-v2`, record schema version) and the record types that were previously missing:
 
 - training sessions
 - feed schedules with their weeks and products
@@ -26,6 +26,8 @@ Before replacing, the restore dialog states what the backup holds: record count 
 
 **Verified delete-all.** Delete-all walks the inventory, throws instead of swallowing failures, rolls the context back when it cannot complete, and reports the record counts that remain. The completion message says what was removed and that Files copies, device backups and iCloud backups are outside the app.
 
+**Compliance history is part of the data controls.** `ComplianceSnapshot` and `RuleEvaluationEvent` are in the same model inventory, so export, backup, restore and delete-all cover them without a separate path. Export writes `complianceSnapshots` and `ruleEvaluationEvents` sections plus two CSV files; restore reads them back; a v2 manifest can verify their counts. See `docs/COMPLIANCE_HISTORY.md`.
+
 ## Corrections to earlier planning assumptions
 
 These were checked against the source in this branch:
@@ -37,6 +39,6 @@ These were checked against the source in this branch:
 
 ## Still open
 
-- COMP-01 (versioned SwiftData schema, `ComplianceSnapshot` / `RuleEvaluationEvent`, rule-change review) — needs the verified backup and the migration plan first.
+- COMP-01 (versioned SwiftData schema, `ComplianceSnapshot` / `RuleEvaluationEvent`, rule-change review) is implemented and documented in `docs/COMPLIANCE_HISTORY.md`. Release gates remain: legal review of any changed rule-pack content and copy, staged rollout, privacy sign-off, and migration fixtures from every released build (none can be retrieved from this repository, so the migration test uses a locally created V1 store).
 - Legal and privacy review queue from the plan, including the deletion-boundary copy and the iOS 18 decision.
-- Migration, corruption and interruption fixtures from real released builds. The test target now compiles and holds coverage, deletion, envelope and validation tests, but there is no simulator on the build machine to execute them, so they have not been run.
+- The test target compiles with the share, data-safety and compliance-history suites. CI runs the full suite on an iPhone 17 simulator; this environment has no simulator, so the tests have been compiled here but not executed.

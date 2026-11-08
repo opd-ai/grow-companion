@@ -39,6 +39,7 @@ import so location metadata never survives.
 | Protected, recipient-scoped share files | Shipped (file based; encryption not independently reviewed) | `Services/SecureEnvelope.swift`, `Services/SharePayload.swift`, `Services/SharePackageService.swift`, `Views/Sharing/` |
 | Face ID lock, privacy screen, export and delete-all | Shipped | `Services/AppLock.swift`, `Services/PrivacyCover.swift`, `Views/Settings/` |
 | Privacy review and remediation of local security findings | Shipped | `docs/PRIVACY_REVIEW.md`, protected local services |
+| Immutable compliance history and rule-change review | Shipped locally; release gates open | `Models/ComplianceSnapshot.swift`, `Models/RuleEvaluationEvent.swift`, `Services/ComplianceHistory.swift`, `Views/Compliance/` |
 
 The shipped navigation and current feature surfaces are recorded in section 6.2.
 Future cloud, hardware, extension and community features remain explicitly
@@ -430,8 +431,12 @@ adjust my grow without surprises.
   appears on every rule it affects.
 
 *Today:* the pack carries its version and verified date, and each rule shows a
-"Needs re-verification" pill once it is more than 90 days old. Remote signed
-packs, change notices and status-change notifications are the remaining work.
+"Needs re-verification" pill once it is more than 90 days old. The app now also
+records an append-only snapshot of every calculation it displays, and when a
+bundled pack version differs it appends a review event that names the changed
+fields, their citations and a per-metric comparison, which the grower
+acknowledges explicitly. Remote signed packs, status-change notifications and
+legal review of any changed pack content remain the remaining work.
 
 ### 3. Log a watering in under five seconds — Planned
 
@@ -671,6 +676,8 @@ The shipped store uses SwiftData with these models:
 | `Equipment`, `ServiceRecord` | Equipment | Room assignment, service interval and service history. |
 | `ScoutingCheck` | ScoutingCheck | Plant or room findings, date, note and optional protected photo. |
 | `CycleArchive` | CycleArchive | Named completed cycle; nullifying relationship preserves every plant record. |
+| `ComplianceSnapshot` | ComplianceSnapshot | Append-only calculation record: jurisdiction, pack version, stage buckets, retained weight, canopy, limits, warning threshold and per-metric result. No plant or room names. |
+| `RuleEvaluationEvent` | RuleEvaluationEvent | One re-check of a saved snapshot under a different pack, with changed fields, citations, per-metric outcomes and an acknowledgment timestamp. |
 
 ### 5.3 Design decisions
 
@@ -684,6 +691,13 @@ The shipped store uses SwiftData with these models:
 
 ### 5.4 Migration notes
 
+- The cultivation store now has an explicit versioned schema.
+  `CultivationSchemaV1` freezes the model set that shipped with the unversioned
+  store; `CultivationSchemaV2` adds only `ComplianceSnapshot` and
+  `RuleEvaluationEvent`, and `CultivationMigrationPlan` applies one lightweight
+  additive stage. No existing model, relationship, identifier, photo or value is
+  rewritten, and a store that cannot be opened still enters recovery rather than
+  an empty grow.
 - New Tier 3 entities are additive: `Breeder`, parent-line references,
   `Threshold`, `ShareGrant` and `AccessLog`. Each new relationship is optional
   so a lightweight migration keeps existing stores readable.
@@ -773,6 +787,7 @@ Apps locks over everything when app lock is on
 
 TAB 1: HOME
 ├── Compliance ring → breakdown sheet
+├── Compliance history and an unacknowledged rule-change review
 ├── Today (reminders, overdue stages, missing weights, dispositions)
 ├── Room filter
 ├── Plants → plant detail → strain library entry
@@ -792,7 +807,9 @@ TAB 3: STRAINS
 
 TAB 4: RULES
 ├── Jurisdiction summary and "This is my jurisdiction"
+├── Rule-change notice with changed limits, citations and acknowledgment
 ├── Live snapshot (counted plants, stored flower, canopy)
+├── Compliance history → saved calculation detail
 ├── Rule detail (summary, citation, source, verified date, stale badge)
 └── Federal notice and verification duty
 
