@@ -1083,14 +1083,17 @@ equivalent.
 **What ships.** A full Spanish (Mexico) localization of interface copy, units,
 dates and plural counts, and a data-table alternative for every chart and ring.
 
-**Status: partly shipped.** The engineering half is in the app: numbers,
-weights, areas, temperatures, volumes, percentages and dates now come from the
+**Status: in progress.** The engineering half is in the app: numbers,
+weights, areas, temperatures, volumes, percentages and dates come from the
 device locale's formatters, and every chart and the compliance ring has a text
-table equivalent reachable with VoiceOver. The Spanish copy itself is still open.
-It needs the localisation and legal-translation review recorded above, it touches
-every screen rather than one feature, and legal and rule copy has to stay in
-English with a note until that review exists. It is not half-done on purpose: a
-partial translation would ship mixed-language legal text.
+table equivalent reachable with VoiceOver. The Spanish copy has started: a
+review-ready first batch of 159 keys (the shared vocabulary, app chrome and the
+Home screen) ships in `Resources/Localizable.xcstrings`, and the mechanism is
+verified — an ordinary build produces `es.lproj/Localizable.strings` with no
+project-file change. The remaining screens are listed, with the glossary and the
+rules for later batches, in `docs/LOCALIZATION.md`. Legal and rule text stays in
+English with an in-app note while the app runs in Spanish, until the legal
+localisation review exists.
 
 **Shipped:** `Services/Format.swift` renders numbers through a locale-aware
 `NumberFormatter` (a Spanish device sees `24,5`, an English one `24.5`) and dates
