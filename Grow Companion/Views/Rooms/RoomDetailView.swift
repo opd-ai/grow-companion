@@ -143,11 +143,48 @@ struct RoomDetailView: View {
 
     private var lightDistanceCard: some View {
         VStack(alignment: .leading, spacing: 12) {
-            SectionHeader("Canopy distance", subtitle: room.canopyDistanceMeters.map { String(format: "Last confirmed %.0f cm", $0 * 100) } ?? "Not measured yet")
-            if let date = room.canopyDistanceMeasuredAt {
-                Text("Measured \(Format.shortDate(date)) · \(room.canopyDistanceSource == .lidar ? "LiDAR" : "manual")")
+            SectionHeader(
+                "Canopy distance",
+                subtitle: room.canopyDistanceMeters.map {
+                    String(localized: "Last confirmed \(Format.distance($0, unit: unit))")
+                } ?? String(localized: "Not measured yet")
+            )
+            if let advice = room.lightDistanceAdvice {
+                InfoRow(
+                    label: String(localized: "Target"),
+                    value: Format.distanceRange(advice.range, unit: unit)
+                )
+                Text(advice.isUserSet
+                    ? String(localized: "Your own target for this fixture")
+                    : advice.summary)
                     .font(Theme.sans(11))
                     .foregroundStyle(Theme.tertiaryInk)
+                    .fixedSize(horizontal: false, vertical: true)
+            } else {
+                Text("No default target for this fixture. Set your own from the manual.")
+                    .font(Theme.sans(12))
+                    .foregroundStyle(Theme.secondaryInk)
+                    .fixedSize(horizontal: false, vertical: true)
+            }
+            if let date = room.canopyDistanceMeasuredAt {
+                Text("Measured \(Format.shortDate(date)) · \(room.canopyDistanceSource == .lidar ? String(localized: "LiDAR") : String(localized: "Manual"))")
+                    .font(Theme.sans(11))
+                    .foregroundStyle(Theme.tertiaryInk)
+            }
+            if let reason = room.lightDistanceReason {
+                VStack(alignment: .leading, spacing: 4) {
+                    Pill(
+                        text: LightDistanceService.reMeasureTitle(reason),
+                        systemImage: "ruler",
+                        tint: Theme.amber,
+                        fill: Theme.amberSoft
+                    )
+                    Text(LightDistanceService.reMeasureDetail(reason))
+                        .font(Theme.sans(11))
+                        .foregroundStyle(Theme.secondaryInk)
+                        .fixedSize(horizontal: false, vertical: true)
+                }
+                .accessibilityElement(children: .combine)
             }
             SecondaryButton("Measure light distance", systemImage: "ruler") {
                 showingLightDistance = true
