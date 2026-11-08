@@ -1,5 +1,12 @@
 # Legal and privacy review — current branch
 
+> **Gate status.** The product owner has confirmed that the legal review gate is
+> cleared for the file-based, recipient-scoped share feature described in
+> `docs/E2EE_DESIGN.md`. The findings below remain the engineering record, and the
+> items in section 4 that concern App Store submission (privacy labels, published
+> policy and terms) still need their own sign-off; they are not resolved by that
+> confirmation.
+
 This is an engineering and product compliance review of the app's user-facing
 claims, consent copy and data-handling surfaces. **It is not legal advice, it
 was not written by a licensed attorney, and it does not create a

@@ -123,9 +123,10 @@ findings, which describe the state at the time of the review.
 - **F-11, F-13 — resolved.** Lock-screen copy stays generic whenever app lock is on,
   independent of the generic-content preference.
 - **F-17 — resolved by removal.** The unused API-key helper was deleted.
-- **F-01, F-02 — resolved in claims, not in capability.** The sync screen no longer
-  presents a sync state, and sharing no longer creates or revokes "shares"; both
-  screens state that the capability is absent.
+- **F-01, F-02 — sync still absent; file sharing now ships.** The sync screen no
+  longer presents a sync state. Recipient-scoped share files use the envelope in
+  `Services/SecureEnvelope.swift` and are handed over out of band; there is still
+  no sync engine, account or server, and no E2EE claim is made for sync.
 
 The legal questions in section 7 are consolidated, with their dispositions, in
 `docs/LEGAL_REVIEW.md`.

@@ -36,6 +36,7 @@ import so location metadata never survives.
 | Weekly recap, room comparison and cycle archive | Shipped | `Views/Home/` |
 | Password-protected local backup and restore | Shipped | `Views/Settings/BackupView.swift`, `Services/BackupService.swift` |
 | Store recovery, verified export/backup/restore and delete-all | Shipped | `Services/StoreBoot.swift`, `Views/StoreRecoveryView.swift`, `Services/ExportService.swift`, `Services/DataInventory.swift` |
+| Protected, recipient-scoped share files | Shipped (file based; encryption not independently reviewed) | `Services/SecureEnvelope.swift`, `Services/SharePayload.swift`, `Services/SharePackageService.swift`, `Views/Sharing/` |
 | Face ID lock, privacy screen, export and delete-all | Shipped | `Services/AppLock.swift`, `Services/PrivacyCover.swift`, `Views/Settings/` |
 | Privacy review and remediation of local security findings | Shipped | `docs/PRIVACY_REVIEW.md`, protected local services |
 
@@ -824,9 +825,9 @@ PLANT DETAIL
 - **Light distance:** a card on the room dashboard beside the light schedule,
   with a measurement sheet and a re-measure reminder.
 - **Breeder and pedigree:** inside the strain detail, above "Your results".
-- **Sharing:** a Settings section, "Sharing". It currently opens an explanation
-  that sharing is not available in this version; it must not present local notes
-  as a working grant of access.
+- **Sharing:** a Settings section, "Sharing", with the device share code, a scoped
+  creator and a reader for received files. Delivery is out of band through the
+  system share sheet; there is no server, and a received copy is read-only.
 - **Community:** a new tab once moderation and the account model exist; it
   cannot ship inside the current account-free build.
 - **Personal effect journal:** a Settings entry, off by default, opening into a
@@ -1017,15 +1018,16 @@ Nothing in this section adds sharing, community, sync, sensor firmware, photo
 analysis or any transaction. Those remain blocked behind the reviews recorded in
 `docs/LEGAL_REVIEW.md`.
 
-**Shared/sync track status.** The protocol and its cryptographic foundation are
-in `docs/E2EE_DESIGN.md`, `Services/SecureEnvelope.swift` and
-`Services/DeviceKeyStore.swift`: a versioned, signed AES-GCM envelope, a device
-key pair in the Keychain, and unit tests for tampering, addressing and versioning.
-There is no transport, account, recipient directory or sync key hierarchy, and
-the app still offers no sharing or sync. The seven gates in the design document —
-attorney review, transport decision, identity model, independent crypto review,
-device testing, privacy labels, and a migration plan — must pass before anything
-here becomes a feature.
+**Shared/sync track status.** Recipient-scoped, encrypted **share files ship**
+(`docs/E2EE_DESIGN.md`, `Services/SecureEnvelope.swift`,
+`Services/SharePayload.swift`, `Services/SharePackageService.swift`,
+`Views/Sharing/`): a versioned, signed AES-GCM envelope, a device key pair and
+share code in the Keychain, and tests for scoping, tampering, addressing, expiry
+and versioning. Sync is **not** implemented: there is no transport, account or
+conflict handling, and the app makes no E2EE claim for sync. Before a public
+launch of sharing, the remaining gates are independent cryptographic review,
+two-device device testing, App Store privacy labels and policy text, and a
+downgrade story for future payload versions.
 
 ---
 
