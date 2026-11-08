@@ -50,13 +50,13 @@ struct OnboardingFlow: View {
 
     private var primaryTitle: String {
         switch step {
-        case 0: return "I understand — continue"
-        case 1: return "Continue"
-        case 2: return "Continue"
-        case 3: return "Continue"
-        case 4: return "Looks right"
-        case 5: return "Start growing"
-        default: return "Continue"
+        case 0: return String(localized: "I understand — continue")
+        case 1: return String(localized: "Continue")
+        case 2: return String(localized: "Continue")
+        case 3: return String(localized: "Continue")
+        case 4: return String(localized: "Looks right")
+        case 5: return String(localized: "Start growing")
+        default: return String(localized: "Continue")
         }
     }
 

@@ -105,10 +105,10 @@ struct NotificationSettingsView: View {
 
     private var statusLabel: String {
         switch notificationStatus {
-        case .authorized, .provisional, .ephemeral: return "On"
-        case .denied: return "Off"
-        case .notDetermined: return "Not set up"
-        @unknown default: return "Unknown"
+        case .authorized, .provisional, .ephemeral: return String(localized: "On")
+        case .denied: return String(localized: "Off")
+        case .notDetermined: return String(localized: "Not set up")
+        @unknown default: return String(localized: "Unknown")
         }
     }
 

@@ -18,7 +18,7 @@ struct CycleArchiveView: View {
         case all, thisYear, withYield
         var id: String { rawValue }
         var title: String {
-            switch self { case .all: return "All cycles"; case .thisYear: return "This year"; case .withYield: return "With yield" }
+            switch self { case .all: return String(localized: "All cycles"); case .thisYear: return String(localized: "This year"); case .withYield: return String(localized: "With yield") }
         }
     }
 

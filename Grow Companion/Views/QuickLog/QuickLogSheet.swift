@@ -128,11 +128,11 @@ struct QuickLogSheet: View {
         case .water:
             return feedKind == .water ? "Save watering" : "Save feed"
         case .reading:
-            return "Save reading"
+            return String(localized: "Save reading")
         case .note:
-            return "Save note"
+            return String(localized: "Save note")
         case .stage:
-            return "Move to \(newStage?.title ?? "next stage")"
+            return String(localized: "Move to \(newStage?.title ?? "next stage")")
         }
     }
 

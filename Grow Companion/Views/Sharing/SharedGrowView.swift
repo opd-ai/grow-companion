@@ -142,7 +142,7 @@ struct SharedGrowDetail: View {
     }
 
     private var title: String {
-        guard let name = payload.profile?.stateName, !name.isEmpty else { return "Shared grow" }
+        guard let name = payload.profile?.stateName, !name.isEmpty else { return String(localized: "Shared grow") }
         return name
     }
 

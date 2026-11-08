@@ -23,7 +23,7 @@ struct EquipmentView: View {
         case all, dueSoon, overdue
         var id: String { rawValue }
         var title: String {
-            switch self { case .all: return "All"; case .dueSoon: return "Due soon"; case .overdue: return "Overdue" }
+            switch self { case .all: return String(localized: "All"); case .dueSoon: return String(localized: "Due soon"); case .overdue: return String(localized: "Overdue") }
         }
     }
 

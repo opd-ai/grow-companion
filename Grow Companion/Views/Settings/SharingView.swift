@@ -256,9 +256,9 @@ struct SharingView: View {
     // MARK: Actions
 
     private func statusTitle(for grant: ShareGrant) -> String {
-        if grant.isRevoked { return "Revoked" }
-        if grant.isExpired { return "Expired" }
-        return "Active"
+        if grant.isRevoked { return String(localized: "Revoked") }
+        if grant.isExpired { return String(localized: "Expired") }
+        return String(localized: "Active")
     }
 
     private func refreshCode() {

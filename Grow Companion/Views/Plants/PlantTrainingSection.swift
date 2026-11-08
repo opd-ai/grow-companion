@@ -19,9 +19,9 @@ struct PlantTrainingSection: View {
     }
 
     private var subtitle: String {
-        guard let last = sessions.first else { return "No sessions recorded" }
+        guard let last = sessions.first else { return String(localized: "No sessions recorded") }
         let count = sessions.count
-        return "\(count) session\(count == 1 ? "" : "s") · last \(TrainingLog.relativeText(last.date))"
+        return String(localized: "\(count) session\(count == 1 ? "" : "s") · last \(TrainingLog.relativeText(last.date))")
     }
 
     var body: some View {

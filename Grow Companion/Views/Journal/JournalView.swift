@@ -129,8 +129,8 @@ struct JournalView: View {
 
     private func dayTitle(_ date: Date) -> String {
         let calendar = Calendar.current
-        if calendar.isDateInToday(date) { return "Today" }
-        if calendar.isDateInYesterday(date) { return "Yesterday" }
+        if calendar.isDateInToday(date) { return String(localized: "Today") }
+        if calendar.isDateInYesterday(date) { return String(localized: "Yesterday") }
         return Format.shortDate(date)
     }
 }

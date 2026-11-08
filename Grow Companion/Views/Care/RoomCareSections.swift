@@ -22,7 +22,7 @@ struct RoomEnvironmentSection: View {
     private var unit: UnitSystem { UnitSystem(rawValue: unitRaw) ?? .metric }
 
     private var subtitle: String {
-        guard let latest = room.latestEnvironmentReading else { return "No readings yet" }
+        guard let latest = room.latestEnvironmentReading else { return String(localized: "No readings yet") }
         return "Last reading \(Format.shortDate(latest.date)) at \(Format.time(latest.date))"
     }
 
@@ -209,9 +209,9 @@ struct RoomFeedingSection: View {
 
     private var targetSubtitle: String {
         if room.feedTargetPH == nil && room.feedTargetEC == nil {
-            return "No reservoir target set"
+            return String(localized: "No reservoir target set")
         }
-        return "Compared with your reservoir target"
+        return String(localized: "Compared with your reservoir target")
     }
 }
 
@@ -364,7 +364,7 @@ struct RoomCalibrationSection: View {
     }
 
     private var subtitle: String {
-        guard let nextDue else { return "No calibration scheduled" }
+        guard let nextDue else { return String(localized: "No calibration scheduled") }
         return isOverdue
             ? "Overdue since \(Format.shortDate(nextDue))"
             : "Next due \(Format.shortDate(nextDue))"

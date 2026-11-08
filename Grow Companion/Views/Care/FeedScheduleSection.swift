@@ -27,7 +27,7 @@ struct RoomFeedScheduleSection: View {
     }
 
     private var subtitle: String {
-        guard let schedule else { return "No schedule applied" }
+        guard let schedule else { return String(localized: "No schedule applied") }
         if let status = FeedScheduleEngine.statusText(schedule: schedule, room: room) {
             return "\(schedule.displayName) · \(status)"
         }
@@ -85,7 +85,7 @@ struct RoomFeedScheduleSection: View {
         ) {
             return "All \(schedule.weekCount) weeks are complete. Duplicate the schedule for the next run."
         }
-        return "No mix recorded for this week yet."
+        return String(localized: "No mix recorded for this week yet.")
     }
 }
 

@@ -25,7 +25,7 @@ can grow batch by batch.
 
 ## What is covered
 
-The catalog holds 1,367 Spanish (Mexico) strings and is a complete draft of
+The catalog holds 1,400 Spanish (Mexico) strings and is a complete draft of
 the app's user-facing copy, screen by screen, including every value the app
 formats with a variable:
 
@@ -102,11 +102,12 @@ A build confirmed the result: of 1,130 keys the compiled app asks for, 27 get no
 entry, and every one of them is a placeholder, a unit symbol, a bare number or
 `Grow Companion %@` — text that reads identically in both languages.
 
-**What is left here** is copy computed *inside views* (`HomeView`'s greeting and
-garden summary, the harvest, drying and comparison screens, the room and feed
-sections, onboarding buttons and similar): about 120 display literals across 30
-view files that still hand a `String` to `Text`. They need the same
-`String(localized:)` wrap and their format keys added to the catalog.
+**What is left here** is copy computed *inside views*: the long sentences in the
+home, harvest, drying, comparison, anomaly and feed-schedule screens. The short
+view-level copy (greetings, onboarding buttons, filters, permission and share
+states, empty states) now goes through `String(localized:)` and has its Spanish
+text; about 90 longer display literals across the remaining view files still
+hand a `String` to `Text` and need the same wrap and their format keys.
 
 ## Glossary (use these exact words in later batches)
 
@@ -185,8 +186,8 @@ because Spanish supplies the whole noun instead.
 The interface draft is complete, variable strings and plurals included. What is
 left:
 
-1. **View-level copy**, described above: about 120 display literals computed
-   inside 30 view files still reach `Text` as a `String`, so they need the
+1. **View-level copy**, described above: about 90 longer display literals
+   computed inside view files still reach `Text` as a `String`, so they need the
    `String(localized:)` wrap and their format keys added.
 2. **Legal and rule copy**, once the legal localisation review in
    `docs/ROADMAP.md` 7.8 is signed off. Until then the English text and the

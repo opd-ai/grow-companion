@@ -59,10 +59,10 @@ struct ComplianceView: View {
             return error
         }
         guard let latest = snapshots.first else {
-            return "History starts with this update"
+            return String(localized: "History starts with this update")
         }
         guard latest.fingerprint == currentFingerprint else {
-            return "This calculation is not saved yet"
+            return String(localized: "This calculation is not saved yet")
         }
         return "Saved \(Format.shortDate(latest.capturedAt)) at \(Format.time(latest.capturedAt))"
     }
