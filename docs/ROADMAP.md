@@ -42,6 +42,9 @@ import so location metadata never survives.
 | Immutable compliance history and rule-change review | Shipped locally; release gates open | `Models/ComplianceSnapshot.swift`, `Models/RuleEvaluationEvent.swift`, `Services/ComplianceHistory.swift`, `Views/Compliance/` |
 | Garden timeline and Quick Log | Shipped | `Services/GardenTimeline.swift`, `Views/Garden/GardenTimelineView.swift`, `Services/QuickLog.swift`, `Views/QuickLog/QuickLogSheet.swift` |
 | Photo timeline, side-by-side compare and PDF grow report | Shipped | `Services/PhotoTimeline.swift`, `Views/Garden/PhotoTimelineView.swift`, `Services/GrowReport.swift`, `Views/Settings/GrowReportView.swift` |
+| Per-cycle grow goals: dry yield, flowering time and logging completeness | Shipped | `Models/GrowGoal.swift`, `Services/GrowGoals.swift`, `Views/Home/GrowGoalsSection.swift` |
+| Grow calendar with explicit reminder rescheduling | Shipped | `Services/GrowCalendar.swift`, `Views/Home/GrowCalendarView.swift` |
+| Home Screen and Lock Screen widget with privacy-safe defaults | Shipped | `Grow CompanionWidgetExtension/`, `Services/WidgetSnapshot.swift` |
 
 The shipped navigation and current feature surfaces are recorded in section 6.2.
 Future cloud, hardware, extension and community features remain explicitly
@@ -680,6 +683,7 @@ The shipped store uses SwiftData with these models:
 | `CycleArchive` | CycleArchive | Named completed cycle; nullifying relationship preserves every plant record. |
 | `ComplianceSnapshot` | ComplianceSnapshot | Append-only calculation record: jurisdiction, pack version, stage buckets, retained weight, canopy, limits, warning threshold and per-metric result. No plant or room names. |
 | `RuleEvaluationEvent` | RuleEvaluationEvent | One re-check of a saved snapshot under a different pack, with changed fields, citations, per-metric outcomes and an acknowledgment timestamp. |
+| `GrowGoal` | — | The grower's own optional cycle targets: a dry yield in grams, a flowering time in weeks and a logging-completeness share. One record; saving with every target off deletes it. |
 
 ### 5.3 Design decisions
 
@@ -703,6 +707,10 @@ The shipped store uses SwiftData with these models:
 - New Tier 3 entities are additive: `Breeder`, parent-line references,
   `Threshold`, `ShareGrant` and `AccessLog`. Each new relationship is optional
   so a lightweight migration keeps existing stores readable.
+- `CultivationSchemaV3` adds only `GrowGoal`, the grower's own optional cycle
+  targets, as a second lightweight additive stage after V2. No existing record,
+  relationship, identifier, photo or value is rewritten, and a failed save never
+  leaves a half-written goal behind.
 - The personal effect journal lives in its own store with its own key and never
   shares identifiers with the cultivation store.
 - Sync is only enabled after a versioned schema migration plan and a conflict
@@ -795,7 +803,8 @@ TAB 1: HOME
 ├── Plants → plant detail → strain library entry
 ├── Rooms → room detail (environment, feeding, calibration, reminders,
 │            light schedule, scouting, treatments and override log)
-├── Weekly recap, room comparison, cycle archive and harvest calendar shortcuts
+├── Weekly recap (with this cycle's goals), room comparison, cycle archive,
+│   harvest calendar and grow calendar shortcuts
 ├── Quick Log (water/feed, reading, note, stage) and the garden timeline
 └── Latest journal entries
 
@@ -820,6 +829,7 @@ TAB 4: RULES
 TAB 5: SETTINGS
 ├── Grow profile
 ├── Units and compliance warning
+├── Home Screen widget (counts only unless task names are allowed)
 ├── Privacy and data
 │   ├── App lock
 │   ├── Notifications (priority, quiet hours, lock-screen text)
@@ -994,6 +1004,15 @@ counts ("3 care tasks today") or, only when the grower turns it on, task titles.
 Defaults are generic. Widget content never shows harvest weights, compliance
 numbers or journal text.
 
+**Shipped:** `Grow CompanionWidgetExtension/` adds a WidgetKit extension on the
+app group `group.com.organizationName.Grow-Companion.shared`, for the systemSmall
+and accessoryRectangular families. `Services/WidgetSnapshot.swift` writes the
+shared snapshot whenever a reminder's date, title or state changes: counts always,
+task names only when **Settings → Home Screen widget → Show task names** is on,
+which is off by default. Tapping the widget opens `growcompanion://today` on Home,
+behind whatever lock or cover is showing. Delete-all clears the snapshot and the
+preference. See `docs/V2_3_CALENDAR_GOALS_WIDGETS.md`.
+
 **Acceptance criteria.**
 
 - With app lock on and the detail setting off, no plant, room, product or metric
@@ -1012,6 +1031,17 @@ so conflicts are easy to miss.
 forecast windows and drying or curing check dates. A reminder can be moved to
 another day after an explicit confirmation that names the old and new date.
 
+**Shipped:** `Services/GrowCalendar.swift` merges enabled reminders, per-plant
+stage windows, harvest forecast windows and the next drying check or curing burp
+into one date-ordered list, each entry once. `GrowCalendarService.reschedule`
+writes one new due date, keeping the time of day, then cancels the old
+notification and schedules exactly one new one; a failed save leaves both
+untouched and a past day is rejected. `Views/Home/GrowCalendarView.swift` shows
+the month grid, the selected day's type-labelled entries, a move sheet with a
+second confirmation naming both dates, and a missed-task card that stays until
+the reminder is completed. Reachable from Home. See
+`docs/V2_3_CALENDAR_GOALS_WIDGETS.md`.
+
 **Acceptance criteria.**
 
 - Moving a reminder writes one new due date and re-schedules exactly one
@@ -1029,6 +1059,14 @@ flowering-week target and a logging-completeness target, with progress shown on
 the weekly recap. Targets are the grower's own; there is no cross-grower
 comparison, ranking or score.
 
+**Shipped:** `Models/GrowGoal.swift` (schema V3, one additive lightweight stage)
+holds the three optional targets; `Services/GrowGoals.swift` measures them from
+existing records and reports a figure with nothing to measure as missing rather
+than as zero. `Views/Home/GrowGoalsSection.swift` is shown on the weekly recap and
+edits or removes the targets. The new model is in the data inventory, export,
+backup, restore and delete-all with tests. See
+`docs/V2_3_CALENDAR_GOALS_WIDGETS.md`.
+
 **Acceptance criteria.**
 
 - Targets are editable and removable, and appear in export, backup and delete.
@@ -1045,6 +1083,12 @@ equivalent.
 **What ships.** A full Spanish (Mexico) localization of interface copy, units,
 dates and plural counts, and a data-table alternative for every chart and ring.
 
+**Status: open.** This is the one v2.3 item not started. It needs the
+localisation and legal-translation review recorded above, it touches every screen
+rather than one feature, and legal and rule copy has to stay in English with a
+note until that review exists. It is not half-done on purpose: a partial
+translation would ship mixed-language legal text.
+
 **Acceptance criteria.**
 
 - No clipped or truncated string at the largest Dynamic Type size in either
@@ -1060,7 +1104,7 @@ dates and plural counts, and a data-table alternative for every chart and ring.
 | --- | --- | --- |
 | v2.1 | Garden timeline, Quick Log | None; both read existing records. Shipped. |
 | v2.2 | Photo timeline and compare, PDF grow report | Verified export/backup and delete coverage (shipped). Both shipped. |
-| v2.3 | Widgets, calendar, per-cycle goals, Spanish localisation | Widget extension target; a schema migration for goals; localisation review |
+| v2.3 | Widgets, calendar and per-cycle goals (shipped); Spanish localisation (open) | Widget extension target and the schema V3 migration are in place; localisation needs the review in 7.8 |
 
 Nothing in this section adds sharing, community, sync, sensor firmware, photo
 analysis or any transaction. Those remain blocked behind the reviews recorded in

@@ -8,7 +8,7 @@ Status of the local data-safety work (the SAFE-01 slice of the safe-release plan
 
 **One model inventory.** `DataInventory` lists every `@Model` in the schema and provides counts, deletions and human labels for each. Export, backup, restore, delete-all and the tests read the same list, so a model added later cannot stay out of the data controls unnoticed.
 
-**Export format v2.** The JSON archive now carries a manifest (format version, model list, per-model counts, total, whether the journal and photos were included), a producer block (app version, build, `recordSchema: cultivation-v2`, record schema version) and the record types that were previously missing:
+**Export format v2.** The JSON archive now carries a manifest (format version, model list, per-model counts, total, whether the journal and photos were included), a producer block (app version, build, `recordSchema: cultivation-v3`, record schema version 3) and the record types that were previously missing:
 
 - training sessions
 - feed schedules with their weeks and products
@@ -27,6 +27,8 @@ Before replacing, the restore dialog states what the backup holds: record count 
 **Verified delete-all.** Delete-all walks the inventory, throws instead of swallowing failures, rolls the context back when it cannot complete, and reports the record counts that remain. The completion message says what was removed and that Files copies, device backups and iCloud backups are outside the app.
 
 **Compliance history is part of the data controls.** `ComplianceSnapshot` and `RuleEvaluationEvent` are in the same model inventory, so export, backup, restore and delete-all cover them without a separate path. Export writes `complianceSnapshots` and `ruleEvaluationEvents` sections plus two CSV files; restore reads them back; a v2 manifest can verify their counts. See `docs/COMPLIANCE_HISTORY.md`.
+
+**Cycle goals are part of the data controls.** `GrowGoal` (schema V3) is in the model inventory and in `ExportService.exportedModelNames`, so it is counted, labelled, exported as the JSON `goals` section, verified by the backup manifest, restored and deleted with everything else. Delete-all also clears the widget's shared snapshot and its preference. See `docs/V2_3_CALENDAR_GOALS_WIDGETS.md`.
 
 ## Corrections to earlier planning assumptions
 

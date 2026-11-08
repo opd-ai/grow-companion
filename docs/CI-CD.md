@@ -2,7 +2,7 @@
 
 ## What the workflows do
 
-- `.github/workflows/ios-ci.yml` runs for pushes and pull requests targeting `main`. It uses a GitHub-hosted `macos-26` runner, selects Xcode `26.4.1`, resolves Swift packages, then builds and runs the unit and UI test targets on an iPhone 17 simulator. It does not use signing credentials, so pull requests can run without secrets.
+- `.github/workflows/ios-ci.yml` runs for pushes and pull requests targeting `main`. It uses a GitHub-hosted `macos-26` runner, selects Xcode `26.4.1`, resolves Swift packages, then builds and runs the unit and UI test targets on an iPhone 17 simulator. The same `Grow Companion` scheme embeds the `Grow CompanionWidgetExtension` target, so CI compiles the widget with the app. It does not use signing credentials, so pull requests can run without secrets.
 - `.github/workflows/testflight.yml` runs for tags named `v*` and can also be started from the Actions tab. It archives and signs the iOS app, exports an IPA, and uploads it to App Store Connect for TestFlight processing.
 
 The pipelines use Xcode's `xcodebuild` and macOS `security` commands for archive, signing, and export. `xcrun altool` (included with Xcode) uploads the IPA using an App Store Connect API key. This avoids adding a signing/upload dependency to the app and does not use an Apple ID password. The distribution keychain, profile copy, certificate, API key file, archive, and exported IPA are temporary runner files; cleanup runs on success and failure.
