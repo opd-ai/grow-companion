@@ -1083,11 +1083,25 @@ equivalent.
 **What ships.** A full Spanish (Mexico) localization of interface copy, units,
 dates and plural counts, and a data-table alternative for every chart and ring.
 
-**Status: open.** This is the one v2.3 item not started. It needs the
-localisation and legal-translation review recorded above, it touches every screen
-rather than one feature, and legal and rule copy has to stay in English with a
-note until that review exists. It is not half-done on purpose: a partial
-translation would ship mixed-language legal text.
+**Status: partly shipped.** The engineering half is in the app: numbers,
+weights, areas, temperatures, volumes, percentages and dates now come from the
+device locale's formatters, and every chart and the compliance ring has a text
+table equivalent reachable with VoiceOver. The Spanish copy itself is still open.
+It needs the localisation and legal-translation review recorded above, it touches
+every screen rather than one feature, and legal and rule copy has to stay in
+English with a note until that review exists. It is not half-done on purpose: a
+partial translation would ship mixed-language legal text.
+
+**Shipped:** `Services/Format.swift` renders numbers through a locale-aware
+`NumberFormatter` (a Spanish device sees `24,5`, an English one `24.5`) and dates
+through the locale's medium style (`Nov 7, 2026` / `7 nov 2026`), with the
+grower's metric or imperial choice still deciding the unit. `Services/ChartTables.swift`
+and `Design/ChartTableView.swift` give the environment chart, the out-of-range
+bar chart and the compliance ring a `Data table` / `Values as a table` disclosure
+that lists every value the picture draws, each row a VoiceOver element. Day counts
+go through `String(localized:)` so a plural variant can be supplied later. The
+table builders are pure functions with tests. See
+`docs/V2_3_CALENDAR_GOALS_WIDGETS.md`.
 
 **Acceptance criteria.**
 
@@ -1104,7 +1118,7 @@ translation would ship mixed-language legal text.
 | --- | --- | --- |
 | v2.1 | Garden timeline, Quick Log | None; both read existing records. Shipped. |
 | v2.2 | Photo timeline and compare, PDF grow report | Verified export/backup and delete coverage (shipped). Both shipped. |
-| v2.3 | Widgets, calendar and per-cycle goals (shipped); Spanish localisation (open) | Widget extension target and the schema V3 migration are in place; localisation needs the review in 7.8 |
+| v2.3 | Widgets, calendar and per-cycle goals (shipped); locale formatters and chart data tables (shipped); Spanish copy (open) | Widget extension target and the schema V3 migration are in place; the Spanish text needs the review in 7.8 |
 
 Nothing in this section adds sharing, community, sync, sensor firmware, photo
 analysis or any transaction. Those remain blocked behind the reviews recorded in

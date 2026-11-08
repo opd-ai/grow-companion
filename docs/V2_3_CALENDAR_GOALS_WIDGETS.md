@@ -120,10 +120,54 @@ suite on an iPhone 17 simulator):
 
 ## Open
 
-- Spanish (Mexico) localisation and the chart data-table alternatives (7.8) are
-  not started. They need the localisation and legal-translation review recorded
-  in the roadmap, and the app is English-only today.
+- **Spanish copy (7.8).** The locale plumbing and the chart data tables ship (see
+  below); the Spanish text for every screen does not. It needs a translator and
+  the legal-translation review recorded in the roadmap, because legal and rule
+  copy must stay in English with a note until that review exists.
 - The widget is covered by unit tests for its payload; its rendered appearance
   and the widget gallery need a device or simulator check.
 - The reminder move re-schedules one notification, which is what the app uses
   today; there is still no recurring notification chain to re-schedule.
+
+## Locale-aware formatting and accessible charts (7.8, engineering half)
+
+**Numbers and dates.** `Services/Format.swift` no longer hard-codes a format
+pattern or a decimal point. `Format.number` uses a locale-aware `NumberFormatter`,
+so weights, areas, temperatures, volumes and percentages follow the device
+language (`1,5 g` in Spanish, `1.5 g` in English). `Format.shortDate` uses the
+locale's medium date style (`Nov 7, 2026` / `7 nov 2026`), and `Format.time` the
+locale's short time. The grower's metric or imperial choice still decides which
+unit is shown and converted; the unit symbols (`g`, `kg`, `oz`, `°C`, `m²`,
+`ft²`, `L`, `gal`) are language-neutral. `Format.dayCount` goes through
+`String(localized:)`, so a plural variant can be added in a String Catalog without
+touching the call sites. Tests set `Format.locale` to `en_US`, `es_ES` and
+`es_MX` and assert the separators, conversions and date output.
+
+**Every chart has a table.** `Services/ChartTables.swift` builds the rows and
+`Design/ChartTableView.swift` renders a `Data table` (or `Values as a table`)
+disclosure under each picture:
+
+- the environment line chart (`ChartTables.environment`), replacing its inline
+  list so both charts use the same component;
+- the out-of-range bar chart in the performance report
+  (`ChartTables.weeklyCounts`);
+- the compliance ring in the breakdown sheet (`ChartTables.compliance`), which
+  also states each metric's level and flags an over-limit value.
+
+Each row is one VoiceOver element reading `label: value`, and the disclosure's
+hint is the same sentence the chart speaks, so a grower who cannot see the shape
+hears the values. The builders are pure functions, tested without a screen.
+
+**Translating the app when the copy is approved.** The app already uses
+`Text("literal")` and `String(localized:)` throughout, so the work is a String
+Catalog plus a `knownRegions` entry for `es-MX`, not a source rewrite. In order:
+
+1. Resolve the copy through a translator and the legal review.
+2. Add `Localizable.xcstrings` with `en` as the source language and `es-MX`
+   translations; leave every legal, rule and verification-duty string in English
+   and keep the visible note that says so.
+3. Add plural variations for the strings that carry counts
+   (`Format.dayCount`, the reminder and plant counts).
+4. Check the largest Dynamic Type size in both languages on a device, since no
+   layout here can be verified from the build alone.
+
