@@ -328,9 +328,9 @@ struct SettingsView: View {
                 SyncPrivacyView()
             } label: {
                 SettingsLinkRow(
-                    icon: "lock.icloud",
-                    title: "Sync and privacy",
-                    value: "No account and no cloud sync"
+                    icon: "lock.shield",
+                    title: "Privacy",
+                    value: "On-device only, no account, no network"
                 )
             }
             .buttonStyle(.plain)

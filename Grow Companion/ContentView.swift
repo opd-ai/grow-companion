@@ -2,7 +2,7 @@
 //  ContentView.swift
 //  Grow Companion
 //
-//  Root gate: onboarding until a profile exists, education-only when the
+//  Root switch: onboarding until a profile exists, education-only when the
 //  jurisdiction does not permit home cultivation, the tracked app otherwise.
 //
 

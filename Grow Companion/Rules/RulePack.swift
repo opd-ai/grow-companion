@@ -79,7 +79,7 @@ enum LegalCopy {
 
     static let ageAttestation = "This app is for adults of legal age to cultivate cannabis where they live — 21 or older in most states that allow home growing. This is a self-attestation, not an identity check: your confirmation is stored on this device as a flag with a timestamp, nothing more. Grow Companion never scans an ID, never sends it anywhere and never stores a date of birth."
 
-    static let privacy = "Everything you record stays on this device unless you export it. Grow Companion has no account, no cloud sync and no analytics, and your records work with no network connection. If you ask the app to suggest your state, that one lookup is handled by Apple's location service and the app keeps only a state or locality name, never coordinates. Photos are re-encoded so location metadata is removed."
+    static let privacy = "Everything you record stays on this device unless you export it. Grow Companion has no account, no cloud sync, no analytics and no network request of its own. It never asks for your location and never looks one up: you choose your state yourself. Photos are re-encoded so location metadata is removed."
 
     static let educationOnly = "Your jurisdiction does not permit personal home cultivation, so tracking is turned off. You can still read the rules and the guidance in this app."
 }

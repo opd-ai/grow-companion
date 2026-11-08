@@ -2,9 +2,10 @@
 //  SyncPrivacyView.swift
 //  Grow Companion
 //
-//  Honest, read-only explanation of what leaves this device, plus the local
-//  device key that the protected-envelope work uses. The app has no account,
-//  server or sync engine, so this screen must never imply one exists.
+//  The privacy statement: everything is on this device, by design. There is no
+//  account, server, sync or network request, so there is nothing to sign into
+//  and nothing to send. The share key is the one key this app holds, and it is
+//  used only by the share file the grower writes themselves.
 //
 
 import SwiftUI
@@ -25,8 +26,8 @@ struct SyncPrivacyView: View {
             VStack(alignment: .leading, spacing: 20) {
                 header
                 statusCard
-                encryptionCard
                 leavesCard
+                keyCard
                 notAvailableCard
             }
             .padding(20)
@@ -38,16 +39,16 @@ struct SyncPrivacyView: View {
         .navigationBarTitleDisplayMode(.inline)
         .task { refreshKeys() }
         .confirmationDialog(
-            "Remove the device key?",
+            "Remove the share key?",
             isPresented: $showRemoveKeys,
             titleVisibility: .visible
         ) {
-            Button("Remove device key", role: .destructive) { removeKeys() }
+            Button("Remove share key", role: .destructive) { removeKeys() }
             Button("Keep it", role: .cancel) {}
         } message: {
-            Text("The key is only used by the protected-envelope code in this build. Removing it changes nothing you have recorded, and nothing has been sent anywhere.")
+            Text("The key is only used to protect share files you create yourself. Removing it changes nothing you have recorded, and nothing has been sent anywhere.")
         }
-        .alert("Device key", isPresented: Binding(
+        .alert("Share key", isPresented: Binding(
             get: { keyError != nil },
             set: { if !$0 { keyError = nil } }
         )) {
@@ -59,10 +60,10 @@ struct SyncPrivacyView: View {
 
     private var header: some View {
         VStack(alignment: .leading, spacing: 6) {
-            Text("Sync and privacy")
+            Text("Privacy")
                 .font(Theme.serif(30))
                 .foregroundStyle(Theme.ink)
-            Text("There is no cloud sync to protect, because there is no cloud sync in this version.")
+            Text("This app is on-device only, by design. There is nothing to sign into, nothing to sync and no request for data to leave the phone.")
                 .font(Theme.sans(13))
                 .foregroundStyle(Theme.secondaryInk)
                 .fixedSize(horizontal: false, vertical: true)
@@ -81,7 +82,7 @@ struct SyncPrivacyView: View {
                 Text("This device only")
                     .font(Theme.serif(22))
                     .foregroundStyle(Theme.onHero)
-                Text("Grow Companion has no account, no server and no sync. Your records live in a protected store on this device, and every screen works offline.")
+                Text("No account, no server, no sync and no network request. Your records live in a protected store on this device and every screen works offline.")
                     .font(Theme.sans(13))
                     .foregroundStyle(Theme.onHero.opacity(0.88))
                     .fixedSize(horizontal: false, vertical: true)
@@ -90,16 +91,33 @@ struct SyncPrivacyView: View {
         .growCard(fill: Theme.primary, padding: 18)
     }
 
-    private var encryptionCard: some View {
-        VStack(alignment: .leading, spacing: 12) {
-            SectionHeader("Device key", subtitle: "Prepared on this device, not in use")
+    private var leavesCard: some View {
+        VStack(alignment: .leading, spacing: 11) {
+            SectionHeader("What can leave this device", subtitle: "Only when you choose it")
 
-            Text("Grow Companion can hold a device key pair for the protected envelopes that future sharing and sync would use. The key is stored in this device's Keychain, available only while it is unlocked, and never leaves it.")
+            bullet("An export or backup you save to Files. Where that copy goes afterwards is outside the app.")
+            bullet("A share file you create and send yourself. Its recipient holds a read-only copy.")
+            bullet("A device or iCloud backup made by iOS. Grow Companion does not control those copies, so delete-all cannot remove them.")
+
+            Text("The app itself opens no network connection. No analytics, crash reporting, advertising or third-party SDK is included, and nothing is uploaded in the background.")
+                .font(Theme.sans(12))
+                .foregroundStyle(Theme.secondaryInk)
+                .fixedSize(horizontal: false, vertical: true)
+                .padding(.top, 2)
+        }
+        .growCard()
+    }
+
+    private var keyCard: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            SectionHeader("Share key", subtitle: "On this device, for your own share files")
+
+            Text("Grow Companion holds one device key pair. It signs and encrypts the share files you create yourself, so a recipient can tell the file came from this device and read only what you chose to include.")
                 .font(Theme.sans(13))
                 .foregroundStyle(Theme.secondaryInk)
                 .fixedSize(horizontal: false, vertical: true)
 
-            Text("It is not used to send anything today: there is no account, no server and no recipient.")
+            Text("The key is stored in this device's Keychain, available only while it is unlocked, and never leaves it. It is not used to send anything on its own.")
                 .font(Theme.sans(12))
                 .foregroundStyle(Theme.tertiaryInk)
                 .fixedSize(horizontal: false, vertical: true)
@@ -113,11 +131,11 @@ struct SyncPrivacyView: View {
                 InfoRow(label: "Agreement key", value: keySummary.agreementID)
                 InfoRow(label: "Signing key", value: keySummary.signingID)
 
-                SecondaryButton("Remove device key", systemImage: "trash") {
+                SecondaryButton("Remove share key", systemImage: "trash") {
                     showRemoveKeys = true
                 }
             } else {
-                PrimaryButton("Create device key", systemImage: "key") {
+                PrimaryButton("Create share key", systemImage: "key") {
                     createKey()
                 }
                 .accessibilityHint("Creates a key pair on this device only. Nothing is sent anywhere.")
@@ -126,38 +144,15 @@ struct SyncPrivacyView: View {
         .growCard()
     }
 
-    private var leavesCard: some View {
-        VStack(alignment: .leading, spacing: 11) {
-            SectionHeader("What can leave this device", subtitle: "Only when you choose it")
-
-            bullet("An export or backup you save to Files. Where that copy goes afterwards is outside the app.")
-            bullet("A device or iCloud backup made by iOS. Grow Companion does not control those copies, so delete-all cannot remove them.")
-            bullet("The optional state lookup: one request handled by Apple's location service. The app keeps only a state or locality name.")
-            bullet("Diagnostics you choose to send to support, after a preview you can redact.")
-
-            Text("No analytics, crash reporting, advertising or third-party SDK is included, and nothing is uploaded in the background.")
-                .font(Theme.sans(12))
-                .foregroundStyle(Theme.secondaryInk)
-                .fixedSize(horizontal: false, vertical: true)
-                .padding(.top, 2)
-        }
-        .growCard()
-    }
-
     private var notAvailableCard: some View {
         VStack(alignment: .leading, spacing: 10) {
-            SectionHeader("Not in this version")
+            SectionHeader("Not part of this app")
             bullet("Cloud sync, encrypted or otherwise")
             bullet("Accounts, sign-in or device pairing")
-            bullet("Conflict resolution between devices")
-            bullet("Group or community sharing")
+            bullet("Community posts, groups or a public profile")
+            bullet("Remote rule or content downloads")
 
-            Text("A protected grow can be shared with one person from Sharing: it is a file you send yourself, and their copy is read-only. There is still no server, no account and no live link between devices.")
-                .font(Theme.sans(12))
-                .foregroundStyle(Theme.tertiaryInk)
-                .fixedSize(horizontal: false, vertical: true)
-
-            Text("If cloud sync is added, it will be an explicit opt-in and this screen will describe it before the feature ships.")
+            Text("These are not waiting on a review or a future release. A private record that never leaves the device is the product, so there is no network layer to turn on later.")
                 .font(Theme.sans(12))
                 .foregroundStyle(Theme.tertiaryInk)
                 .fixedSize(horizontal: false, vertical: true)

@@ -2,11 +2,10 @@
 //  SecureEnvelope.swift
 //  Grow Companion
 //
-//  Versioned, authenticated encryption envelope for protected sharing and sync.
-//  This is the cryptographic half only: there is no transport, server, account
-//  or recipient directory in this build. See docs/E2EE_DESIGN.md for the threat
-//  model, the byte layout and the gates that must pass before it is used to send
-//  anything to anyone.
+//  Versioned, authenticated encryption envelope for protected share files. This
+//  is the cryptographic half only: there is no transport, server, account or
+//  recipient directory anywhere in this app. See docs/E2EE_DESIGN.md for the
+//  threat model and the byte layout.
 //
 
 import CryptoKit

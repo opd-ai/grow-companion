@@ -30,7 +30,6 @@ struct OnboardingFlow: View {
 
     @State private var draft = OnboardingDraft()
     @State private var step = 0
-    @StateObject private var resolver = LocationResolver()
 
     private let stepCount = 6
 
@@ -75,13 +74,6 @@ struct OnboardingFlow: View {
             footer
         }
         .background(Theme.background.ignoresSafeArea())
-        .onChange(of: resolver.resolvedStateName) { _, name in
-            guard let name, let match = RulePack.rule(forStateName: name) else { return }
-            draft.stateName = match.stateName
-            if let locality = resolver.resolvedLocality, draft.countyOrCity.isEmpty {
-                draft.countyOrCity = locality
-            }
-        }
         .animation(.easeInOut(duration: 0.2), value: step)
     }
 
@@ -91,7 +83,7 @@ struct OnboardingFlow: View {
         case 0:
             AgeStepView(draft: $draft)
         case 1:
-            LocationStepView(draft: $draft, resolver: resolver)
+            JurisdictionStepView(draft: $draft)
         case 2:
             ResidenceStepView(draft: $draft)
         case 3:
@@ -286,9 +278,8 @@ private struct AgeStepView: View {
 
 // MARK: - Step 2: jurisdiction
 
-private struct LocationStepView: View {
+private struct JurisdictionStepView: View {
     @Binding var draft: OnboardingDraft
-    @ObservedObject var resolver: LocationResolver
 
     @State private var showingPicker = false
 
@@ -302,7 +293,7 @@ private struct LocationStepView: View {
                 Text("Where do you grow?")
                     .font(Theme.serif(32))
                     .foregroundStyle(Theme.ink)
-                Text("We use this only to load your plant limits. Grow Companion does not send it anywhere.")
+                Text("We use this only to load your plant limits. Grow Companion does not send it anywhere, and no location permission is requested.")
                     .font(Theme.sans(14))
                     .foregroundStyle(Theme.secondaryInk)
                     .fixedSize(horizontal: false, vertical: true)
@@ -351,33 +342,15 @@ private struct LocationStepView: View {
             }
 
             VStack(alignment: .leading, spacing: 8) {
-                Button {
-                    resolver.resolve()
-                } label: {
-                    HStack(spacing: 8) {
-                        if resolver.isResolving {
-                            ProgressView()
-                                .controlSize(.small)
-                        } else {
-                            Image(systemName: "location")
-                                .font(.system(size: 13, weight: .semibold))
-                        }
-                        Text(resolver.isResolving ? "Finding your state…" : "Use approximate location")
-                            .font(Theme.sans(14, weight: .semibold))
-                    }
-                    .foregroundStyle(Theme.primary)
+                HStack(spacing: 8) {
+                    Image(systemName: "hand.raised")
+                        .font(.system(size: 13, weight: .semibold))
+                    Text("No location permission is requested")
+                        .font(Theme.sans(14, weight: .semibold))
                 }
-                .buttonStyle(.plain)
-                .disabled(resolver.isResolving)
+                .foregroundStyle(Theme.primary)
 
-                if let error = resolver.errorMessage {
-                    Text(error)
-                        .font(Theme.sans(12))
-                        .foregroundStyle(Theme.amber)
-                        .fixedSize(horizontal: false, vertical: true)
-                }
-
-                Text("Approximate only. Grow Companion keeps a state name and nothing else. The one-off lookup is handled by Apple's location service; nothing is sent to Grow Companion.")
+                Text("Grow Companion never asks for your location and makes no lookup. You choose the state, and that name is stored with your grow profile and nothing else.")
                     .font(Theme.sans(11))
                     .foregroundStyle(Theme.tertiaryInk)
                     .fixedSize(horizontal: false, vertical: true)

@@ -31,8 +31,6 @@
 	<string>Grow Companion uses the camera to measure the distance from your light fixture to the canopy. Depth data is processed on-device and not saved.</string>
 	<key>NSFaceIDUsageDescription</key>
 	<string>Grow Companion uses Face ID to keep your grow records private when the app is locked.</string>
-	<key>NSLocationWhenInUseUsageDescription</key>
-	<string>Grow Companion can use your approximate location to suggest your state for the home-cultivation rules. The lookup is handled by Apple's geocoding service; the app keeps only a state or locality name, never your coordinates, and nothing is sent to Grow Companion.</string>
 	<key>UIDeviceFamily</key>
 	<array>
 		<integer>1</integer>
