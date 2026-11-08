@@ -26,22 +26,29 @@ struct StrainDetailView: View {
         StrainInsights.observedAverage(for: strain)
     }
 
-    private var reference: StrainReferenceContext {
-        StrainCatalog.referenceContext(for: strain.displayBreeder)
+    private var breederProfile: BreederProfile? {
+        BreederLibrary.profile(for: strain)
     }
 
-    private var profile: BreederProfileReference? {
-        reference.breederProfile
+    private var lineage: CultivarLineage? {
+        BreederLibrary.lineage(for: strain)
     }
 
     private var displayedParentLines: String? {
         let entered = strain.parentLines.trimmingCharacters(in: .whitespacesAndNewlines)
-        return entered.isEmpty ? reference.parentLines : entered
+        return entered.isEmpty ? lineage?.parentLines : entered
     }
 
     private var displayedClaimedYield: String? {
         let entered = strain.claimedYield.trimmingCharacters(in: .whitespacesAndNewlines)
-        return entered.isEmpty ? reference.claimedYield : entered
+        return entered.isEmpty ? lineage?.claimedYield : entered
+    }
+
+    /// The status the card shows: the strain's own entry when it has one, then
+    /// the bundled claim for the same cultivar and breeder.
+    private var effectiveLineageStatus: LineageStatus {
+        if strain.lineageStatus != .missing { return strain.lineageStatus }
+        return lineage?.lineageStatus ?? .missing
     }
 
     var body: some View {
@@ -102,7 +109,7 @@ struct StrainDetailView: View {
             HStack(spacing: 8) {
                 Pill(text: strain.type.title, systemImage: strain.type.systemImage)
                 Pill(
-                    text: "\(strain.floweringLabel) expected",
+                    text: String(localized: "\(strain.floweringLabel) claimed"),
                     systemImage: "calendar",
                     tint: Theme.secondaryInk,
                     fill: Theme.surfaceSunken
@@ -131,24 +138,36 @@ struct StrainDetailView: View {
         VStack(alignment: .leading, spacing: 13) {
             SectionHeader("Breeder context", subtitle: "Reference material kept separate from your results")
 
-            if let profile {
-                HStack(alignment: .top, spacing: 10) {
-                    Image(systemName: "person.crop.circle.badge.checkmark")
-                        .font(.system(size: 22, weight: .semibold))
-                        .foregroundStyle(Theme.primary)
-                    VStack(alignment: .leading, spacing: 3) {
-                        Text(profile.name)
-                            .font(Theme.sans(15, weight: .semibold))
-                            .foregroundStyle(Theme.ink)
-                        Text(profile.summary)
-                            .font(Theme.sans(12))
-                            .foregroundStyle(Theme.secondaryInk)
-                            .fixedSize(horizontal: false, vertical: true)
-                        Text(profile.source)
-                            .font(Theme.sans(10, weight: .semibold))
+            if let breederProfile {
+                NavigationLink {
+                    BreederProfileView(profile: breederProfile)
+                } label: {
+                    HStack(alignment: .top, spacing: 10) {
+                        Image(systemName: "person.crop.circle.badge.checkmark")
+                            .font(.system(size: 22, weight: .semibold))
+                            .foregroundStyle(Theme.primary)
+                        VStack(alignment: .leading, spacing: 3) {
+                            Text(breederProfile.name)
+                                .font(Theme.sans(15, weight: .semibold))
+                                .foregroundStyle(Theme.ink)
+                            Text(breederProfile.summary)
+                                .font(Theme.sans(12))
+                                .foregroundStyle(Theme.secondaryInk)
+                                .fixedSize(horizontal: false, vertical: true)
+                            Text(breederProfile.source)
+                                .font(Theme.sans(10, weight: .semibold))
+                                .foregroundStyle(Theme.tertiaryInk)
+                        }
+                        Spacer(minLength: 6)
+                        Image(systemName: "chevron.right")
+                            .font(.system(size: 12, weight: .semibold))
                             .foregroundStyle(Theme.tertiaryInk)
+                            .padding(.top, 4)
                     }
+                    .contentShape(Rectangle())
                 }
+                .buttonStyle(.plain)
+                .accessibilityLabel(String(localized: "View the \(breederProfile.name) reference profile"))
             } else {
                 statusRow(icon: "person.crop.circle", title: "Breeder profile", value: "No shared profile available", tint: Theme.amber)
             }
@@ -156,7 +175,14 @@ struct StrainDetailView: View {
             Divider().overlay(Theme.hairline)
             contextRow("Parent lines", displayedParentLines ?? "Not documented", icon: "arrow.triangle.branch", warning: displayedParentLines == nil)
             contextRow("Claimed yield", displayedClaimedYield ?? "Not provided", icon: "chart.bar.xaxis", warning: displayedClaimedYield == nil)
-            contextRow("Lineage status", strain.lineageStatus.title, icon: strain.lineageStatus.systemImage, warning: strain.lineageStatus != .documented)
+            contextRow("Lineage status", effectiveLineageStatus.title, icon: effectiveLineageStatus.systemImage, warning: effectiveLineageStatus != .documented)
+
+            if effectiveLineageStatus == .disputed {
+                Text(BreederLibrary.lineageCaveat)
+                    .font(Theme.sans(11))
+                    .foregroundStyle(Theme.secondaryInk)
+                    .fixedSize(horizontal: false, vertical: true)
+            }
 
             Text("Breeder figures are claims from reference material, not verified results. Your observed flowering time, yield, rating and notes below come only from your own grow.")
                 .font(Theme.sans(11))
@@ -202,7 +228,11 @@ struct StrainDetailView: View {
             SectionHeader("Flowering time", subtitle: "The breeder's figure beside your own")
 
             HStack(alignment: .top, spacing: 16) {
-                metric("Expected", strain.floweringLabel, detail: "Breeder's figure")
+                metric(
+                    String(localized: "Claimed"),
+                    strain.floweringLabel,
+                    detail: String(localized: "Breeder's claim")
+                )
                 metric(
                     "Observed",
                     average.map { StrainInsights.shortLengthText(days: $0.days) } ?? "—",

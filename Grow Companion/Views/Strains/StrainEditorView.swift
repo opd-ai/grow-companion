@@ -53,6 +53,8 @@ struct StrainEditorView: View {
 
                     field("Breeder (optional)", placeholder: "Humboldt Seed Organization", text: $breeder)
 
+                    breederSuggestions
+
                     typePicker
 
                     weeksPicker
@@ -126,13 +128,53 @@ struct StrainEditorView: View {
         breeder = template.breeder
         type = template.type
         weeks = min(max(template.expectedFloweringWeeks, 5), 16)
-        let reference = StrainCatalog.referenceContext(for: template.breeder)
-        claimedYield = reference.claimedYield ?? ""
-        parentLines = reference.parentLines ?? ""
-        lineageStatus = reference.parentLines == nil ? .missing : .documented
-        breederSource = reference.source ?? ""
+        let lineage = BreederLibrary.lineage(forCultivar: template.name, breeder: template.breeder)
+        claimedYield = lineage?.claimedYield ?? ""
+        parentLines = lineage?.parentLines ?? ""
+        lineageStatus = lineage?.lineageStatus ?? .missing
+        breederSource = lineage?.source ?? ""
         notes = template.notes
         appliedTemplateID = template.id
+    }
+
+    // MARK: Breeder suggestions
+
+    private func isSelected(_ profile: BreederProfile) -> Bool {
+        BreederLibrary.key(for: breeder) == BreederLibrary.key(for: profile.name)
+    }
+
+    private var breederSuggestions: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            label("Bundled breeders")
+
+            ScrollView(.horizontal, showsIndicators: false) {
+                HStack(spacing: 8) {
+                    ForEach(BreederLibrary.profiles) { profile in
+                        Button {
+                            breeder = profile.name
+                        } label: {
+                            Text(profile.name)
+                                .font(Theme.sans(12, weight: .semibold))
+                                .foregroundStyle(isSelected(profile) ? Theme.primary : Theme.secondaryInk)
+                                .padding(.horizontal, 12)
+                                .padding(.vertical, 8)
+                                .background(
+                                    RoundedRectangle(cornerRadius: 12, style: .continuous)
+                                        .fill(isSelected(profile) ? Theme.sageSoft : Theme.surfaceSunken)
+                                )
+                        }
+                        .buttonStyle(.plain)
+                        .accessibilityAddTraits(isSelected(profile) ? [.isSelected] : [])
+                    }
+                }
+                .padding(.vertical, 2)
+            }
+
+            Text("Choosing a bundled breeder links this strain to its reference profile. Type any other name if yours is not listed.")
+                .font(Theme.sans(11))
+                .foregroundStyle(Theme.tertiaryInk)
+                .fixedSize(horizontal: false, vertical: true)
+        }
     }
 
     // MARK: Fields

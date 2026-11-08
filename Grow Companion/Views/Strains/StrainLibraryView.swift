@@ -26,6 +26,7 @@ struct StrainLibraryView: View {
         ScrollView {
             VStack(alignment: .leading, spacing: 20) {
                 header
+                breederReferenceLink
 
                 if strains.isEmpty {
                     emptyState
@@ -61,6 +62,45 @@ struct StrainLibraryView: View {
                 .foregroundStyle(Theme.secondaryInk)
                 .fixedSize(horizontal: false, vertical: true)
         }
+    }
+
+    private var breederReferenceLink: some View {
+        NavigationLink {
+            BreederLibraryView()
+        } label: {
+            HStack(spacing: 12) {
+                ZStack {
+                    RoundedRectangle(cornerRadius: 12, style: .continuous)
+                        .fill(Theme.sageSoft)
+                        .frame(width: 44, height: 44)
+                    Image(systemName: "person.2")
+                        .font(.system(size: 16, weight: .semibold))
+                        .foregroundStyle(Theme.primary)
+                }
+
+                VStack(alignment: .leading, spacing: 3) {
+                    Text("Breeder reference")
+                        .font(Theme.sans(15, weight: .semibold))
+                        .foregroundStyle(Theme.ink)
+                    Text("Bundled profiles and claimed figures, kept apart from your results.")
+                        .font(Theme.sans(12))
+                        .foregroundStyle(Theme.secondaryInk)
+                        .lineLimit(2)
+                        .fixedSize(horizontal: false, vertical: true)
+                }
+
+                Spacer(minLength: 6)
+
+                Image(systemName: "chevron.right")
+                    .font(.system(size: 12, weight: .semibold))
+                    .foregroundStyle(Theme.tertiaryInk)
+            }
+            .padding(.vertical, 4)
+            .contentShape(Rectangle())
+        }
+        .buttonStyle(.plain)
+        .growCard(padding: 14)
+        .accessibilityElement(children: .combine)
     }
 
     private var strainList: some View {
