@@ -16,6 +16,7 @@ struct RoomDetailView: View {
     @Environment(\.dismiss) private var dismiss
 
     @Query(sort: \GrowProfile.createdAt, order: .reverse) private var profiles: [GrowProfile]
+    @Query(sort: \JournalEntry.createdAt, order: .reverse) private var journal: [JournalEntry]
     @AppStorage(SettingsKey.unitSystem) private var unitRaw = "metric"
     @AppStorage(SettingsKey.warningThreshold) private var warningThreshold: Double = 0.8
 
@@ -26,6 +27,7 @@ struct RoomDetailView: View {
     @State private var showingTreatmentEditor = false
     @State private var editingTreatment: Treatment?
     @State private var showingLightDistance = false
+    @State private var showingPhotos = false
 
     private var unit: UnitSystem { UnitSystem(rawValue: unitRaw) ?? .metric }
     private var rule: JurisdictionRule? { profiles.first?.rule }
@@ -44,10 +46,19 @@ struct RoomDetailView: View {
         )
     }
 
+    private var photos: [PlantPhoto] {
+        let entries = journal.filter { entry in
+            entry.room?.persistentModelID == room.persistentModelID
+                || entry.plant?.room?.persistentModelID == room.persistentModelID
+        }
+        return PhotoTimelineService.photos(from: entries)
+    }
+
     var body: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 20) {
                 headerCard
+                if !photos.isEmpty { photoTimelineCard }
                 scheduleCard
                 lightDistanceCard
                 complianceCard
@@ -88,6 +99,9 @@ struct RoomDetailView: View {
                 LightDistanceView(room: room)
             }
         }
+        .sheet(isPresented: $showingPhotos) {
+            PhotoTimelineView(title: room.name, photos: photos)
+        }
         .sheet(isPresented: $showingAddPlant) {
             AddPlantView(preselectedRoom: room)
         }
@@ -109,6 +123,22 @@ struct RoomDetailView: View {
         } message: {
             Text("Its plants are kept and lose their room assignment. The schedule history is deleted.")
         }
+    }
+
+    private var photoTimelineCard: some View {
+        VStack(alignment: .leading, spacing: 10) {
+            SectionHeader(
+                "Photos",
+                subtitle: "\(photos.count) photo\(photos.count == 1 ? "" : "s") in date order"
+            )
+            PhotoTimelineStrip(photos: photos) { _ in
+                showingPhotos = true
+            }
+            SecondaryButton("Compare photos", systemImage: "rectangle.split.2x1") {
+                showingPhotos = true
+            }
+        }
+        .growCard(padding: 16)
     }
 
     private var lightDistanceCard: some View {

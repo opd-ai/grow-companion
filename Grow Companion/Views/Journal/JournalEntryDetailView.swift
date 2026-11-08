@@ -12,6 +12,13 @@ import UIKit
 struct JournalEntryDetailView: View {
     let entry: JournalEntry
 
+    @Environment(\.modelContext) private var context
+    @Environment(\.dismiss) private var dismiss
+
+    @State private var showingDelete = false
+    @State private var errorMessage = ""
+    @State private var showingError = false
+
     var body: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 16) {
@@ -58,6 +65,43 @@ struct JournalEntryDetailView: View {
         .navigationTitle("Journal entry")
         .navigationBarTitleDisplayMode(.inline)
         .toolbar(.visible, for: .navigationBar)
+        .toolbar {
+            ToolbarItem(placement: .primaryAction) {
+                Button(role: .destructive) {
+                    showingDelete = true
+                } label: {
+                    Image(systemName: "trash")
+                }
+                .accessibilityLabel("Delete journal entry")
+            }
+        }
+        .confirmationDialog(
+            "Delete this journal entry?",
+            isPresented: $showingDelete,
+            titleVisibility: .visible
+        ) {
+            Button("Delete entry", role: .destructive) { deleteEntry() }
+            Button("Keep entry", role: .cancel) {}
+        } message: {
+            Text(entry.photoFileName == nil
+                 ? "The entry is removed from the journal and the garden timeline."
+                 : "The entry and its photo, thumbnail and cached copy are removed from this device.")
+        }
+        .alert("Could not delete", isPresented: $showingError) {
+            Button("OK", role: .cancel) {}
+        } message: {
+            Text(errorMessage)
+        }
+    }
+
+    private func deleteEntry() {
+        do {
+            try JournalEntryService.delete(entry, in: context)
+            dismiss()
+        } catch {
+            errorMessage = "The entry was kept. \(error.localizedDescription)"
+            showingError = true
+        }
     }
 
     private func linkedRow(title: String, symbol: String) -> some View {
