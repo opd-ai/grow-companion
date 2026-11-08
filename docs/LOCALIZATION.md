@@ -74,7 +74,7 @@ Legal and rule text — `LegalCopy`, `RulePack` citations, rule summaries,
 jurisdiction data and the federal notice — stays English on purpose. Rule 4
 below, and the in-app notice, explain why.
 
-## Model and service copy
+## Model, service and view copy
 
 Copy held in a model or a service is a plain `String`, and `Text(stage.title)`
 treats a `String` as verbatim text, so the catalog never applied to it. That is
