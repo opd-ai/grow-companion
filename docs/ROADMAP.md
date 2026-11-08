@@ -832,7 +832,10 @@ PLANT DETAIL
 - **Personal effect journal:** a Settings entry, off by default, opening into a
   separately authenticated store.
 - **Sync:** a Settings row showing state, the recovery key and the last sync,
-  plus an onboarding step when the grower first enables it.
+  plus an onboarding step when the grower first enables it. Not available today;
+  the current screen states that there is no account and no cloud sync. The
+  protocol and its cryptographic foundation are recorded in
+  `docs/E2EE_DESIGN.md`.
 - **Educational library:** a Settings row and contextual "Learn why" links from
   rule and care cards.
 
@@ -1013,6 +1016,16 @@ dates and plural counts, and a data-table alternative for every chart and ring.
 Nothing in this section adds sharing, community, sync, sensor firmware, photo
 analysis or any transaction. Those remain blocked behind the reviews recorded in
 `docs/LEGAL_REVIEW.md`.
+
+**Shared/sync track status.** The protocol and its cryptographic foundation are
+in `docs/E2EE_DESIGN.md`, `Services/SecureEnvelope.swift` and
+`Services/DeviceKeyStore.swift`: a versioned, signed AES-GCM envelope, a device
+key pair in the Keychain, and unit tests for tampering, addressing and versioning.
+There is no transport, account, recipient directory or sync key hierarchy, and
+the app still offers no sharing or sync. The seven gates in the design document —
+attorney review, transport decision, identity model, independent crypto review,
+device testing, privacy labels, and a migration plan — must pass before anything
+here becomes a feature.
 
 ---
 

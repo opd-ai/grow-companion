@@ -348,6 +348,7 @@ struct DataControlsView: View {
         }
         lines.append("Journal photos and their thumbnails")
         lines.append("Every pending notification")
+        lines.append("Device encryption keys")
         lines.append("App lock, notification and unit preferences")
         return lines
     }

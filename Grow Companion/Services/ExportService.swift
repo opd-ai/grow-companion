@@ -1322,6 +1322,7 @@ enum ExportService {
         CareNotifications.cancelAll()
         PhotoStore.deleteAll()
         DataControlPreferences.resetToDefaults()
+        DeviceKeyStore.deleteAll()
 
         let remaining: [String: Int]
         do {

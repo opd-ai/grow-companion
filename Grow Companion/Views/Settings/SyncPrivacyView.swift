@@ -2,18 +2,30 @@
 //  SyncPrivacyView.swift
 //  Grow Companion
 //
-//  Honest, read-only explanation of what leaves this device. The app has no
-//  account, server or sync engine, so this screen must never imply one exists.
+//  Honest, read-only explanation of what leaves this device, plus the local
+//  device key that the protected-envelope work uses. The app has no account,
+//  server or sync engine, so this screen must never imply one exists.
 //
 
 import SwiftUI
 
 struct SyncPrivacyView: View {
+    private struct DeviceKeySummary {
+        let createdAt: Date?
+        let agreementID: String
+        let signingID: String
+    }
+
+    @State private var keySummary: DeviceKeySummary?
+    @State private var keyError: String?
+    @State private var showRemoveKeys = false
+
     var body: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 20) {
                 header
                 statusCard
+                encryptionCard
                 leavesCard
                 notAvailableCard
             }
@@ -24,6 +36,25 @@ struct SyncPrivacyView: View {
         .background(Theme.background)
         .navigationTitle("")
         .navigationBarTitleDisplayMode(.inline)
+        .task { refreshKeys() }
+        .confirmationDialog(
+            "Remove the device key?",
+            isPresented: $showRemoveKeys,
+            titleVisibility: .visible
+        ) {
+            Button("Remove device key", role: .destructive) { removeKeys() }
+            Button("Keep it", role: .cancel) {}
+        } message: {
+            Text("The key is only used by the protected-envelope code in this build. Removing it changes nothing you have recorded, and nothing has been sent anywhere.")
+        }
+        .alert("Device key", isPresented: Binding(
+            get: { keyError != nil },
+            set: { if !$0 { keyError = nil } }
+        )) {
+            Button("OK", role: .cancel) { keyError = nil }
+        } message: {
+            Text(keyError ?? "")
+        }
     }
 
     private var header: some View {
@@ -57,6 +88,42 @@ struct SyncPrivacyView: View {
             }
         }
         .growCard(fill: Theme.primary, padding: 18)
+    }
+
+    private var encryptionCard: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            SectionHeader("Device key", subtitle: "Prepared on this device, not in use")
+
+            Text("Grow Companion can hold a device key pair for the protected envelopes that future sharing and sync would use. The key is stored in this device's Keychain, available only while it is unlocked, and never leaves it.")
+                .font(Theme.sans(13))
+                .foregroundStyle(Theme.secondaryInk)
+                .fixedSize(horizontal: false, vertical: true)
+
+            Text("It is not used to send anything today: there is no account, no server and no recipient.")
+                .font(Theme.sans(12))
+                .foregroundStyle(Theme.tertiaryInk)
+                .fixedSize(horizontal: false, vertical: true)
+
+            if let keySummary {
+                Divider().overlay(Theme.hairline)
+                InfoRow(
+                    label: "Created",
+                    value: keySummary.createdAt.map { Format.shortDate($0) } ?? "Not recorded"
+                )
+                InfoRow(label: "Agreement key", value: keySummary.agreementID)
+                InfoRow(label: "Signing key", value: keySummary.signingID)
+
+                SecondaryButton("Remove device key", systemImage: "trash") {
+                    showRemoveKeys = true
+                }
+            } else {
+                PrimaryButton("Create device key", systemImage: "key") {
+                    createKey()
+                }
+                .accessibilityHint("Creates a key pair on this device only. Nothing is sent anywhere.")
+            }
+        }
+        .growCard()
     }
 
     private var leavesCard: some View {
@@ -101,5 +168,35 @@ struct SyncPrivacyView: View {
                 .foregroundStyle(Theme.ink)
                 .fixedSize(horizontal: false, vertical: true)
         }
+    }
+
+    private func refreshKeys() {
+        guard let identity = try? DeviceKeyStore.existingIdentity() else {
+            keySummary = nil
+            return
+        }
+        keySummary = summary(for: identity)
+    }
+
+    private func createKey() {
+        do {
+            let identity = try DeviceKeyStore.identity()
+            keySummary = summary(for: identity)
+        } catch {
+            keyError = error.localizedDescription
+        }
+    }
+
+    private func removeKeys() {
+        DeviceKeyStore.deleteAll()
+        keySummary = nil
+    }
+
+    private func summary(for identity: SecureEnvelope.Identity) -> DeviceKeySummary {
+        DeviceKeySummary(
+            createdAt: DeviceKeyStore.createdAt(),
+            agreementID: SecureEnvelope.keyIDText(SecureEnvelope.keyID(for: identity.agreementPublicKey)),
+            signingID: SecureEnvelope.keyIDText(SecureEnvelope.keyID(for: identity.signingPublicKey))
+        )
     }
 }

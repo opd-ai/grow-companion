@@ -72,4 +72,7 @@ not silently assumed to be settled:
 
 Until those are answered, the product posture is: local-only, account-free,
 sharing and sync unavailable, rule content labelled as an estimate with a
-verification duty, and no claim of legal compliance.
+verification duty, and no claim of legal compliance. The protected-envelope code
+described in `docs/E2EE_DESIGN.md` is foundation only: it is not used to send
+anything, and it must not be presented as end-to-end encryption of a shipped
+feature.
