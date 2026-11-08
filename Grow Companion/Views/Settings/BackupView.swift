@@ -24,6 +24,10 @@ struct BackupView: View {
     @Query(sort: \CycleArchive.completedAt, order: .reverse) private var cycleArchives: [CycleArchive]
     @Query(sort: \SensorDevice.name) private var sensors: [SensorDevice]
     @Query(sort: \ShareGrant.createdAt, order: .reverse) private var shareGrants: [ShareGrant]
+    @Query(sort: \ComplianceSnapshot.capturedAt, order: .reverse)
+    private var complianceSnapshots: [ComplianceSnapshot]
+    @Query(sort: \RuleEvaluationEvent.evaluatedAt, order: .reverse)
+    private var ruleEvaluationEvents: [RuleEvaluationEvent]
 
     @AppStorage(SettingsKey.lastBackupDate) private var lastBackupDate = ""
     @AppStorage(SettingsKey.lastBackupIncludesPhotos) private var lastBackupIncludesPhotos = false
@@ -56,6 +60,8 @@ struct BackupView: View {
             cycleArchives: cycleArchives,
             sensors: sensors,
             shareGrants: shareGrants,
+            complianceSnapshots: complianceSnapshots,
+            ruleEvaluationEvents: ruleEvaluationEvents,
             counts: DataInventory.counts(in: context)
         )
     }

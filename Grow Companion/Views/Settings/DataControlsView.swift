@@ -28,6 +28,10 @@ struct DataControlsView: View {
     @Query(sort: \CycleArchive.completedAt, order: .reverse) private var cycleArchives: [CycleArchive]
     @Query(sort: \SensorDevice.name) private var sensors: [SensorDevice]
     @Query(sort: \ShareGrant.createdAt, order: .reverse) private var shareGrants: [ShareGrant]
+    @Query(sort: \ComplianceSnapshot.capturedAt, order: .reverse)
+    private var complianceSnapshots: [ComplianceSnapshot]
+    @Query(sort: \RuleEvaluationEvent.evaluatedAt, order: .reverse)
+    private var ruleEvaluationEvents: [RuleEvaluationEvent]
 
     @State private var includeJournal = false
     @State private var includePhotos = false
@@ -286,6 +290,8 @@ struct DataControlsView: View {
                     cycleArchives: cycleArchives,
                     sensors: sensors,
                     shareGrants: shareGrants,
+                    complianceSnapshots: complianceSnapshots,
+                    ruleEvaluationEvents: ruleEvaluationEvents,
                     counts: recordCounts.isEmpty ? DataInventory.counts(in: context) : recordCounts
                 ),
                 options: ExportOptions(

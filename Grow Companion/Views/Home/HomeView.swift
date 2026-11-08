@@ -13,10 +13,13 @@ struct HomeView: View {
     let profile: GrowProfile
 
     @Environment(\.modelContext) private var context
+    @Environment(ComplianceHistoryMonitor.self) private var historyMonitor
     @Query(sort: \Plant.plantedAt, order: .reverse) private var plants: [Plant]
     @Query(sort: \Room.createdAt) private var rooms: [Room]
     @Query(sort: \JournalEntry.createdAt, order: .reverse) private var journal: [JournalEntry]
     @Query(sort: \EnvironmentReading.date) private var allReadings: [EnvironmentReading]
+    @Query(sort: \RuleEvaluationEvent.evaluatedAt, order: .reverse)
+    private var ruleEvaluations: [RuleEvaluationEvent]
 
     @AppStorage(SettingsKey.unitSystem) private var unitRaw = "metric"
     @AppStorage(SettingsKey.warningThreshold) private var warningThreshold: Double = 0.8
@@ -25,12 +28,25 @@ struct HomeView: View {
     @State private var showingBreakdown = false
     @State private var showingQuickLog = false
     @State private var showingRoomEditor = false
+    @State private var showingHistory = false
+    @State private var showingRuleReview = false
     @State private var selectedRoom: Room?
     @State private var selectedFamily: Plant?
     @State private var loggingReminder: CareReminder?
 
     private var unit: UnitSystem { UnitSystem(rawValue: unitRaw) ?? .metric }
     private var rule: JurisdictionRule? { profile.rule }
+
+    private var pendingRuleChanges: [RuleEvaluationEvent] {
+        ruleEvaluations.filter { !$0.isAcknowledged }
+    }
+
+    private var historyCaption: String {
+        guard let saved = historyMonitor.lastSavedAt else {
+            return "History starts with this update"
+        }
+        return "Saved \(Format.shortDate(saved)) at \(Format.time(saved))"
+    }
 
     private var report: ComplianceReport? {
         guard let rule else { return nil }
@@ -90,6 +106,11 @@ struct HomeView: View {
                 header
                 if !rooms.isEmpty { roomFilter }
                 if !familyRoots.isEmpty { familyFilter }
+                if !pendingRuleChanges.isEmpty {
+                    RuleUpdateBanner(events: pendingRuleChanges) {
+                        showingRuleReview = true
+                    }
+                }
                 complianceCard
                 todaySection
                 plantsSection
@@ -119,6 +140,12 @@ struct HomeView: View {
                     rooms: ComplianceEngine.breakdown(plants: visiblePlants, rooms: filteredRooms, rule: rule)
                 )
             }
+        }
+        .sheet(isPresented: $showingHistory) {
+            ComplianceHistoryView()
+        }
+        .sheet(isPresented: $showingRuleReview) {
+            RuleChangeReviewView(events: pendingRuleChanges)
         }
         .onChange(of: rooms) { _, newRooms in
             guard let current = selectedRoom else { return }
@@ -333,6 +360,43 @@ struct HomeView: View {
                     .padding(.top, 2)
                 }
                 .buttonStyle(.plain)
+
+                Divider().overlay(Theme.onHero.opacity(0.12))
+
+                HStack(alignment: .top, spacing: 10) {
+                    Image(systemName: historyMonitor.lastError == nil ? "clock.arrow.circlepath" : "exclamationmark.triangle")
+                        .font(.system(size: 12, weight: .semibold))
+                        .foregroundStyle(historyMonitor.lastError == nil ? Theme.primaryBright : Theme.amberBright)
+
+                    VStack(alignment: .leading, spacing: 2) {
+                        Text("Compliance history")
+                            .font(Theme.sans(13, weight: .semibold))
+                            .foregroundStyle(Theme.onHero)
+                        Text(historyMonitor.lastError ?? historyCaption)
+                            .font(.system(size: 11))
+                            .foregroundStyle(historyMonitor.lastError == nil ? Theme.onHeroSecondary : Theme.amberBright)
+                            .fixedSize(horizontal: false, vertical: true)
+                    }
+
+                    Spacer(minLength: 8)
+
+                    if historyMonitor.lastSavedAt != nil {
+                        Button {
+                            showingHistory = true
+                        } label: {
+                            HStack(spacing: 4) {
+                                Text("View")
+                                    .font(Theme.sans(12, weight: .semibold))
+                                Image(systemName: "chevron.right")
+                                    .font(.system(size: 9, weight: .semibold))
+                            }
+                            .foregroundStyle(Theme.onHero)
+                        }
+                        .buttonStyle(.plain)
+                        .accessibilityLabel("View compliance history")
+                    }
+                }
+                .accessibilityElement(children: .combine)
             }
             .growCard(fill: Theme.hero, padding: 20)
         } else {
