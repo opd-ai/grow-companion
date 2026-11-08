@@ -76,18 +76,23 @@ enum SettingsKey {
 }
 
 enum Format {
+    /// The locale numbers and dates are rendered in. Defaults to the device
+    /// locale, so a Spanish device sees Spanish separators, month names and
+    /// date order; tests set it to prove that another language is honoured.
+    static var locale: Locale = .current
+
     static func weight(_ grams: Double, unit: UnitSystem) -> String {
         switch unit {
         case .metric:
             if grams >= 1000 {
-                return String(format: "%.1f kg", grams / 1000)
+                return number(grams / 1000, digits: 1) + " kg"
             }
             if grams < 10 {
-                return String(format: "%.1f g", grams)
+                return number(grams, digits: 1) + " g"
             }
-            return String(format: "%.0f g", grams)
+            return number(grams, digits: 0) + " g"
         case .imperial:
-            return String(format: "%.1f oz", grams / 28.3495)
+            return number(grams / 28.3495, digits: 1) + " oz"
         }
     }
 
@@ -99,9 +104,9 @@ enum Format {
     static func area(_ squareMeters: Double, unit: UnitSystem) -> String {
         switch unit {
         case .metric:
-            return String(format: "%.2f m²", squareMeters)
+            return number(squareMeters, digits: 2) + " m²"
         case .imperial:
-            return String(format: "%.1f sq ft", squareMeters * 10.7639)
+            return number(squareMeters * 10.7639, digits: 1) + " ft²"
         }
     }
 
@@ -111,53 +116,76 @@ enum Format {
     }
 
     static func dayCount(_ days: Int) -> String {
-        days == 1 ? "1 day" : "\(days) days"
+        days == 1
+            ? String(localized: "1 day")
+            : String(localized: "\(days) days")
     }
 
     static func temperature(_ celsius: Double, unit: UnitSystem) -> String {
         switch unit {
         case .metric:
-            return String(format: "%.1f °C", celsius)
+            return number(celsius, digits: 1) + " °C"
         case .imperial:
-            return String(format: "%.1f °F", celsius * 9 / 5 + 32)
+            return number(celsius * 9 / 5 + 32, digits: 1) + " °F"
         }
     }
 
     static func temperatureRange(_ range: ClosedRange<Double>, unit: UnitSystem) -> String {
         switch unit {
         case .metric:
-            return String(format: "%.0f–%.0f °C", range.lowerBound, range.upperBound)
+            return number(range.lowerBound, digits: 0) + "–" + number(range.upperBound, digits: 0) + " °C"
         case .imperial:
             let low = range.lowerBound * 9 / 5 + 32
             let high = range.upperBound * 9 / 5 + 32
-            return String(format: "%.0f–%.0f °F", low, high)
+            return number(low, digits: 0) + "–" + number(high, digits: 0) + " °F"
         }
     }
 
     static func volume(_ liters: Double, unit: UnitSystem) -> String {
         switch unit {
         case .metric:
-            return String(format: "%.2f L", liters)
+            return number(liters, digits: 2) + " L"
         case .imperial:
-            return String(format: "%.2f gal", liters * 0.264172)
+            return number(liters * 0.264172, digits: 2) + " gal"
         }
     }
 
     static func shortDate(_ date: Date) -> String {
-        dateFormatter.string(from: date)
+        dateFormatter.locale = locale
+        return dateFormatter.string(from: date)
     }
 
     static func time(_ date: Date) -> String {
-        timeFormatter.string(from: date)
+        timeFormatter.locale = locale
+        return timeFormatter.string(from: date)
     }
 
     static func percent(_ value: Double) -> String {
-        "\(Int((value * 100).rounded()))%"
+        number(value * 100, digits: 0) + "%"
     }
 
+    /// A number in the current locale: a Spanish (Spain) device sees `24,5`
+    /// and an English one `24.5`, and neither is hard-coded here.
+    static func number(_ value: Double, digits: Int) -> String {
+        numberFormatter.locale = locale
+        numberFormatter.minimumFractionDigits = digits
+        numberFormatter.maximumFractionDigits = digits
+        return numberFormatter.string(from: NSNumber(value: value)) ?? "\(value)"
+    }
+
+    private static let numberFormatter: NumberFormatter = {
+        let formatter = NumberFormatter()
+        formatter.numberStyle = .decimal
+        formatter.roundingMode = .halfUp
+        return formatter
+    }()
+
+    /// The locale's medium date: `Nov 7, 2026` in English, `7 nov 2026` in
+    /// Spanish. The old fixed `d MMM yyyy` pattern is gone.
     private static let dateFormatter: DateFormatter = {
         let formatter = DateFormatter()
-        formatter.dateFormat = "d MMM yyyy"
+        formatter.dateStyle = .medium
+        formatter.timeStyle = .none
         return formatter
     }()
 

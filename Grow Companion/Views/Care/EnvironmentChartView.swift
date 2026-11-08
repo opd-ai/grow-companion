@@ -15,8 +15,6 @@ struct EnvironmentChartView: View {
     let targetRange: ClosedRange<Double>?
     let unit: UnitSystem
 
-    @State private var showingTable = false
-
     private var recentReadings: [EnvironmentReading] {
         let calendar = Calendar.current
         guard let cutoff = calendar.date(byAdding: .day, value: -7, to: Date()) else { return readings }
@@ -99,31 +97,14 @@ struct EnvironmentChartView: View {
                         .foregroundStyle(outOfRangeCount == 0 ? Theme.primary : Theme.amber)
                 }
 
-                DisclosureGroup(isExpanded: $showingTable) {
-                    VStack(spacing: 6) {
-                        ForEach(points.reversed()) { point in
-                            HStack {
-                                if let reading = recentReadings.first(where: { String(describing: $0.persistentModelID) == point.id }) {
-                                    Image(systemName: reading.source == .sensor ? "checkmark.shield.fill" : "pencil")
-                                        .foregroundStyle(reading.source == .sensor ? Theme.primary : Theme.tertiaryInk)
-                                }
-                                Text(Format.shortDate(point.date) + " · " + Format.time(point.date))
-                                    .font(Theme.sans(11))
-                                    .foregroundStyle(Theme.secondaryInk)
-                                Spacer(minLength: 8)
-                                Text(metric.display(point.value, unit: unit))
-                                    .font(Theme.sans(12, weight: .semibold))
-                                    .foregroundStyle(point.isOutOfRange ? Theme.danger : Theme.ink)
-                            }
-                            .accessibilityElement(children: .combine)
-                        }
-                    }
-                    .padding(.top, 8)
-                } label: {
-                    Text("Data table")
-                        .font(Theme.sans(13, weight: .semibold))
-                        .foregroundStyle(Theme.primary)
-                }
+                ChartTableDisclosure(
+                    table: ChartTables.environment(
+                        points: points,
+                        metric: metric,
+                        unit: unit,
+                        summary: accessibilitySummary
+                    )
+                )
             }
         }
     }

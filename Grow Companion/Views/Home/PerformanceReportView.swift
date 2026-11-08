@@ -145,6 +145,13 @@ struct PerformanceReportView: View {
                 Text("\(outOfRangeReadings.count) of \(totalReadings) recorded readings were outside their room target.")
                     .font(Theme.sans(12, weight: .semibold))
                     .foregroundStyle(Theme.amber)
+
+                ChartTableDisclosure(
+                    table: ChartTables.weeklyCounts(
+                        weeklyOutOfRange.map { WeeklyCount(date: $0.date, count: $0.count) },
+                        summary: "\(outOfRangeReadings.count) of \(totalReadings) recorded readings were outside their room target, week by week."
+                    )
+                )
             }
         }
         .growCard()

@@ -993,6 +993,11 @@ struct ComplianceBreakdownSheet: View {
                     }
                     .growCard()
 
+                    ChartTableDisclosure(
+                        table: ChartTables.compliance(report: report, unit: unit)
+                    )
+                    .growCard()
+
                     HStack(spacing: 8) {
                         Image(systemName: "checkmark.shield")
                             .font(.system(size: 13, weight: .semibold))
