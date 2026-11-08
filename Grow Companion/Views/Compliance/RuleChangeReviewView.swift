@@ -72,6 +72,8 @@ struct RuleChangeReviewView: View {
 
     @Environment(\.modelContext) private var context
     @Environment(\.dismiss) private var dismiss
+    @Query(sort: \ComplianceSnapshot.capturedAt, order: .reverse)
+    private var snapshots: [ComplianceSnapshot]
     @AppStorage(SettingsKey.unitSystem) private var unitRaw = "metric"
 
     @State private var errorMessage = ""
@@ -238,13 +240,14 @@ struct RuleChangeReviewView: View {
     }
 
     private func recordsCard(_ group: ReviewGroup) -> some View {
-        VStack(alignment: .leading, spacing: 12) {
+        let shown = Array(group.events.prefix(25))
+        return VStack(alignment: .leading, spacing: 12) {
             SectionHeader("Saved calculations under this change")
 
-            ForEach(group.events, id: \.eventID) { event in
+            ForEach(shown, id: \.eventID) { event in
                 VStack(alignment: .leading, spacing: 6) {
                     HStack(alignment: .firstTextBaseline, spacing: 8) {
-                        Text(Format.shortDate(event.evaluatedAt))
+                        Text(snapshotDate(for: event))
                             .font(Theme.sans(13, weight: .semibold))
                             .foregroundStyle(Theme.ink)
                         Spacer(minLength: 8)
@@ -286,12 +289,25 @@ struct RuleChangeReviewView: View {
                 }
                 .padding(.vertical, 2)
 
-                if event.eventID != group.events.last?.eventID {
+                if event.eventID != shown.last?.eventID {
                     Divider().overlay(Theme.hairline)
                 }
             }
+
+            if group.events.count > shown.count {
+                Text("and \(group.events.count - shown.count) more saved calculation\(group.events.count - shown.count == 1 ? "" : "s") compared the same way.")
+                    .font(.system(size: 12))
+                    .foregroundStyle(Theme.tertiaryInk)
+                    .fixedSize(horizontal: false, vertical: true)
+            }
         }
         .growCard(padding: 16)
+    }
+
+    /// The date of the saved snapshot, not the date the review ran.
+    private func snapshotDate(for event: RuleEvaluationEvent) -> String {
+        let snapshot = snapshots.first { $0.snapshotID == event.priorSnapshotID }
+        return Format.shortDate(snapshot?.capturedAt ?? event.evaluatedAt)
     }
 
     @ViewBuilder
