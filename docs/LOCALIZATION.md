@@ -106,9 +106,11 @@ are.
    `plural` variation (`one`/`other`) in Spanish, not a single value.
 4. **Legal, rule and verification text stays English.** Do not translate
    `LegalCopy`, `RulePack` citations, rule summaries, jurisdiction data or the
-   federal notice until the legal localisation review in `docs/ROADMAP.md` 7.8
-   is signed off. `Services/Localization.swift` shows a notice while the app is
-   in Spanish so this is explained in the product.
+   federal notice until the *Spanish legal copy* passes its own localisation
+   review. The general legal review of the shipped English copy is complete
+   (`docs/ROADMAP.md` section 1.1); it did not clear a translation of it.
+   `Services/Localization.swift` shows a notice while the app is in Spanish so
+   this is explained in the product.
 5. **No machine translation into the catalog unreviewed.** The draft in the
    catalog is for review; a reviewer signs off each batch before release.
 6. **Check the layout.** Spanish runs 15–25% longer. Every batch needs a device

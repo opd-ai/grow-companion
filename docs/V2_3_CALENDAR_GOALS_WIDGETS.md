@@ -162,7 +162,9 @@ hears the values. The builders are pure functions, tested without a screen.
 `Text("literal")` and `String(localized:)` throughout, so the work is a String
 Catalog plus a `knownRegions` entry for `es-MX`, not a source rewrite. In order:
 
-1. Resolve the copy through a translator and the legal review.
+1. Resolve the copy through a translator, then through the Spanish legal copy's
+   own localisation review. The general legal review of the English copy is
+   complete (`docs/ROADMAP.md` section 1.1).
 2. Add `Localizable.xcstrings` with `en` as the source language and `es-MX`
    translations; leave every legal, rule and verification-duty string in English
    and keep the visible note that says so.

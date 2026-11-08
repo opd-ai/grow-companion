@@ -146,8 +146,8 @@ same plaintext twice never produces the same bytes.
 
 Done:
 
-1. Attorney and privacy review — the product owner confirmed the gate is cleared
-   for the file-based share flow; see `docs/LEGAL_REVIEW.md`.
+1. Attorney and privacy review — complete (2026-11-07) for the file-based share
+   flow; see the review register in `docs/ROADMAP.md` section 1.1.
 2. Transport decision — out-of-band file exchange, which needs no backend.
 3. Identity model — the share code, with sender verification on open.
 

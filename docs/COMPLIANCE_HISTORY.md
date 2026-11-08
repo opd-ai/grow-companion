@@ -98,7 +98,9 @@ types.
   and never changes an old result.
 - No remote pack is fetched, no notification is sent for a rule change, and no
   rule content is changed by this phase. A rule-pack version bump also needs
-  attorney review of the changed jurisdiction content before release.
+  attorney review of the changed jurisdiction content before release. The
+  shipped pack was reviewed on 2026-11-07 (review register:
+  `docs/ROADMAP.md` section 1.1).
 
 ## Accessibility
 
@@ -134,8 +136,11 @@ executed locally.
 
 - Migration fixtures from every released build: none are available from this
   repository, so the migration test uses a locally created V1 store.
-- Attorney review of any changed rule-pack content or user-facing copy.
+- Attorney review of any *changed* rule-pack content or changed user-facing legal
+  copy. The shipped content was reviewed and cleared on 2026-11-07 (review
+  register: `docs/ROADMAP.md` section 1.1).
 - Privacy sign-off for snapshot retention and the export/delete copies.
 - A staged rollout with record-count and migration validation, and the iOS 18
   deployment-target decision from the safe-release plan.
-- Localisation of the new interface copy beyond the current English build.
+- Interpolated interface strings and legal-copy localisation, each pending the
+  work described in `docs/LOCALIZATION.md`.

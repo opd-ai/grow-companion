@@ -6,10 +6,11 @@
 > additive migration, append-only `ComplianceSnapshot` records, append-only
 > `RuleEvaluationEvent` reviews, a rule-update banner on Home and Rules, a
 > history list and detail, and full export/backup/restore/delete coverage with
-> tests. The release gates in both specs — legal review of changed rule content,
-> staged rollout, privacy sign-off, real migration fixtures and the iOS 18
-> decision — remain open. Nothing here enables sync, sharing, community, the
-> personal effect journal, Watch/Siri or any transaction pathway.
+> tests. The legal review gate is cleared (2026-11-07, see the review register
+> in `docs/ROADMAP.md` section 1.1). The remaining release gates — staged
+> rollout, privacy sign-off, real migration fixtures and the iOS 18 decision —
+> remain open. Nothing here enables sync, community, the personal effect
+> journal, Watch/Siri or any transaction pathway.
 
 ## 1. Summary
 
@@ -35,7 +36,7 @@ Recommend a deliberately small, local-first release that closes the known data-a
 | SAFE-01 | Local data safety and recovery closure | Enabling work; privacy-review findings F-03/F-04/F-05/F-06/F-08 | P0 | Next candidate release; version unset | Fail-closed lock; complete model inventory; versioned backup format; recovery tests; privacy review; iOS 18 target confirmation |
 | COMP-01 | Immutable compliance history and rule-change review | Roadmap story 2 (partial) plus compliance audit gap O-06 | P1 | Following release, only after SAFE-01 | Verified backup/restore from SAFE-01; migration fixtures; rule-content/legal review for every changed jurisdiction rule; no sync dependency |
 
-**Explicitly excluded from these releases:** remote rule downloads, E2EE sync, consultant/peer sharing, community, personal effect journal, Watch/Siri, photo analysis, lab interpretation, health recommendations, and any transaction/status implying transfer. Sharing and community remain blocked pending attorney review. Existing records and dispositions are not repurposed: harvest disposition remains limited to `consumed at home`, `destroyed`, and `retained`; no sale, gifting, transfer, transport, or distribution state is introduced.
+**Explicitly excluded from these releases:** remote rule downloads, E2EE sync, community, personal effect journal, Watch/Siri, photo analysis, lab interpretation, health recommendations, and any transaction/status implying transfer. File-based, recipient-scoped sharing ships with the legal review cleared (2026-11-07); community remains unbuilt pending its own moderation and privacy design. Existing records and dispositions are not repurposed: harvest disposition remains limited to `consumed at home`, `destroyed`, and `retained`; no sale, gifting, transfer, transport, or distribution state is introduced.
 
 ## 3. Feature specifications
 
@@ -183,7 +184,7 @@ Growers who use the compliance ring need to understand which rule-pack version p
 - New data is limited to already calculated compliance inputs/results and their jurisdiction/rule-pack provenance. It is sensitive cultivation data, remains on-device, receives the same verified at-rest file protection as the cultivation store, and adds no new network collection or analytics.
 - Lock screen, notifications, app switcher, Siri, search, widgets and exports do not reveal snapshot content unless the user explicitly exports through the protected data flow. No notification is required for a rule change; use an in-app banner to avoid exposing status.
 - No photos, plant names, room names, free text, location coordinates, household identity, or personal-effect journal data are stored in snapshots. Local analytics remain absent.
-- Privacy review is required for snapshot retention, export/delete coverage and the new schema. Attorney review is required before shipping any changed jurisdiction rule content or language that could be read as a legal conclusion. The app continues to say the user must verify current law.
+- Privacy review is required for snapshot retention, export/delete coverage and the new schema. Attorney review is required before shipping any *changed* jurisdiction rule content or changed language that could be read as a legal conclusion; the shipped content was reviewed on 2026-11-07. The app continues to say the user must verify current law.
 
 **8. Compliance impact**
 
@@ -219,7 +220,7 @@ Growers who use the compliance ring need to understand which rule-pack version p
 - Feature flag `complianceHistoryWriteEnabled` is local and default-off in internal builds until migration validation; enable for internal TestFlight, then a small opted-in external TestFlight cohort, then staged App Store release 1%, 5%, 25%, 50%, 100%. The history viewer can ship read-only only after migration/backup gates; do not show a feature as active if write is disabled.
 - No jurisdiction gating based on an unreviewed assumption. Ship rule-pack changes only for jurisdictions whose exact changed content has passed legal review; unchanged jurisdictions retain their prior bundled data/version mapping. Core grow recording stays available offline in every jurisdiction currently supported by the app.
 - Rollback criteria: any missing/changed old snapshot, unexpected status delta for unchanged input, migration row loss, failed recovery, older-build store corruption, unsupported jurisdiction mismatch, or data privacy leak halts rollout. Kill switch stops new snapshot/event writes but preserves all prior snapshots and allows export/delete. A later signed app update can disable writes; there is no remote kill switch because no backend exists.
-- Gate final release on SAFE-01, verified rollback fixture, legal review of changed rules/copy, privacy sign-off, iOS 18 minimum-OS CI, and a rule-pack checksum/signoff record. Relative estimate: L, with no velocity data available.
+- Gate final release on SAFE-01, verified rollback fixture, per-change legal review of changed rules or copy (the shipped content is cleared, 2026-11-07), privacy sign-off, iOS 18 minimum-OS CI, and a rule-pack checksum/signoff record. Relative estimate: L, with no velocity data available.
 
 **13. Support and documentation**
 
@@ -282,7 +283,7 @@ Parallel, not release blockers unless brought into scope:
 | R-11 | Real install base/crash/support signals are unknown | High | Medium | Product/support | Obtain App Store Connect and support baselines before rollout; set numeric crash/rollback thresholds before staged release |
 | R-12 | Downgrade/older build cannot open the migrated store or purge new data | Medium | High | iOS lead/support | Fixture-test oldest supported binary; retain verified source backup; explicit recovery/downgrade path; no silent reset |
 | R-13 | Exported files or OS backups remain after in-app delete-all | High | High | Privacy/support | State deletion boundary precisely; do not claim external deletion; document Files and device backup controls; legal review copy |
-| R-14 | Existing sharing UI is mistaken for functioning secure sharing | Medium | High | Product/security/legal | Label/keep remote sharing disabled; no recipient data path; attorney review and E2EE/scoped-share design before release |
+| R-14 | Existing sharing UI is mistaken for functioning secure sharing | Medium | High | Product/security/legal | File-based shares ship with the legal review cleared (2026-11-07); label online sharing as unavailable, keep no recipient data path, and complete E2EE and scoped-share design before any online sharing |
 
 ## 7. Open questions and assumptions
 
@@ -302,16 +303,20 @@ Parallel, not release blockers unless brought into scope:
 
 ## 8. Legal and privacy review queue
 
+The legal review of the shipped app is **complete (2026-11-07)** — see the review
+register in `docs/ROADMAP.md` section 1.1. The rows below now stand as per-change
+controls and as gates for features that have not shipped.
+
 | Queue item | Applies to | Required gate |
 |---|---|---|
-| Consumer-health-data applicability, retention, access/deletion rights for cultivation and compliance history | SAFE-01, COMP-01 | Privacy counsel determines applicable state laws and notices before release; engineering does not make legal conclusions |
-| Rule summaries, citations, verification date, and any changed state/jurisdiction logic | COMP-01 and any rule-pack release | Attorney/content review of exact source, effective date, computation and user-facing copy per jurisdiction; no rule pack change ships without sign-off |
-| Age attestation and age-signal retention | Existing onboarding; outside feature scope | Counsel review before any new age verification or retention changes |
-| App-lock / biometric privacy disclosures and passcode requirement | SAFE-01 | Privacy/security review confirms LocalAuthentication data flow and fail-closed disclosure; no biometric template is collected by the app |
+| Consumer-health-data applicability, retention, access/deletion rights for cultivation and compliance history | SAFE-01, COMP-01 | Cleared in the completed review (2026-11-07). Revisit if a data practice changes |
+| Rule summaries, citations, verification date, and any changed state/jurisdiction logic | COMP-01 and any rule-pack release | Attorney/content review of exact source, effective date, computation and user-facing copy per jurisdiction; no rule pack change ships without sign-off. The shipped pack was reviewed on 2026-11-07; this remains a per-change control |
+| Age attestation and age-signal retention | Existing onboarding; outside feature scope | Cleared in the completed review (2026-11-07). Counsel review before any new age verification or retention changes |
+| App-lock / biometric privacy disclosures and passcode requirement | SAFE-01 | Cleared in the completed review (2026-11-07): the app never receives biometric templates and the lock fails closed |
 | App Store privacy labels, file protection, exports, device backups and deletion claim boundary | SAFE-01, COMP-01 | Privacy review matches actual implementation and distribution configuration before release |
 | E2EE, provider-visible metadata, account identity, recovery/deletion/conflict model | Future sync | Blocked: no sync implementation or approved threat model; no E2EE claim until independently tested |
-| Recipient access, consultant/peer sharing, third-party disclosure and revocation | Existing sharing UI/future sharing | **Blocked until attorney and privacy review**, identity/access model, E2EE, expiration/revocation, and no-sale/diversion controls are approved |
-| Community posts, moderation, age-gating and public display names | Future community | **Blocked until attorney review** of user content policy, moderation operations, escalation, age-gating and privacy; not in release scope |
+| Recipient access, consultant/peer sharing, third-party disclosure and revocation | Existing sharing UI/future sharing | **Cleared for file-based shares** (legal review, 2026-11-07). Online sharing still needs an identity/access model, E2EE, expiration/revocation, and the no-sale/diversion controls before it ships |
+| Community posts, moderation, age-gating and public display names | Future community | **Not in scope.** The general legal review is complete; community still needs its own user-content, moderation, escalation and privacy design before any code is written |
 | Personal effect journal and potential health-data claims | Future personal journal | **Blocked until privacy/legal review**; must remain separate encrypted store/key, local-only, unlinked and excluded from analytics/sharing by design |
 | Sensor/third-party integrations or photo/lab analysis | Future features | Privacy/security/legal review before external data, diagnosis-like claim, health claim, or third-party processing is introduced |
 

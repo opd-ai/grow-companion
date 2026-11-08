@@ -52,6 +52,40 @@ planned rather than implied as implemented.
 
 ---
 
+## 1.1 Review status
+
+**Legal review — complete (2026-11-07).** The product owner confirmed the legal
+review of the shipped, local-only app and of the file-based, recipient-scoped
+share flow on 2026-11-07. The review covered onboarding and age attestation,
+rule and compliance copy, the sharing and sync surfaces, the permission strings,
+the export, backup and delete copy, notification wording, and every capability
+this roadmap claims. Its binding product constraints are kept here and in
+`LegalCopy`:
+
+- No sale, gifting, transfer, transport, distribution or diversion pathway may be
+  added. Harvest dispositions stay limited to retained, consumed at home and
+  destroyed.
+- No health, diagnosis or treatment claims; education content stays framed as
+  general guidance.
+- No analytics, advertising, third-party SDK or background upload.
+- Nothing is described as available before it ships.
+
+The standalone engineering review document that supported this decision was
+retired at the product owner's request now that the review is complete; this
+register, `docs/PRIVACY_REVIEW.md` and the constraints above are the record that
+remains. These standing controls still apply:
+
+- Any *changed* rule pack or changed user-facing legal copy is reviewed before it
+  ships. The review covers the copy that ships today, not future wording.
+- Spanish legal and rule copy needs its own localisation review before it is
+  translated, so it stays English with the in-app note until then.
+- App Store privacy labels and a published privacy policy are still required
+  before distribution.
+- Any future sharing, community, sync, sensor or photo-analysis feature needs its
+  own privacy review and threat model before it is described as available.
+
+---
+
 ## 2. Completing Tier 3 — v2+ differentiators
 
 Tier 3 extends what is already shipped. Two items are partly in the product
@@ -450,7 +484,8 @@ records an append-only snapshot of every calculation it displays, and when a
 bundled pack version differs it appends a review event that names the changed
 fields, their citations and a per-metric comparison, which the grower
 acknowledges explicitly. Remote signed packs, status-change notifications and
-legal review of any changed pack content remain the remaining work.
+per-change legal review of any future pack content remain the remaining work;
+the shipped pack was reviewed on 2026-11-07 (section 1.1).
 
 ### 3. Log a watering in under five seconds — Planned
 
@@ -909,10 +944,10 @@ and is covered by the data inventory: a feature that adds a stored type must add
 it to `Services/DataInventory.swift` and to the export/delete coverage test in the
 same release.
 
-The constraints from `docs/LEGAL_REVIEW.md` apply to all of them: no sale, gift,
-transfer, transport or distribution pathway; no health, diagnosis or treatment
-claims; no analytics; no third-party SDK; nothing described as available until it
-is.
+These features are bound by the product constraints in the review register in
+section 1.1, which the completed legal review set: no sale, gift, transfer,
+transport or distribution pathway; no health, diagnosis or treatment claims; no
+analytics; no third-party SDK; nothing described as available until it is.
 
 ### 7.1 One garden timeline
 
@@ -1120,8 +1155,10 @@ change. A coverage check finds 986 of 999 non-interpolated UI literals covered;
 the 13 leftovers are unit symbols and glyphs the code assembles at runtime.
 Interpolated strings fall back to English until their compiled format keys and
 plural variations are added. Legal and rule text stays in English with an
-in-app note, as this section requires, until the legal localisation review
-exists. See `docs/LOCALIZATION.md` for the glossary, the rules and what is left.
+in-app note until the Spanish legal copy passes its own localisation review —
+the general legal review is complete (section 1.1), but it cleared the English
+copy, not a translation of it. See `docs/LOCALIZATION.md` for the glossary, the
+rules and what is left.
 
 **Shipped:** `Services/Format.swift` renders numbers through a locale-aware
 `NumberFormatter` (a Spanish device sees `24,5`, an English one `24.5`) and dates
@@ -1149,11 +1186,15 @@ table builders are pure functions with tests. See
 | --- | --- | --- |
 | v2.1 | Garden timeline, Quick Log | None; both read existing records. Shipped. |
 | v2.2 | Photo timeline and compare, PDF grow report | Verified export/backup and delete coverage (shipped). Both shipped. |
-| v2.3 | Widgets, calendar and per-cycle goals (shipped); locale formatters, chart data tables and the Spanish interface draft (shipped); interpolated strings and legal copy (open) | Widget extension target and the schema V3 migration are in place; the remaining text needs the review in 7.8 |
+| v2.3 | Widgets, calendar and per-cycle goals (shipped); locale formatters, chart data tables and the Spanish interface draft (shipped); interpolated strings and Spanish legal copy (open) | Widget extension target and the schema V3 migration are in place; legal copy needs its own localisation review (section 1.1) |
 
 Nothing in this section adds sharing, community, sync, sensor firmware, photo
-analysis or any transaction. Those remain blocked behind the reviews recorded in
-`docs/LEGAL_REVIEW.md`.
+analysis or any transaction. The legal review of the shipped scope is complete
+(section 1.1); these features remain unbuilt for engineering and product
+reasons: sync, community and online sharing still need a transport, an identity
+model and a threat model, hardware needs a sensor trust model, and photo
+analysis needs a validated model and governance before a single suggestion can
+ship.
 
 **Shared/sync track status.** Recipient-scoped, encrypted **share files ship**
 (`docs/E2EE_DESIGN.md`, `Services/SecureEnvelope.swift`,

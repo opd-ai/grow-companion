@@ -90,7 +90,12 @@ The cultivation store and personal effect journal separation described in the sp
 9. Are treatment, equipment, service-history, and weekly-recap records in scope for export, delete-all, backup, and any future sync?
 10. What legal basis and retention policy apply to age attestation, jurisdiction, approximate location, and cultivation records in each launch state?
 
-## 7. Items for legal review
+## 7. Items referred to legal review
+
+These were referred to legal review and were cleared on 2026-11-07; the review
+register and the binding product constraints that replace the standalone legal
+review document are in `docs/ROADMAP.md` section 1.1. Any future data practice or
+feature that changes them needs a fresh review.
 
 - Whether cultivation records, jurisdiction, location, harvest, and treatment data fall under CCPA/CPRA, Washington My Health My Health Data Act, Colorado or other state consumer-health-data regimes, and what notices/rights are required.
 - Whether age attestation triggers COPPA or other age-assurance obligations, and whether the product should collect or retain any age signal at all.
@@ -128,5 +133,6 @@ findings, which describe the state at the time of the review.
   `Services/SecureEnvelope.swift` and are handed over out of band; there is still
   no sync engine, account or server, and no E2EE claim is made for sync.
 
-The legal questions in section 7 are consolidated, with their dispositions, in
-`docs/LEGAL_REVIEW.md`.
+The legal questions in section 7 were reviewed and cleared on 2026-11-07. The
+binding product constraints and the review register that replace the standalone
+legal review document are kept in `docs/ROADMAP.md` section 1.1.
