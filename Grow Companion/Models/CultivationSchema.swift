@@ -4,8 +4,9 @@
 //
 //  The explicit, versioned cultivation store. V1 freezes the model set that
 //  shipped before compliance history; V2 adds the two append-only compliance
-//  records. The migration is additive and lightweight: no existing model,
-//  relationship, identifier or value is rewritten.
+//  records; V3 adds the grower's own cycle goals. Every migration is additive
+//  and lightweight: no existing model, relationship, identifier or value is
+//  rewritten.
 //
 
 import Foundation
@@ -59,9 +60,17 @@ enum CultivationSchemaV2: VersionedSchema {
     }
 }
 
+enum CultivationSchemaV3: VersionedSchema {
+    static let versionIdentifier = Schema.Version(3, 0, 0)
+
+    static var models: [any PersistentModel.Type] {
+        CultivationSchemaV2.models + [GrowGoal.self]
+    }
+}
+
 enum CultivationMigrationPlan: SchemaMigrationPlan {
     static var schemas: [any VersionedSchema.Type] {
-        [CultivationSchemaV1.self, CultivationSchemaV2.self]
+        [CultivationSchemaV1.self, CultivationSchemaV2.self, CultivationSchemaV3.self]
     }
 
     static var stages: [MigrationStage] {
@@ -69,6 +78,10 @@ enum CultivationMigrationPlan: SchemaMigrationPlan {
             .lightweight(
                 fromVersion: CultivationSchemaV1.self,
                 toVersion: CultivationSchemaV2.self
+            ),
+            .lightweight(
+                fromVersion: CultivationSchemaV2.self,
+                toVersion: CultivationSchemaV3.self
             )
         ]
     }

@@ -41,6 +41,7 @@ struct ExportSnapshot {
     var shareGrants: [ShareGrant] = []
     var complianceSnapshots: [ComplianceSnapshot] = []
     var ruleEvaluationEvents: [RuleEvaluationEvent] = []
+    var goals: [GrowGoal] = []
     var counts: [String: Int] = [:]
 }
 
@@ -86,7 +87,7 @@ enum ExportService {
         "DryingSession", "DryingCheck", "CureBurp", "TrainingSession",
         "Treatment", "Equipment", "ServiceRecord", "ScoutingCheck",
         "FeedSchedule", "FeedWeek", "FeedProduct",
-        "ComplianceSnapshot", "RuleEvaluationEvent"
+        "ComplianceSnapshot", "RuleEvaluationEvent", "GrowGoal"
     ]
 
     static func build(snapshot: ExportSnapshot, options: ExportOptions) throws -> ExportPayload {
@@ -193,6 +194,9 @@ enum ExportService {
             "ruleEvaluationEvents": snapshot.ruleEvaluationEvents
                 .sorted { $0.evaluatedAt < $1.evaluatedAt }
                 .map(ruleEvaluationEventDictionary),
+            "goals": snapshot.goals
+                .sorted { $0.createdAt < $1.createdAt }
+                .map(goalDictionary),
             "journal": options.includeJournal ? snapshot.journal.map(journalDictionary) : []
         ]
 
@@ -206,8 +210,18 @@ enum ExportService {
             "version": info?["CFBundleShortVersionString"] as? String ?? "unknown",
             "build": info?["CFBundleVersion"] as? String ?? "unknown",
             // The explicit versioned SwiftData schema this build writes.
-            "recordSchema": "cultivation-v2",
-            "recordSchemaVersion": 2
+            "recordSchema": "cultivation-v3",
+            "recordSchemaVersion": 3
+        ]
+    }
+
+    private static func goalDictionary(_ goal: GrowGoal) -> [String: Any] {
+        [
+            "dryYieldTargetGrams": boxed(goal.dryYieldTargetGrams),
+            "floweringWeeksTarget": boxed(goal.floweringWeeksTarget),
+            "loggingCompletenessTargetPercent": boxed(goal.loggingCompletenessTargetPercent),
+            "createdAt": iso(goal.createdAt),
+            "updatedAt": iso(goal.updatedAt)
         ]
     }
 

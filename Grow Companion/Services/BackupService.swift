@@ -19,7 +19,7 @@ enum BackupService {
         "calibrations", "lightScheduleEvents", "dryingSessions", "treatments",
         "equipment", "serviceRecords", "scoutingChecks", "environmentAlerts",
         "trainingSessions", "feedSchedules", "cycleArchives", "sensors",
-        "shareGrants", "complianceSnapshots", "ruleEvaluationEvents",
+        "shareGrants", "complianceSnapshots", "ruleEvaluationEvents", "goals",
         "journal", "photos"
     ]
 
@@ -107,7 +107,8 @@ enum BackupService {
             ("SensorDevice", try arrays("sensors", in: root).count),
             ("ShareGrant", try arrays("shareGrants", in: root).count),
             ("ComplianceSnapshot", try arrays("complianceSnapshots", in: root).count),
-            ("RuleEvaluationEvent", try arrays("ruleEvaluationEvents", in: root).count)
+            ("RuleEvaluationEvent", try arrays("ruleEvaluationEvents", in: root).count),
+            ("GrowGoal", try arrays("goals", in: root).count)
         ]
 
         for check in checks {
@@ -635,6 +636,19 @@ enum BackupService {
             )
             context.insert(event)
             count("RuleEvaluationEvent")
+        }
+
+        // The grower's own cycle goals
+        for value in try arrays("goals", in: root) {
+            let goal = GrowGoal(
+                dryYieldTargetGrams: number(value["dryYieldTargetGrams"]),
+                floweringWeeksTarget: value["floweringWeeksTarget"] as? Int,
+                loggingCompletenessTargetPercent: value["loggingCompletenessTargetPercent"] as? Int,
+                createdAt: date(value["createdAt"]) ?? Date()
+            )
+            goal.updatedAt = date(value["updatedAt"]) ?? goal.createdAt
+            context.insert(goal)
+            count("GrowGoal")
         }
 
         // Journal

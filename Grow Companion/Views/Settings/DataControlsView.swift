@@ -32,6 +32,7 @@ struct DataControlsView: View {
     private var complianceSnapshots: [ComplianceSnapshot]
     @Query(sort: \RuleEvaluationEvent.evaluatedAt, order: .reverse)
     private var ruleEvaluationEvents: [RuleEvaluationEvent]
+    @Query(sort: \GrowGoal.updatedAt, order: .reverse) private var goals: [GrowGoal]
 
     @State private var includeJournal = false
     @State private var includePhotos = false
@@ -292,6 +293,7 @@ struct DataControlsView: View {
                     shareGrants: shareGrants,
                     complianceSnapshots: complianceSnapshots,
                     ruleEvaluationEvents: ruleEvaluationEvents,
+                    goals: goals,
                     counts: recordCounts.isEmpty ? DataInventory.counts(in: context) : recordCounts
                 ),
                 options: ExportOptions(

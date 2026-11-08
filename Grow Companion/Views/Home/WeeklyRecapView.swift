@@ -13,8 +13,19 @@ struct WeeklyRecapView: View {
     @Query private var rooms: [Room]
     @Query private var journalEntries: [JournalEntry]
     @Query private var reminders: [CareReminder]
+    @Query private var goals: [GrowGoal]
+
+    @AppStorage(SettingsKey.unitSystem) private var unitRaw = "metric"
 
     @State private var weekStart = Calendar.current.dateInterval(of: .weekOfYear, for: Date())?.start ?? Date()
+
+    private var unit: UnitSystem { UnitSystem(rawValue: unitRaw) ?? .metric }
+
+    private var currentGoal: GrowGoal? { GrowGoalService.current(from: goals) }
+
+    private var goalSources: GrowGoalSources {
+        GrowGoalSources(plants: plants, rooms: rooms, journal: journalEntries)
+    }
 
     private var calendar: Calendar { Calendar.current }
     private var weekEnd: Date { calendar.date(byAdding: .day, value: 7, to: weekStart) ?? weekStart }
@@ -95,6 +106,7 @@ struct WeeklyRecapView: View {
             VStack(alignment: .leading, spacing: 18) {
                 weekHeader
                 summaryCard
+                GrowGoalsSection(goal: currentGoal, sources: goalSources, unit: unit)
                 if !stageMoves.isEmpty { movedSection }
                 if !readingsOutOfRange.isEmpty { outOfRangeSection }
                 comingUpSection
