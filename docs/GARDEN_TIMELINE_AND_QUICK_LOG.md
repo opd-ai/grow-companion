@@ -44,11 +44,19 @@ reads type, title, date and time, room and plant as one element.
 
 ## Quick Log
 
-
 **What ships.** One sheet with four actions: water/feed, environment reading,
 journal note and stage change. It remembers the last room and plant and fills
 in the last values as starting points. Nothing is written until the grower taps
 the confirm button; Cancel writes nothing.
+
+**Siri and Shortcuts.** `Intents/LogWateringIntent.swift` exposes a "Log a
+watering" app shortcut with an optional room, backed by
+`Services/WateringShortcut.swift`. An explicit room wins, then the room the app
+remembers, then the only room there is; several rooms is a question that names
+them rather than a guess, and nothing is written when the room is missing or
+unknown. The write uses the same service as the sheet, so the timeline, the
+reminders and the counts see it immediately. The Watch half of story 3 still
+needs a Watch target.
 
 **Remembered context.** `QuickLogPreferences` stores the last room and plant by
 their user-visible names in `UserDefaults` under `quickLogRoomName` and
