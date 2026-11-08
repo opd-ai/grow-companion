@@ -203,6 +203,9 @@ enum BackupService {
                 canopyDistanceMeters: number(value["canopyDistanceMeters"]),
                 canopyDistanceMeasuredAt: date(value["canopyDistanceMeasuredAt"]),
                 canopyDistanceSource: LightDistanceSource(rawValue: string(value["canopyDistanceSource"])),
+                canopyDistanceStage: PlantStage(rawValue: string(value["canopyDistanceStage"])),
+                lightTargetLowerMeters: number(value["lightTargetLowerMeters"]),
+                lightTargetUpperMeters: number(value["lightTargetUpperMeters"]),
                 lightsOnMinutes: value["lightsOnMinutes"] as? Int ?? 360,
                 lightsOffMinutes: value["lightsOffMinutes"] as? Int ?? 0,
                 createdAt: date(value["createdAt"]) ?? Date()

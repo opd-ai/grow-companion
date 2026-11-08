@@ -68,9 +68,25 @@ enum CultivationSchemaV3: VersionedSchema {
     }
 }
 
+/// V4 adds no model. It records the light-distance fields added to `Room`
+/// (stage at reading, grower-set target) as their own lightweight stage, so the
+/// declared schema version matches the store's shape.
+enum CultivationSchemaV4: VersionedSchema {
+    static let versionIdentifier = Schema.Version(4, 0, 0)
+
+    static var models: [any PersistentModel.Type] {
+        CultivationSchemaV3.models
+    }
+}
+
 enum CultivationMigrationPlan: SchemaMigrationPlan {
     static var schemas: [any VersionedSchema.Type] {
-        [CultivationSchemaV1.self, CultivationSchemaV2.self, CultivationSchemaV3.self]
+        [
+            CultivationSchemaV1.self,
+            CultivationSchemaV2.self,
+            CultivationSchemaV3.self,
+            CultivationSchemaV4.self
+        ]
     }
 
     static var stages: [MigrationStage] {
@@ -82,6 +98,10 @@ enum CultivationMigrationPlan: SchemaMigrationPlan {
             .lightweight(
                 fromVersion: CultivationSchemaV2.self,
                 toVersion: CultivationSchemaV3.self
+            ),
+            .lightweight(
+                fromVersion: CultivationSchemaV3.self,
+                toVersion: CultivationSchemaV4.self
             )
         ]
     }

@@ -29,10 +29,10 @@ struct ModelCount: Identifiable, Hashable {
 
 enum DataInventory {
     /// Every model registered in the container, in the order the versioned
-    /// schema lists it. `CultivationSchemaV3` is the single source for the list.
-    static var models: [any PersistentModel.Type] { CultivationSchemaV3.models }
+    /// schema lists it. `CultivationSchemaV4` is the single source for the list.
+    static var models: [any PersistentModel.Type] { CultivationSchemaV4.models }
 
-    static var schema: Schema { Schema(versionedSchema: CultivationSchemaV3.self) }
+    static var schema: Schema { Schema(versionedSchema: CultivationSchemaV4.self) }
 
     /// The name each model is counted, exported and reported under.
     static var modelNames: [String] {

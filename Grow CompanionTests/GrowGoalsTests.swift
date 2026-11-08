@@ -230,7 +230,7 @@ struct GrowGoalDataControlTests {
     @Test func cycleGoalsAreInTheSchemaAndMigration() {
         #expect(DataInventory.modelNames.contains("GrowGoal"))
         #expect(DataInventory.label(for: "GrowGoal") != "GrowGoal")
-        #expect(CultivationMigrationPlan.stages.count == 2)
+        #expect(CultivationMigrationPlan.stages.count == 3)
         #expect(
             CultivationSchemaV3.models.contains { String(describing: $0) == "GrowGoal" }
         )

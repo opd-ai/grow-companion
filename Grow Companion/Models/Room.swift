@@ -20,6 +20,13 @@ final class Room {
     var canopyDistanceMeters: Double?
     var canopyDistanceMeasuredAt: Date?
     var canopyDistanceSourceRaw: String?
+    /// The stage the room was in when the distance was confirmed, so a later
+    /// stage change can prompt a re-measure.
+    var canopyDistanceStageRaw: String?
+
+    /// A grower-set target replaces the app's cited band for this fixture.
+    var lightTargetLowerMeters: Double?
+    var lightTargetUpperMeters: Double?
 
     /// Reservoir or feed-plan targets for this room.
     var feedTargetPH: Double?
@@ -86,6 +93,9 @@ final class Room {
         canopyDistanceMeters: Double? = nil,
         canopyDistanceMeasuredAt: Date? = nil,
         canopyDistanceSource: LightDistanceSource? = nil,
+        canopyDistanceStage: PlantStage? = nil,
+        lightTargetLowerMeters: Double? = nil,
+        lightTargetUpperMeters: Double? = nil,
         lightsOnMinutes: Int = 360,
         lightsOffMinutes: Int = 0,
         createdAt: Date = Date()
@@ -100,6 +110,9 @@ final class Room {
         self.canopyDistanceMeters = canopyDistanceMeters
         self.canopyDistanceMeasuredAt = canopyDistanceMeasuredAt
         self.canopyDistanceSourceRaw = canopyDistanceSource?.rawValue
+        self.canopyDistanceStageRaw = canopyDistanceStage?.rawValue
+        self.lightTargetLowerMeters = lightTargetLowerMeters
+        self.lightTargetUpperMeters = lightTargetUpperMeters
         self.lightsOnMinutes = lightsOnMinutes
         self.lightsOffMinutes = lightsOffMinutes
         self.createdAt = createdAt
@@ -114,6 +127,27 @@ final class Room {
         get { canopyDistanceSourceRaw.flatMap(LightDistanceSource.init(rawValue:)) }
         set { canopyDistanceSourceRaw = newValue?.rawValue }
     }
+
+    var canopyDistanceStage: PlantStage? {
+        get { canopyDistanceStageRaw.flatMap(PlantStage.init(rawValue:)) }
+        set { canopyDistanceStageRaw = newValue?.rawValue }
+    }
+
+    /// The grower's own target band, or nil when the app's cited band applies.
+    var growerSetLightTargetRange: ClosedRange<Double>? {
+        get {
+            guard let lower = lightTargetLowerMeters,
+                  let upper = lightTargetUpperMeters,
+                  lower > 0, lower < upper else { return nil }
+            return lower...upper
+        }
+        set {
+            lightTargetLowerMeters = newValue?.lowerBound
+            lightTargetUpperMeters = newValue?.upperBound
+        }
+    }
+
+    var hasGrowerSetLightTarget: Bool { growerSetLightTargetRange != nil }
 
     var type: RoomType {
         get { RoomType(rawValue: typeRaw) ?? .tent }

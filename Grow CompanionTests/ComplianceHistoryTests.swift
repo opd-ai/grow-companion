@@ -291,7 +291,7 @@ struct ComplianceHistoryTests {
         #expect(legacy.isSubset(of: current))
         #expect(current.contains("ComplianceSnapshot"))
         #expect(current.contains("RuleEvaluationEvent"))
-        #expect(CultivationMigrationPlan.stages.count == 1)
+        #expect(CultivationMigrationPlan.stages.count == 3)
         #expect(DataInventory.modelNames.count == current.count)
     }
 
