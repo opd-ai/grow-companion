@@ -2,7 +2,8 @@
 //  BreederContext.swift
 //  Grow Companion
 //
-//  Read-only reference context for breeder profiles and lineage disclosure.
+//  How a lineage is described. The reference material itself now lives in
+//  `Models/BreederProfile.swift` and `Services/BreederLibrary.swift`.
 //
 
 import Foundation
@@ -29,17 +30,4 @@ enum LineageStatus: String, CaseIterable, Codable, Identifiable {
         case .missing: return "questionmark"
         }
     }
-}
-
-struct BreederProfileReference: Hashable {
-    let name: String
-    let summary: String
-    let source: String
-}
-
-struct StrainReferenceContext: Hashable {
-    let breederProfile: BreederProfileReference?
-    let parentLines: String?
-    let claimedYield: String?
-    let source: String?
 }

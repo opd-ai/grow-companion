@@ -3,7 +3,8 @@
 //  Grow Companion
 //
 //  The bundled cultivar templates. Flowering figures are the breeders' own
-//  windows rounded to whole weeks; everything stays editable after adding.
+//  windows rounded to whole weeks; everything stays editable after adding. The
+//  breeder profiles and lineage claims behind them live in `BreederLibrary`.
 //
 
 import Foundation
@@ -105,33 +106,4 @@ enum StrainCatalog {
             notes: "Compact hybrid with heavy frost. Lighter feeds go further than heavy ones."
         )
     ]
-
-    static func referenceContext(for breeder: String) -> StrainReferenceContext {
-        let normalized = breeder.trimmingCharacters(in: .whitespacesAndNewlines).lowercased()
-        switch normalized {
-        case "humboldt seed organization":
-            return StrainReferenceContext(
-                breederProfile: BreederProfileReference(name: "Humboldt Seed Organization", summary: "A California seed company known for modern hybrid lines and pack-level flowering estimates.", source: "Bundled reference profile"),
-                parentLines: "Blueberry × Haze",
-                claimedYield: "High indoor yield",
-                source: "Breeder pack description"
-            )
-        case "sensi seeds":
-            return StrainReferenceContext(
-                breederProfile: BreederProfileReference(name: "Sensi Seeds", summary: "A long-running seed breeder with classic lines and published cultivar descriptions.", source: "Bundled reference profile"),
-                parentLines: "Afghan landrace selection × Northern Lights #5",
-                claimedYield: "Moderate to high",
-                source: "Breeder catalog"
-            )
-        case "green house seeds":
-            return StrainReferenceContext(
-                breederProfile: BreederProfileReference(name: "Green House Seeds", summary: "A seed breeder and reference source for several established hybrid lines.", source: "Bundled reference profile"),
-                parentLines: "Brazilian sativa × South Indian indica",
-                claimedYield: "High indoor yield",
-                source: "Breeder catalog"
-            )
-        default:
-            return StrainReferenceContext(breederProfile: nil, parentLines: nil, claimedYield: nil, source: nil)
-        }
-    }
 }
