@@ -25,7 +25,7 @@ can grow batch by batch.
 
 ## What is covered
 
-The catalog holds 1,300 Spanish (Mexico) strings and is a complete draft of
+The catalog holds 1,367 Spanish (Mexico) strings and is a complete draft of
 the app's user-facing copy, screen by screen, including every value the app
 formats with a variable:
 
@@ -74,27 +74,39 @@ Legal and rule text — `LegalCopy`, `RulePack` citations, rule summaries,
 jurisdiction data and the federal notice — stays English on purpose. Rule 4
 below, and the in-app notice, explain why.
 
-## Model copy is still English at runtime
+## Model and service copy
 
-Found while verifying this batch. Copy held in a model property is a plain
-`String`, and `Text(stage.title)` treats a `String` as verbatim text, so those
-lines are never looked up: the catalog has them (`Vegetative`, the stage
-guidance paragraphs, room types, training methods and so on), but the app shows
-them in English.
+Copy held in a model or a service is a plain `String`, and `Text(stage.title)`
+treats a `String` as verbatim text, so the catalog never applied to it. That is
+fixed: the display properties in `Models/Enums.swift`, `Models/DryingSession.swift`,
+`Models/LightDistance.swift`, `Models/SensorDevice.swift`,
+`Models/BreederContext.swift`, `Models/ShareGrant.swift`, and the display and
+error copy in `Services/` (`LightSchedule`, `GardenTimeline`, `CareLog`,
+`CareDigest`, `NotificationSettings`, `GrowGoals`, `QuickLog`, `GrowCalendar`,
+`CareNotifications`, `EducationLibrary`, `AppLock`, `HarvestForecast`,
+`HarvestLog`, `TrainingLog`, `TreatmentLog`, `EquipmentLog`, `Format`,
+`PhotoTimeline`, `SharePayload`, `SensorConnectionService`, `StoreBoot`,
+`ComplianceEngine`, `StrainInsights`, `ExportService`, `SecureEnvelope`,
+`SharePackageService`, `DeviceKeyStore`, `PlantRemovalService`) now go through
+`String(localized:)`, so the existing translations apply. Two kinds of literal
+are deliberately untouched: `rawValue`, `symbolName` and file names, which must
+not move, and the rule-engine labels in `RuleEvaluationEvent` and
+`JurisdictionRule`, which are legal copy.
 
-It reaches `Models/Enums.swift` (about 120 literals: stage names and guidance,
-plant origin, harvest disposition, room types, residence and experience, journal
-kinds, observation tags, training methods, drying phases and profiles, burp
-modes, fixtures and their guidance, sensor transports, breeder lineage),
-`Services/LightSchedule.swift`, `Services/GardenTimeline.swift` and the display
-copy in `Services/CareLog.swift` and `Services/CareDigest.swift` — and 81 view
-call sites read `.title`, `.subtitle` or `.guidance` off those models.
+The widget is a separate bundle and cannot read the app's catalog, so the app
+now writes the localized headline and overdue line into the shared snapshot and
+the widget renders them verbatim; the widget gallery's own name and description
+stay English.
 
-The fix is mechanical: wrap each *display* literal in `String(localized:)` and
-leave `rawValue`, `symbolName`, file names and export keys alone. It belongs in
-its own pass, behind a test run: a mixed-language draft is worse to review than
-a consistently English one that says so, and the CI that would catch a slip is
-blocked by the account's billing lock.
+A build confirmed the result: of 1,130 keys the compiled app asks for, 27 get no
+entry, and every one of them is a placeholder, a unit symbol, a bare number or
+`Grow Companion %@` — text that reads identically in both languages.
+
+**What is left here** is copy computed *inside views* (`HomeView`'s greeting and
+garden summary, the harvest, drying and comparison screens, the room and feed
+sections, onboarding buttons and similar): about 120 display literals across 30
+view files that still hand a `String` to `Text`. They need the same
+`String(localized:)` wrap and their format keys added to the catalog.
 
 ## Glossary (use these exact words in later batches)
 
@@ -173,9 +185,9 @@ because Spanish supplies the whole noun instead.
 The interface draft is complete, variable strings and plurals included. What is
 left:
 
-1. **Model copy**, described above: the enum display properties still hand
-   `String` to `Text`, so the ~180 literals behind them need `String(localized:)`
-   and a test run before they change language.
+1. **View-level copy**, described above: about 120 display literals computed
+   inside 30 view files still reach `Text` as a `String`, so they need the
+   `String(localized:)` wrap and their format keys added.
 2. **Legal and rule copy**, once the legal localisation review in
    `docs/ROADMAP.md` 7.8 is signed off. Until then the English text and the
    notice in the verification-duty card are the correct state.
