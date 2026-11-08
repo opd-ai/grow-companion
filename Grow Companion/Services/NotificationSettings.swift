@@ -18,17 +18,17 @@ enum NotificationPriority: String, CaseIterable, Identifiable, Hashable {
 
     var title: String {
         switch self {
-        case .critical: return "Critical"
-        case .timeSensitive: return "Time-sensitive"
-        case .routine: return "Routine"
+        case .critical: return String(localized: "Critical")
+        case .timeSensitive: return String(localized: "Time-sensitive")
+        case .routine: return String(localized: "Routine")
         }
     }
 
     var subtitle: String {
         switch self {
-        case .critical: return "Skips the app's quiet hours and arrives with sound"
-        case .timeSensitive: return "Arrives with sound, waits for quiet hours to end"
-        case .routine: return "Arrives quietly, waits for quiet hours to end"
+        case .critical: return String(localized: "Skips the app's quiet hours and arrives with sound")
+        case .timeSensitive: return String(localized: "Arrives with sound, waits for quiet hours to end")
+        case .routine: return String(localized: "Arrives quietly, waits for quiet hours to end")
         }
     }
 
@@ -61,21 +61,21 @@ enum NotificationCategory: String, CaseIterable, Identifiable {
 
     var title: String {
         switch self {
-        case .watering: return "Watering"
-        case .feeding: return "Feeding"
-        case .readings: return "Environment readings"
-        case .calibration: return "Meter calibration"
-        case .curing: return "Curing checks"
+        case .watering: return String(localized: "Watering")
+        case .feeding: return String(localized: "Feeding")
+        case .readings: return String(localized: "Environment readings")
+        case .calibration: return String(localized: "Meter calibration")
+        case .curing: return String(localized: "Curing checks")
         }
     }
 
     var subtitle: String {
         switch self {
-        case .watering: return "Watering reminders"
-        case .feeding: return "Feed and reservoir reminders"
-        case .readings: return "Temperature, humidity and light prompts"
-        case .calibration: return "pH meter and EC probe reminders"
-        case .curing: return "Jar burping after harvest"
+        case .watering: return String(localized: "Watering reminders")
+        case .feeding: return String(localized: "Feed and reservoir reminders")
+        case .readings: return String(localized: "Temperature, humidity and light prompts")
+        case .calibration: return String(localized: "pH meter and EC probe reminders")
+        case .curing: return String(localized: "Jar burping after harvest")
         }
     }
 

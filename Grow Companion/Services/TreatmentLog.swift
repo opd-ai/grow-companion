@@ -10,7 +10,7 @@ import Foundation
 enum TreatmentLog {
     static func withdrawalText(_ treatment: Treatment) -> String? {
         guard let end = treatment.withdrawalEndDate else { return nil }
-        return "Withdrawal ends \(Format.shortDate(end))"
+        return String(localized: "Withdrawal ends \(Format.shortDate(end))")
     }
 
     static func activeWithdrawal(for plant: Plant) -> Treatment? {

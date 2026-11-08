@@ -20,9 +20,9 @@ enum EnvironmentMetric: String, CaseIterable, Identifiable {
 
     var title: String {
         switch self {
-        case .temperature: return "Temperature"
-        case .humidity: return "Humidity"
-        case .light: return "Light"
+        case .temperature: return String(localized: "Temperature")
+        case .humidity: return String(localized: "Humidity")
+        case .light: return String(localized: "Light")
         }
     }
 
@@ -62,7 +62,7 @@ enum EnvironmentMetric: String, CaseIterable, Identifiable {
         switch self {
         case .temperature: return Format.temperatureRange(range, unit: unit)
         case .humidity: return String(format: "%.0f–%.0f%%", range.lowerBound, range.upperBound)
-        case .light: return "No target set"
+        case .light: return String(localized: "No target set")
         }
     }
 }
@@ -75,15 +75,15 @@ enum FeedKind: String, CaseIterable, Identifiable {
 
     var title: String {
         switch self {
-        case .water: return "Watering"
-        case .feed: return "Feed"
+        case .water: return String(localized: "Watering")
+        case .feed: return String(localized: "Feed")
         }
     }
 
     var actionTitle: String {
         switch self {
-        case .water: return "Log watering"
-        case .feed: return "Log feed"
+        case .water: return String(localized: "Log watering")
+        case .feed: return String(localized: "Log feed")
         }
     }
 
@@ -103,8 +103,8 @@ enum CalibrationMeter: String, CaseIterable, Identifiable {
 
     var title: String {
         switch self {
-        case .phMeter: return "pH meter"
-        case .ecProbe: return "EC probe"
+        case .phMeter: return String(localized: "pH meter")
+        case .ecProbe: return String(localized: "EC probe")
         }
     }
 
@@ -128,10 +128,10 @@ enum CareReminderKind: String, CaseIterable, Identifiable {
 
     var title: String {
         switch self {
-        case .water: return "Water"
-        case .feed: return "Feed"
-        case .reading: return "Log a reading"
-        case .calibration: return "Calibrate meters"
+        case .water: return String(localized: "Water")
+        case .feed: return String(localized: "Feed")
+        case .reading: return String(localized: "Log a reading")
+        case .calibration: return String(localized: "Calibrate meters")
         }
     }
 

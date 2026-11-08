@@ -27,18 +27,18 @@ enum GardenEventKind: String, CaseIterable, Identifiable {
 
     var title: String {
         switch self {
-        case .stage: return "Stage"
-        case .journal: return "Journal"
-        case .feed: return "Feed"
-        case .reading: return "Reading"
-        case .calibration: return "Calibration"
-        case .lightSchedule: return "Light schedule"
-        case .training: return "Training"
-        case .treatment: return "Treatment"
-        case .scouting: return "Scouting"
-        case .dryingCheck: return "Drying check"
-        case .cureBurp: return "Burping"
-        case .environmentAlert: return "Environment alert"
+        case .stage: return String(localized: "Stage")
+        case .journal: return String(localized: "Journal")
+        case .feed: return String(localized: "Feed")
+        case .reading: return String(localized: "Reading")
+        case .calibration: return String(localized: "Calibration")
+        case .lightSchedule: return String(localized: "Light schedule")
+        case .training: return String(localized: "Training")
+        case .treatment: return String(localized: "Treatment")
+        case .scouting: return String(localized: "Scouting")
+        case .dryingCheck: return String(localized: "Drying check")
+        case .cureBurp: return String(localized: "Burping")
+        case .environmentAlert: return String(localized: "Environment alert")
         }
     }
 

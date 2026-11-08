@@ -20,19 +20,19 @@ enum QuickLogAction: String, CaseIterable, Identifiable {
 
     var title: String {
         switch self {
-        case .water: return "Water / feed"
-        case .reading: return "Reading"
-        case .note: return "Note"
-        case .stage: return "Stage"
+        case .water: return String(localized: "Water / feed")
+        case .reading: return String(localized: "Reading")
+        case .note: return String(localized: "Note")
+        case .stage: return String(localized: "Stage")
         }
     }
 
     var subtitle: String {
         switch self {
-        case .water: return "Volume, pH and EC"
-        case .reading: return "Temperature, humidity, light"
-        case .note: return "A line for the journal"
-        case .stage: return "Move a plant on"
+        case .water: return String(localized: "Volume, pH and EC")
+        case .reading: return String(localized: "Temperature, humidity, light")
+        case .note: return String(localized: "A line for the journal")
+        case .stage: return String(localized: "Move a plant on")
         }
     }
 
@@ -90,13 +90,13 @@ enum QuickLogError: LocalizedError {
     var errorDescription: String? {
         switch self {
         case .missingRoom:
-            return "Pick the room this belongs to first."
+            return String(localized: "Pick the room this belongs to first.")
         case .missingPlant:
-            return "Pick the plant this belongs to first."
+            return String(localized: "Pick the plant this belongs to first.")
         case .sameStage:
-            return "The plant is already in that stage."
+            return String(localized: "The plant is already in that stage.")
         case .emptyNote:
-            return "Write a line for the note first."
+            return String(localized: "Write a line for the note first.")
         }
     }
 }

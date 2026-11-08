@@ -22,25 +22,25 @@ enum PlantStage: String, CaseIterable, Codable, Hashable, Identifiable {
 
     var title: String {
         switch self {
-        case .seed: return "Seed"
-        case .clone: return "Clone"
-        case .veg: return "Vegetative"
-        case .flower: return "Flowering"
-        case .harvest: return "Harvest"
-        case .cure: return "Curing"
-        case .storage: return "Storage"
+        case .seed: return String(localized: "Seed")
+        case .clone: return String(localized: "Clone")
+        case .veg: return String(localized: "Vegetative")
+        case .flower: return String(localized: "Flowering")
+        case .harvest: return String(localized: "Harvest")
+        case .cure: return String(localized: "Curing")
+        case .storage: return String(localized: "Storage")
         }
     }
 
     var shortTitle: String {
         switch self {
-        case .seed: return "Seed"
-        case .clone: return "Clone"
-        case .veg: return "Veg"
-        case .flower: return "Flower"
-        case .harvest: return "Harvest"
-        case .cure: return "Cure"
-        case .storage: return "Storage"
+        case .seed: return String(localized: "Seed")
+        case .clone: return String(localized: "Clone")
+        case .veg: return String(localized: "Veg")
+        case .flower: return String(localized: "Flower")
+        case .harvest: return String(localized: "Harvest")
+        case .cure: return String(localized: "Cure")
+        case .storage: return String(localized: "Storage")
         }
     }
 
@@ -85,19 +85,19 @@ enum PlantStage: String, CaseIterable, Codable, Hashable, Identifiable {
     var guidance: String {
         switch self {
         case .seed:
-            return "Keep the medium moist but not soaked, stay near 22–26 °C, and keep the light gentle. Watch for the first true leaves before you move on."
+            return String(localized: "Keep the medium moist but not soaked, stay near 22–26 °C, and keep the light gentle. Watch for the first true leaves before you move on.")
         case .clone:
-            return "Keep humidity high and light low while roots form. Move the plant to veg once you see new white roots and fresh growth."
+            return String(localized: "Keep humidity high and light low while roots form. Move the plant to veg once you see new white roots and fresh growth.")
         case .veg:
-            return "This is where shape is set. Watch node spacing, keep the light schedule steady, and log feeds so you can compare cycles."
+            return String(localized: "This is where shape is set. Watch node spacing, keep the light schedule steady, and log feeds so you can compare cycles.")
         case .flower:
-            return "Photoperiod is everything now. Keep the dark period completely dark, watch humidity, and check trichomes as the weeks go by."
+            return String(localized: "Photoperiod is everything now. Keep the dark period completely dark, watch humidity, and check trichomes as the weeks go by.")
         case .harvest:
-            return "Weigh wet, hang or rack the plant in a cool dark space, and keep the drying room near 18–21 °C and 58–62% humidity."
+            return String(localized: "Weigh wet, hang or rack the plant in a cool dark space, and keep the drying room near 18–21 °C and 58–62% humidity.")
         case .cure:
-            return "Burp the jars, keep humidity near 58–62%, and let the flower cure for two to four weeks before you judge it."
+            return String(localized: "Burp the jars, keep humidity near 58–62%, and let the flower cure for two to four weeks before you judge it.")
         case .storage:
-            return "Stored flower is finished plant material. Keep it labeled, check it periodically, and record what you keep, use or destroy."
+            return String(localized: "Stored flower is finished plant material. Keep it labeled, check it periodically, and record what you keep, use or destroy.")
         }
     }
 }
@@ -111,17 +111,17 @@ enum PlantOrigin: String, CaseIterable, Codable, Hashable, Identifiable {
 
     var title: String {
         switch self {
-        case .seed: return "Seed"
-        case .clone: return "Clone"
-        case .cutting: return "Cutting"
+        case .seed: return String(localized: "Seed")
+        case .clone: return String(localized: "Clone")
+        case .cutting: return String(localized: "Cutting")
         }
     }
 
     var subtitle: String {
         switch self {
-        case .seed: return "Started from a seed"
-        case .clone: return "Rooted clone from a mother"
-        case .cutting: return "Unrooted cutting"
+        case .seed: return String(localized: "Started from a seed")
+        case .clone: return String(localized: "Rooted clone from a mother")
+        case .cutting: return String(localized: "Unrooted cutting")
         }
     }
 
@@ -151,9 +151,9 @@ enum HarvestDisposition: String, CaseIterable, Codable, Hashable, Identifiable {
 
     var title: String {
         switch self {
-        case .retained: return "Retained"
-        case .consumedAtHome: return "Consumed at home"
-        case .destroyed: return "Destroyed"
+        case .retained: return String(localized: "Retained")
+        case .consumedAtHome: return String(localized: "Consumed at home")
+        case .destroyed: return String(localized: "Destroyed")
         }
     }
 
@@ -167,9 +167,9 @@ enum HarvestDisposition: String, CaseIterable, Codable, Hashable, Identifiable {
 
     var explanation: String {
         switch self {
-        case .retained: return "Kept in storage at home."
-        case .consumedAtHome: return "Used at home by the cultivator."
-        case .destroyed: return "Destroyed and not kept."
+        case .retained: return String(localized: "Kept in storage at home.")
+        case .consumedAtHome: return String(localized: "Used at home by the cultivator.")
+        case .destroyed: return String(localized: "Destroyed and not kept.")
         }
     }
 }
@@ -187,11 +187,11 @@ enum RoomType: String, CaseIterable, Codable, Hashable, Identifiable {
 
     var title: String {
         switch self {
-        case .tent: return "Tent"
-        case .closet: return "Closet"
-        case .room: return "Room"
-        case .greenhouse: return "Greenhouse"
-        case .outdoor: return "Outdoor"
+        case .tent: return String(localized: "Tent")
+        case .closet: return String(localized: "Closet")
+        case .room: return String(localized: "Room")
+        case .greenhouse: return String(localized: "Greenhouse")
+        case .outdoor: return String(localized: "Outdoor")
         }
     }
 
@@ -221,17 +221,17 @@ enum ResidenceType: String, CaseIterable, Codable, Hashable, Identifiable {
 
     var title: String {
         switch self {
-        case .singleFamily: return "Single-family home"
-        case .multiUnit: return "Multi-unit building"
-        case .rental: return "Rental"
+        case .singleFamily: return String(localized: "Single-family home")
+        case .multiUnit: return String(localized: "Multi-unit building")
+        case .rental: return String(localized: "Rental")
         }
     }
 
     var subtitle: String {
         switch self {
-        case .singleFamily: return "A house you control, including the yard"
-        case .multiUnit: return "Apartment, condo or shared building"
-        case .rental: return "You rent the property you grow in"
+        case .singleFamily: return String(localized: "A house you control, including the yard")
+        case .multiUnit: return String(localized: "Apartment, condo or shared building")
+        case .rental: return String(localized: "You rent the property you grow in")
         }
     }
 
@@ -253,17 +253,17 @@ enum ExperienceLevel: String, CaseIterable, Codable, Hashable, Identifiable {
 
     var title: String {
         switch self {
-        case .beginner: return "First grow"
-        case .intermediate: return "A few cycles"
-        case .experienced: return "Experienced"
+        case .beginner: return String(localized: "First grow")
+        case .intermediate: return String(localized: "A few cycles")
+        case .experienced: return String(localized: "Experienced")
         }
     }
 
     var subtitle: String {
         switch self {
-        case .beginner: return "Plain-language guidance and gentle prompts"
-        case .intermediate: return "Guidance when you need it, detail when you want it"
-        case .experienced: return "Compact interface, raw numbers, fewer prompts"
+        case .beginner: return String(localized: "Plain-language guidance and gentle prompts")
+        case .intermediate: return String(localized: "Guidance when you need it, detail when you want it")
+        case .experienced: return String(localized: "Compact interface, raw numbers, fewer prompts")
         }
     }
 
@@ -292,9 +292,9 @@ enum JournalKind: String, CaseIterable, Codable, Hashable, Identifiable {
 
     var title: String {
         switch self {
-        case .note: return "Note"
-        case .observation: return "Observation"
-        case .photo: return "Photo"
+        case .note: return String(localized: "Note")
+        case .observation: return String(localized: "Observation")
+        case .photo: return String(localized: "Photo")
         }
     }
 
@@ -321,14 +321,14 @@ enum ObservationTag: String, CaseIterable, Codable, Hashable, Identifiable {
 
     var title: String {
         switch self {
-        case .healthy: return "Healthy growth"
-        case .yellowing: return "Yellowing leaves"
-        case .drooping: return "Drooping"
-        case .pests: return "Pests"
-        case .moldRisk: return "Mold risk"
-        case .nutrients: return "Nutrient issue"
-        case .stretching: return "Stretching"
-        case .other: return "Other"
+        case .healthy: return String(localized: "Healthy growth")
+        case .yellowing: return String(localized: "Yellowing leaves")
+        case .drooping: return String(localized: "Drooping")
+        case .pests: return String(localized: "Pests")
+        case .moldRisk: return String(localized: "Mold risk")
+        case .nutrients: return String(localized: "Nutrient issue")
+        case .stretching: return String(localized: "Stretching")
+        case .other: return String(localized: "Other")
         }
     }
 
@@ -357,17 +357,17 @@ enum StrainType: String, CaseIterable, Codable, Hashable, Identifiable {
 
     var title: String {
         switch self {
-        case .indica: return "Indica"
-        case .sativa: return "Sativa"
-        case .hybrid: return "Hybrid"
+        case .indica: return String(localized: "Indica")
+        case .sativa: return String(localized: "Sativa")
+        case .hybrid: return String(localized: "Hybrid")
         }
     }
 
     var subtitle: String {
         switch self {
-        case .indica: return "Compact and broad-leafed, usually a shorter flowering window"
-        case .sativa: return "Taller and stretchier, often a longer flowering window"
-        case .hybrid: return "A cross of both, with the ratio left to the breeder"
+        case .indica: return String(localized: "Compact and broad-leafed, usually a shorter flowering window")
+        case .sativa: return String(localized: "Taller and stretchier, often a longer flowering window")
+        case .hybrid: return String(localized: "A cross of both, with the ratio left to the breeder")
         }
     }
 
@@ -393,26 +393,26 @@ enum TrainingMethod: String, CaseIterable, Codable, Hashable, Identifiable {
 
     var title: String {
         switch self {
-        case .topping: return "Topping"
-        case .lowStressTraining: return "Low-stress training"
-        case .defoliation: return "Defoliation"
-        case .supercropping: return "Supercropping"
-        case .scrogTuck: return "SCROG tuck"
+        case .topping: return String(localized: "Topping")
+        case .lowStressTraining: return String(localized: "Low-stress training")
+        case .defoliation: return String(localized: "Defoliation")
+        case .supercropping: return String(localized: "Supercropping")
+        case .scrogTuck: return String(localized: "SCROG tuck")
         }
     }
 
     var subtitle: String {
         switch self {
         case .topping:
-            return "Remove the growing tip to split the canopy."
+            return String(localized: "Remove the growing tip to split the canopy.")
         case .lowStressTraining:
-            return "Bend and tie branches to level the canopy."
+            return String(localized: "Bend and tie branches to level the canopy.")
         case .defoliation:
-            return "Remove leaves to open airflow and light."
+            return String(localized: "Remove leaves to open airflow and light.")
         case .supercropping:
-            return "Soften and bend a stem to slow that shoot."
+            return String(localized: "Soften and bend a stem to slow that shoot.")
         case .scrogTuck:
-            return "Weave a growing shoot under the net."
+            return String(localized: "Weave a growing shoot under the net.")
         }
     }
 

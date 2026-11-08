@@ -18,19 +18,19 @@ enum EducationTopic: String, CaseIterable, Identifiable {
 
     var title: String {
         switch self {
-        case .fundamentals: return "Fundamentals"
-        case .pestManagement: return "Pest checks"
-        case .curing: return "Drying and curing"
-        case .compliance: return "Compliance"
+        case .fundamentals: return String(localized: "Fundamentals")
+        case .pestManagement: return String(localized: "Pest checks")
+        case .curing: return String(localized: "Drying and curing")
+        case .compliance: return String(localized: "Compliance")
         }
     }
 
     var subtitle: String {
         switch self {
-        case .fundamentals: return "Build a steady room routine"
-        case .pestManagement: return "Notice changes before they spread"
-        case .curing: return "Protect the finish after harvest"
-        case .compliance: return "Understand the rules you selected"
+        case .fundamentals: return String(localized: "Build a steady room routine")
+        case .pestManagement: return String(localized: "Notice changes before they spread")
+        case .curing: return String(localized: "Protect the finish after harvest")
+        case .compliance: return String(localized: "Understand the rules you selected")
         }
     }
 

@@ -62,13 +62,13 @@ enum ExportServiceError: LocalizedError {
     var errorDescription: String? {
         switch self {
         case .encryptionFailed:
-            return "The password-protected archive could not be created."
+            return String(localized: "The password-protected archive could not be created.")
         case .unsupportedBackupVersion:
-            return "This backup was created by a newer version of Grow Companion and cannot be opened here."
+            return String(localized: "This backup was created by a newer version of Grow Companion and cannot be opened here.")
         case .invalidBackup(let detail):
-            return "The backup is not complete: \(detail)"
+            return String(localized: "The backup is not complete: \(detail)")
         case .deletionFailed(let detail):
-            return "The records could not be deleted: \(detail)"
+            return String(localized: "The records could not be deleted: \(detail)")
         }
     }
 }

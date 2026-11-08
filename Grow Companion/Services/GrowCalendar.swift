@@ -22,11 +22,11 @@ enum GrowCalendarKind: String, CaseIterable, Identifiable {
 
     var title: String {
         switch self {
-        case .reminder: return "Reminder"
-        case .stageWindow: return "Stage window"
-        case .harvestWindow: return "Harvest window"
-        case .dryingCheck: return "Drying check"
-        case .cureCheck: return "Curing check"
+        case .reminder: return String(localized: "Reminder")
+        case .stageWindow: return String(localized: "Stage window")
+        case .harvestWindow: return String(localized: "Harvest window")
+        case .dryingCheck: return String(localized: "Drying check")
+        case .cureCheck: return String(localized: "Curing check")
         }
     }
 
@@ -85,9 +85,9 @@ enum GrowCalendarError: LocalizedError {
     var errorDescription: String? {
         switch self {
         case .inThePast:
-            return "A reminder cannot be moved to a day that has already passed."
+            return String(localized: "A reminder cannot be moved to a day that has already passed.")
         case .saveFailed(let detail):
-            return "The reminder was not moved: \(detail)"
+            return String(localized: "The reminder was not moved: \(detail)")
         }
     }
 }

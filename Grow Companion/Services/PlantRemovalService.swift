@@ -37,7 +37,7 @@ enum PlantRemovalError: LocalizedError {
     var errorDescription: String? {
         switch self {
         case .saveFailed(let detail):
-            return "The plant was not changed: \(detail)"
+            return String(localized: "The plant was not changed: \(detail)")
         }
     }
 }

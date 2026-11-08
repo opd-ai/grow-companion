@@ -17,7 +17,9 @@ enum LightPreset: String, CaseIterable, Identifiable {
 
     var id: String { rawValue }
 
-    var title: String { rawValue }
+    var title: String {
+        self == .custom ? String(localized: "Custom") : rawValue
+    }
 
     var hoursOfLight: Int? {
         switch self {
@@ -30,10 +32,10 @@ enum LightPreset: String, CaseIterable, Identifiable {
 
     var subtitle: String {
         switch self {
-        case .eighteenSix: return "Vegetative growth"
-        case .twelveTwelve: return "Flowering"
-        case .twentyFour: return "Fast vegetative growth"
-        case .custom: return "Your own on and off times"
+        case .eighteenSix: return String(localized: "Vegetative growth")
+        case .twelveTwelve: return String(localized: "Flowering")
+        case .twentyFour: return String(localized: "Fast vegetative growth")
+        case .custom: return String(localized: "Your own on and off times")
         }
     }
 
@@ -63,12 +65,12 @@ enum LightSchedule {
     static func summary(on: Int, off: Int) -> String {
         let light = hours(on: on, off: off)
         let dark = 24 - light
-        return "\(formatHours(light)) on · \(formatHours(dark)) off"
+        return String(localized: "\(formatHours(light)) on · \(formatHours(dark)) off")
     }
 
     static func formatHours(_ value: Double) -> String {
         if abs(value.rounded() - value) < 0.01 {
-            return "\(Int(value.rounded())) h"
+            return String(localized: "\(Int(value.rounded())) h")
         }
         return String(format: "%.1f h", value)
     }
@@ -133,12 +135,12 @@ enum LightSchedule {
         let remainingSeconds = seconds % 60
 
         if hours > 0 {
-            return "\(hours)h \(minutes)m \(remainingSeconds)s"
+            return String(localized: "\(hours)h \(minutes)m \(remainingSeconds)s")
         }
         if minutes > 0 {
-            return "\(minutes)m \(remainingSeconds)s"
+            return String(localized: "\(minutes)m \(remainingSeconds)s")
         }
-        return "\(remainingSeconds)s"
+        return String(localized: "\(remainingSeconds)s")
     }
 
     static func countdownCompact(from now: Date, to target: Date) -> String {
@@ -146,8 +148,8 @@ enum LightSchedule {
         let hours = seconds / 3600
         let minutes = (seconds % 3600) / 60
 
-        if hours > 0 { return "\(hours)h \(minutes)m" }
-        return "\(minutes)m"
+        if hours > 0 { return String(localized: "\(hours)h \(minutes)m") }
+        return String(localized: "\(minutes)m")
     }
 
     private static let labelFormatter: DateFormatter = {

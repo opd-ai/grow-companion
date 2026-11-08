@@ -79,7 +79,7 @@ enum FeedScheduleEngine {
     /// "1.5 ml/L", without trailing zeros.
     static func doseText(_ value: Double?) -> String {
         guard let value else { return "—" }
-        return "\(String(format: "%g", value)) ml/L"
+        return String(localized: "\(String(format: "%g", value)) ml/L")
     }
 
     static func statusText(
@@ -93,7 +93,7 @@ enum FeedScheduleEngine {
 
         if isPending(startDate: room.feedScheduleStartDate, now: now) {
             let date = room.feedScheduleStartDate.map(Format.shortDate) ?? "soon"
-            return "Starts \(date)"
+            return String(localized: "Starts \(date)")
         }
 
         if let week = currentWeek(
@@ -101,9 +101,9 @@ enum FeedScheduleEngine {
             weekCount: schedule.weekCount,
             now: now
         ) {
-            return "Week \(week) of \(schedule.weekCount)"
+            return String(localized: "Week \(week) of \(schedule.weekCount)")
         }
 
-        return "All \(schedule.weekCount) weeks complete"
+        return String(localized: "All \(schedule.weekCount) weeks complete")
     }
 }

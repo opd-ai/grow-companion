@@ -19,17 +19,17 @@ enum GrowGoalKind: String, CaseIterable, Identifiable {
 
     var title: String {
         switch self {
-        case .dryYield: return "Dry yield"
-        case .floweringWeeks: return "Flowering time"
-        case .loggingCompleteness: return "Logging completeness"
+        case .dryYield: return String(localized: "Dry yield")
+        case .floweringWeeks: return String(localized: "Flowering time")
+        case .loggingCompleteness: return String(localized: "Logging completeness")
         }
     }
 
     var subtitle: String {
         switch self {
-        case .dryYield: return "The dry flower this cycle aims to finish with"
-        case .floweringWeeks: return "How long you want flowering to run"
-        case .loggingCompleteness: return "The share of days you want on the record"
+        case .dryYield: return String(localized: "The dry flower this cycle aims to finish with")
+        case .floweringWeeks: return String(localized: "How long you want flowering to run")
+        case .loggingCompleteness: return String(localized: "The share of days you want on the record")
         }
     }
 
@@ -69,12 +69,12 @@ struct GoalProgress: Identifiable {
     }
 
     var measuredText: String {
-        guard let measured else { return "Not measured yet" }
+        guard let measured else { return String(localized: "Not measured yet") }
         switch kind {
         case .dryYield:
             return Format.weight(measured, unit: unit)
         case .floweringWeeks:
-            return "\(Self.weeks(measured)) weeks"
+            return String(localized: "\(Self.weeks(measured)) weeks")
         case .loggingCompleteness:
             return "\(Int(measured.rounded()))%"
         }
@@ -83,11 +83,11 @@ struct GoalProgress: Identifiable {
     var targetText: String {
         switch kind {
         case .dryYield:
-            return "target \(Format.weight(target, unit: unit))"
+            return String(localized: "target \(Format.weight(target, unit: unit))")
         case .floweringWeeks:
-            return "target \(Self.weeks(target)) weeks"
+            return String(localized: "target \(Self.weeks(target)) weeks")
         case .loggingCompleteness:
-            return "target \(Int(target.rounded()))%"
+            return String(localized: "target \(Int(target.rounded()))%")
         }
     }
 
@@ -110,7 +110,7 @@ enum GrowGoalError: LocalizedError {
     var errorDescription: String? {
         switch self {
         case .invalidTarget:
-            return "Enter a target above zero. Logging completeness is a share between 1 and 100 percent."
+            return String(localized: "Enter a target above zero. Logging completeness is a share between 1 and 100 percent.")
         }
     }
 }

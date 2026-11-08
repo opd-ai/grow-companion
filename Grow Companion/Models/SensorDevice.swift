@@ -16,8 +16,8 @@ enum SensorTransport: String, CaseIterable, Codable, Identifiable {
 
     var title: String {
         switch self {
-        case .bluetooth: return "Bluetooth"
-        case .wifi: return "Wi-Fi"
+        case .bluetooth: return String(localized: "Bluetooth")
+        case .wifi: return String(localized: "Wi-Fi")
         }
     }
 
@@ -63,11 +63,11 @@ final class SensorDevice {
     }
 
     var lastSeenLabel: String {
-        guard let lastSeenAt else { return "Never seen" }
+        guard let lastSeenAt else { return String(localized: "Never seen") }
         let interval = Date().timeIntervalSince(lastSeenAt)
-        if interval < 60 { return "Just now" }
-        if interval < 3600 { return "\(Int(interval / 60)) min ago" }
-        if interval < 86400 { return "\(Int(interval / 3600)) hr ago" }
+        if interval < 60 { return String(localized: "Just now") }
+        if interval < 3600 { return String(localized: "\(Int(interval / 60)) min ago") }
+        if interval < 86400 { return String(localized: "\(Int(interval / 3600)) hr ago") }
         return Format.shortDate(lastSeenAt)
     }
 }

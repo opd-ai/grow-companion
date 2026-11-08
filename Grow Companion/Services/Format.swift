@@ -15,15 +15,15 @@ enum UnitSystem: String, CaseIterable, Identifiable {
 
     var title: String {
         switch self {
-        case .metric: return "Metric"
-        case .imperial: return "Imperial"
+        case .metric: return String(localized: "Metric")
+        case .imperial: return String(localized: "Imperial")
         }
     }
 
     var subtitle: String {
         switch self {
-        case .metric: return "°C, grams, square metres"
-        case .imperial: return "°F, ounces, square feet"
+        case .metric: return String(localized: "°C, grams, square metres")
+        case .imperial: return String(localized: "°F, ounces, square feet")
         }
     }
 }
@@ -97,7 +97,7 @@ enum Format {
     }
 
     static func weightLimit(_ grams: Double?, unit: UnitSystem) -> String {
-        guard let grams else { return "Not specified" }
+        guard let grams else { return String(localized: "Not specified") }
         return weight(grams, unit: unit)
     }
 
@@ -111,7 +111,7 @@ enum Format {
     }
 
     static func areaLimit(_ squareMeters: Double?, unit: UnitSystem) -> String {
-        guard let squareMeters else { return "Not specified" }
+        guard let squareMeters else { return String(localized: "Not specified") }
         return area(squareMeters, unit: unit)
     }
 

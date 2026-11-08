@@ -19,11 +19,11 @@ enum StoreBootError: LocalizedError {
     var errorDescription: String? {
         switch self {
         case .noApplicationDirectory:
-            return "The app's storage folder could not be found."
+            return String(localized: "The app's storage folder could not be found.")
         case .noStoreFile:
-            return "The old store could not be moved aside."
+            return String(localized: "The old store could not be moved aside.")
         case .stillUnreadable:
-            return "A new store could not be opened either. Restart the app and try again."
+            return String(localized: "A new store could not be opened either. Restart the app and try again.")
         }
     }
 }

@@ -16,9 +16,9 @@ enum LineageStatus: String, CaseIterable, Codable, Identifiable {
 
     var title: String {
         switch self {
-        case .documented: return "Documented"
-        case .disputed: return "Disputed"
-        case .missing: return "Not documented"
+        case .documented: return String(localized: "Documented")
+        case .disputed: return String(localized: "Disputed")
+        case .missing: return String(localized: "Not documented")
         }
     }
 

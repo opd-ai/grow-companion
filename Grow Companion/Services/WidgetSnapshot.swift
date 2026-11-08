@@ -15,6 +15,10 @@ struct WidgetCareSnapshot: Codable, Equatable {
     var overdue: Int
     /// Empty unless the grower allowed task names.
     var titles: [String]
+    /// Written by the app so the widget shows the app's language, plurals and
+    /// all. Optional so a snapshot from an older build still decodes.
+    var headline: String?
+    var overdueText: String?
 }
 
 enum WidgetSnapshotStore {
@@ -86,8 +90,18 @@ enum WidgetSnapshotService {
             generatedAt: Date(),
             dueToday: dueToday,
             overdue: overdue,
-            titles: titles
+            titles: titles,
+            headline: headline(dueToday: dueToday, overdue: overdue),
+            overdueText: overdue > 0 ? String(localized: "\(overdue) overdue") : nil
         )
+    }
+
+    /// The widget renders this verbatim, so the plural and the language come
+    /// from the app's catalog rather than the extension's.
+    static func headline(dueToday: Int, overdue: Int) -> String {
+        let total = dueToday + overdue
+        guard total > 0 else { return String(localized: "No care tasks today") }
+        return String(localized: "\(total) care task\(total == 1 ? "" : "s") today")
     }
 
     /// Rewrites the shared file from the current reminders and preference.

@@ -22,9 +22,9 @@ enum SensorReadingError: LocalizedError {
 
     var errorDescription: String? {
         switch self {
-        case .stale: return "This reading is too old to trust and was not saved."
-        case .replayed: return "This timestamp was already received and was not saved again."
-        case .empty: return "The sensor sent no supported environmental values."
+        case .stale: return String(localized: "This reading is too old to trust and was not saved.")
+        case .replayed: return String(localized: "This timestamp was already received and was not saved again.")
+        case .empty: return String(localized: "The sensor sent no supported environmental values.")
         }
     }
 }

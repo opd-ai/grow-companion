@@ -18,9 +18,9 @@ enum DryingPhase: String, CaseIterable, Identifiable {
 
     var title: String {
         switch self {
-        case .drying: return "Drying"
-        case .curing: return "Curing"
-        case .finished: return "Finished"
+        case .drying: return String(localized: "Drying")
+        case .curing: return String(localized: "Curing")
+        case .finished: return String(localized: "Finished")
         }
     }
 }
@@ -33,15 +33,15 @@ enum DryingProfile: String, CaseIterable, Identifiable {
 
     var title: String {
         switch self {
-        case .hangDry: return "Hang dry"
-        case .rapidDry: return "Rapid dry"
+        case .hangDry: return String(localized: "Hang dry")
+        case .rapidDry: return String(localized: "Rapid dry")
         }
     }
 
     var subtitle: String {
         switch self {
-        case .hangDry: return "Cool and slow · 18–21 °C, 58–62%"
-        case .rapidDry: return "Faster, higher risk · 21–24 °C, 50–55%"
+        case .hangDry: return String(localized: "Cool and slow · 18–21 °C, 58–62%")
+        case .rapidDry: return String(localized: "Faster, higher risk · 21–24 °C, 50–55%")
         }
     }
 
@@ -77,19 +77,19 @@ enum BurpMode: String, CaseIterable, Identifiable {
 
     var title: String {
         switch self {
-        case .progressive: return "Progressive"
-        case .daily: return "Every day"
-        case .everyTwoDays: return "Every 2 days"
-        case .everyThreeDays: return "Every 3 days"
+        case .progressive: return String(localized: "Progressive")
+        case .daily: return String(localized: "Every day")
+        case .everyTwoDays: return String(localized: "Every 2 days")
+        case .everyThreeDays: return String(localized: "Every 3 days")
         }
     }
 
     var subtitle: String {
         switch self {
-        case .progressive: return "Daily in week one, then every 2–3 days"
-        case .daily: return "Open the jars once a day"
-        case .everyTwoDays: return "Open the jars every other day"
-        case .everyThreeDays: return "Open the jars every third day"
+        case .progressive: return String(localized: "Daily in week one, then every 2–3 days")
+        case .daily: return String(localized: "Open the jars once a day")
+        case .everyTwoDays: return String(localized: "Open the jars every other day")
+        case .everyThreeDays: return String(localized: "Open the jars every third day")
         }
     }
 
@@ -115,17 +115,17 @@ enum StemSnap: String, CaseIterable, Identifiable {
 
     var title: String {
         switch self {
-        case .bends: return "Stems bend"
-        case .cracks: return "Stems crack"
-        case .snaps: return "Snap cleanly"
+        case .bends: return String(localized: "Stems bend")
+        case .cracks: return String(localized: "Stems crack")
+        case .snaps: return String(localized: "Snap cleanly")
         }
     }
 
     var detail: String {
         switch self {
-        case .bends: return "Still wet — keep drying"
-        case .cracks: return "Getting close"
-        case .snaps: return "Ready to cure"
+        case .bends: return String(localized: "Still wet — keep drying")
+        case .cracks: return String(localized: "Getting close")
+        case .snaps: return String(localized: "Ready to cure")
         }
     }
 }

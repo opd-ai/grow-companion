@@ -38,6 +38,8 @@ struct WidgetSnapshotTests {
         #expect(snapshot.dueToday == 1)
         #expect(snapshot.overdue == 1)
         #expect(snapshot.titles.isEmpty)
+        #expect(snapshot.headline == "2 care tasks today")
+        #expect(snapshot.overdueText == "1 overdue")
     }
 
     @Test func titlesAppearOnlyWhenAllowed() throws {
@@ -80,6 +82,8 @@ struct WidgetSnapshotTests {
         #expect(snapshot.dueToday == 0)
         #expect(snapshot.overdue == 0)
         #expect(snapshot.titles.isEmpty)
+        #expect(snapshot.headline == "No care tasks today")
+        #expect(snapshot.overdueText == nil)
     }
 
     private func widgetContext() throws -> ModelContext {

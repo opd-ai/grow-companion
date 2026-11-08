@@ -45,7 +45,7 @@ final class ShareGrant {
     var isActive: Bool { !isRevoked && !isExpired }
     var scopeSummary: String {
         let count = roomNames.count + plantNames.count
-        return "\(count) selected \(count == 1 ? "scope" : "scopes") · \(categories.count) categories"
+        return String(localized: "\(count) selected \(count == 1 ? "scope" : "scopes") · \(categories.count) categories")
     }
 }
 

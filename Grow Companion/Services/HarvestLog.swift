@@ -16,9 +16,9 @@ struct DryPrediction {
 
     var basisText: String {
         if sampleCount > 0 {
-            return "From your history: \(sampleCount) harvest\(sampleCount == 1 ? "" : "s") averaged \(Int((ratio * 100).rounded()))% dry-to-wet."
+            return String(localized: "From your history: \(sampleCount) harvest\(sampleCount == 1 ? "" : "s") averaged \(Int((ratio * 100).rounded()))% dry-to-wet.")
         }
-        return "From the default 22% dry-to-wet ratio. Your own ratio takes over as you record harvests."
+        return String(localized: "From the default 22% dry-to-wet ratio. Your own ratio takes over as you record harvests.")
     }
 }
 
@@ -94,17 +94,17 @@ enum HarvestLog {
         let expected = session.profile.expectedDryDays
         let day = dryingDay(session, now: now)
         if day < expected.lowerBound {
-            return "Day \(day) of about \(expected.lowerBound)–\(expected.upperBound)"
+            return String(localized: "Day \(day) of about \(expected.lowerBound)–\(expected.upperBound)")
         }
         if day <= expected.upperBound {
-            return "Day \(day) · in the harvest window"
+            return String(localized: "Day \(day) · in the harvest window")
         }
-        return "Day \(day) · longer than usual"
+        return String(localized: "Day \(day) · longer than usual")
     }
 
     static func curingDayText(_ session: DryingSession, now: Date = Date()) -> String {
         let day = curingDay(session, now: now) ?? 1
-        return "Day \(day) of curing"
+        return String(localized: "Day \(day) of curing")
     }
 
     // MARK: Burping

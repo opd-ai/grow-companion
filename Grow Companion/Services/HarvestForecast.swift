@@ -53,11 +53,11 @@ struct HarvestForecast: Identifiable {
     var sourceText: String {
         switch source {
         case .observed:
-            return "From your observed flowering time"
+            return String(localized: "From your observed flowering time")
         case .breeder:
-            return "From the breeder's figure"
+            return String(localized: "From the breeder's figure")
         case .typical:
-            return "From the usual flowering time"
+            return String(localized: "From the usual flowering time")
         }
     }
 }

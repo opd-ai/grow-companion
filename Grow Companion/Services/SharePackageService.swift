@@ -23,19 +23,19 @@ enum SharePackageError: LocalizedError {
     var errorDescription: String? {
         switch self {
         case .noDeviceKey:
-            return "Create your share code first, then try again."
+            return String(localized: "Create your share code first, then try again.")
         case .invalidCode(let reason):
-            return "That share code could not be read: \(reason)."
+            return String(localized: "That share code could not be read: \(reason).")
         case .expired(let date):
-            return "This share expired on \(Format.shortDate(date))."
+            return String(localized: "This share expired on \(Format.shortDate(date)).")
         case .unsupportedFormat(let version):
-            return "This share was created by a newer version of Grow Companion (format \(version))."
+            return String(localized: "This share was created by a newer version of Grow Companion (format \(version)).")
         case .notAddressedToThisDevice:
-            return "This share is addressed to a different device, so it cannot be opened here."
+            return String(localized: "This share is addressed to a different device, so it cannot be opened here.")
         case .tampered:
-            return "This share could not be verified. It may be damaged or altered."
+            return String(localized: "This share could not be verified. It may be damaged or altered.")
         case .emptyScope:
-            return "Choose at least one room or plant to share."
+            return String(localized: "Choose at least one room or plant to share.")
         }
     }
 }

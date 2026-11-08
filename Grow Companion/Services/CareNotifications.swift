@@ -79,10 +79,10 @@ enum CareNotifications {
 
     private static func title(for kind: CareReminderKind) -> String {
         switch kind {
-        case .water: return "Watering due"
-        case .feed: return "Feeding due"
-        case .reading: return "Reading due"
-        case .calibration: return "Meter calibration due"
+        case .water: return String(localized: "Watering due")
+        case .feed: return String(localized: "Feeding due")
+        case .reading: return String(localized: "Reading due")
+        case .calibration: return String(localized: "Meter calibration due")
         }
     }
 }

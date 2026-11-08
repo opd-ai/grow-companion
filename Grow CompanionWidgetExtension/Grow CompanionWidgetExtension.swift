@@ -10,6 +10,10 @@ struct CareWidgetSnapshot: Codable, Equatable {
     var overdue: Int
     /// Empty unless the grower allowed task names in the app's settings.
     var titles: [String]
+    /// Localized headline and overdue line, written by the app so the widget
+    /// shows the app's language. Optional: an older snapshot has neither.
+    var headline: String?
+    var overdueText: String?
 }
 
 enum CareWidgetStore {
@@ -73,8 +77,13 @@ struct CareWidgetView: View {
     private var total: Int { due + overdue }
 
     private var headline: String {
+        if let headline = snapshot?.headline { return headline }
         guard total > 0 else { return "No care tasks today" }
         return "\(total) care task\(total == 1 ? "" : "s") today"
+    }
+
+    private var overdueLabel: String {
+        snapshot?.overdueText ?? "\(overdue) overdue"
     }
 
     var body: some View {
@@ -101,7 +110,7 @@ struct CareWidgetView: View {
                 .lineLimit(2)
 
             if overdue > 0 {
-                Text("\(overdue) overdue")
+                Text(overdueLabel)
                     .font(.caption)
                     .foregroundStyle(.orange)
             }
@@ -134,7 +143,7 @@ struct CareWidgetView: View {
                     .font(.caption2)
                     .lineLimit(1)
             } else if overdue > 0 {
-                Text("\(overdue) overdue")
+                Text(overdueLabel)
                     .font(.caption2)
             }
         }
@@ -144,7 +153,7 @@ struct CareWidgetView: View {
     private var accessibilityText: String {
         var parts = [headline]
         if overdue > 0 {
-            parts.append("\(overdue) overdue")
+            parts.append(overdueLabel)
         }
         if !titles.isEmpty {
             parts.append(titles.joined(separator: ", "))

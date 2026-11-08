@@ -16,10 +16,10 @@ enum ComplianceLevel: String, Codable, CaseIterable {
 
     var title: String {
         switch self {
-        case .good: return "Within limits"
-        case .warning: return "Close to a limit"
-        case .over: return "Over a limit"
-        case .unknown: return "Limit not set"
+        case .good: return String(localized: "Within limits")
+        case .warning: return String(localized: "Close to a limit")
+        case .over: return String(localized: "Over a limit")
+        case .unknown: return String(localized: "Limit not set")
         }
     }
 
@@ -90,23 +90,23 @@ struct ComplianceReport {
 
     var statusTitle: String {
         switch overallLevel {
-        case .good: return "You're within your limits"
-        case .warning: return "You're getting close"
-        case .over: return "This is over your limit"
-        case .unknown: return "No limit recorded"
+        case .good: return String(localized: "You're within your limits")
+        case .warning: return String(localized: "You're getting close")
+        case .over: return String(localized: "This is over your limit")
+        case .unknown: return String(localized: "No limit recorded")
         }
     }
 
     var statusDetail: String {
         switch overallLevel {
         case .good:
-            return "Your plant count, stored flower and canopy are inside your jurisdiction's limits."
+            return String(localized: "Your plant count, stored flower and canopy are inside your jurisdiction's limits.")
         case .warning:
-            return "One of your metrics is past \(Int((warningThreshold * 100).rounded()))% of the limit. Plan before you add another plant or room."
+            return String(localized: "One of your metrics is past \(Int((warningThreshold * 100).rounded()))% of the limit. Plan before you add another plant or room.")
         case .over:
-            return "A metric is at or over a limit. Open the breakdown to see which room and plant are responsible."
+            return String(localized: "A metric is at or over a limit. Open the breakdown to see which room and plant are responsible.")
         case .unknown:
-            return "This jurisdiction's rule pack does not record a numeric limit for the metric you are tracking."
+            return String(localized: "This jurisdiction's rule pack does not record a numeric limit for the metric you are tracking.")
         }
     }
 

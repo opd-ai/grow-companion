@@ -169,18 +169,26 @@ private func spanishValues(in raw: Any) -> [(label: String, value: String)] {
 
 // MARK: - Placeholders
 
-/// A value may leave out trailing arguments the plural suffix used to carry,
-/// but every placeholder it keeps must be the one the key expects, in order.
+/// A value may leave out any of the `%@` suffix arguments the English plural
+/// trick used, because Spanish supplies the whole noun instead, but every
+/// placeholder it keeps must be the one the key expects, in order.
 private func placeholderProblem(key: String, value: String) -> String? {
     let expected = placeholders(in: key)
     let actual = placeholders(in: value)
 
-    guard actual.count <= expected.count,
-          Array(expected.prefix(actual.count)) == actual,
-          expected.dropFirst(actual.count).allSatisfy({ $0 == "%@" }) else {
-        return "“\(key)” expects \(expected) but its Spanish value has \(actual)"
+    var index = 0
+    for token in expected {
+        if index < actual.count, actual[index] == token {
+            index += 1
+        } else if token == "%@" {
+            continue
+        } else {
+            return "“\(key)” expects \(expected) but its Spanish value has \(actual)"
+        }
     }
-    return nil
+    return index == actual.count
+        ? nil
+        : "“\(key)” expects \(expected) but its Spanish value has \(actual)"
 }
 
 /// The printf placeholders in a string, normalised to their conversion

@@ -19,9 +19,9 @@ enum DeviceKeyStoreError: LocalizedError {
     var errorDescription: String? {
         switch self {
         case .keychain(let status):
-            return "The device key could not be stored securely (Keychain error \(status))."
+            return String(localized: "The device key could not be stored securely (Keychain error \(status)).")
         case .unreadableKey:
-            return "The stored device key could not be read."
+            return String(localized: "The stored device key could not be read.")
         }
     }
 }

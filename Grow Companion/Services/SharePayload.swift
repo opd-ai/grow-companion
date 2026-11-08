@@ -22,21 +22,21 @@ enum ShareCategory: String, CaseIterable, Codable, Identifiable, Hashable {
 
     var title: String {
         switch self {
-        case .plantRecords: return "Plant records"
-        case .environment: return "Environment"
-        case .careHistory: return "Care history"
-        case .harvest: return "Harvest and cure"
-        case .compliance: return "Compliance estimate"
+        case .plantRecords: return String(localized: "Plant records")
+        case .environment: return String(localized: "Environment")
+        case .careHistory: return String(localized: "Care history")
+        case .harvest: return String(localized: "Harvest and cure")
+        case .compliance: return String(localized: "Compliance estimate")
         }
     }
 
     var subtitle: String {
         switch self {
-        case .plantRecords: return "Room and plant names, strain and stage"
-        case .environment: return "Temperature, humidity and light readings"
-        case .careHistory: return "Feeds, treatments and scouting checks"
-        case .harvest: return "Wet and dry weight, disposition and rating"
-        case .compliance: return "Counted plants and limits, labelled as an estimate"
+        case .plantRecords: return String(localized: "Room and plant names, strain and stage")
+        case .environment: return String(localized: "Temperature, humidity and light readings")
+        case .careHistory: return String(localized: "Feeds, treatments and scouting checks")
+        case .harvest: return String(localized: "Wet and dry weight, disposition and rating")
+        case .compliance: return String(localized: "Counted plants and limits, labelled as an estimate")
         }
     }
 }

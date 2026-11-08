@@ -43,11 +43,11 @@ struct FloweringExpectation {
             let cycles = sampleCount == 1
                 ? "one of your completed cycles"
                 : "\(sampleCount) of your completed cycles"
-            return "Using \(Format.dayCount(days)) observed across \(cycles) — your own timing, not the breeder's label."
+            return String(localized: "Using \(Format.dayCount(days)) observed across \(cycles) — your own timing, not the breeder's label.")
         case .breeder:
-            return "Using the breeder's expected \(weeks) weeks. Your own observed timing replaces it once a cycle finishes."
+            return String(localized: "Using the breeder's expected \(weeks) weeks. Your own observed timing replaces it once a cycle finishes.")
         case .typical:
-            return "No strain history yet. Using the usual \(weeks) weeks for flowering."
+            return String(localized: "No strain history yet. Using the usual \(weeks) weeks for flowering.")
         }
     }
 }
@@ -129,7 +129,7 @@ enum StrainInsights {
         if weeks == 0 { return Format.dayCount(total) }
         let weekText = "\(weeks) week\(weeks == 1 ? "" : "s")"
         guard rest > 0 else { return weekText }
-        return "\(weekText) \(Format.dayCount(rest))"
+        return String(localized: "\(weekText) \(Format.dayCount(rest))")
     }
 
     /// Short form for metric tiles: "9 wk 3 d".
@@ -137,8 +137,8 @@ enum StrainInsights {
         let total = max(0, Int(days.rounded()))
         let weeks = total / 7
         let rest = total % 7
-        if weeks == 0 { return "\(total) d" }
-        guard rest > 0 else { return "\(weeks) wk" }
-        return "\(weeks) wk \(rest) d"
+        if weeks == 0 { return String(localized: "\(total) d") }
+        guard rest > 0 else { return String(localized: "\(weeks) wk") }
+        return String(localized: "\(weeks) wk \(rest) d")
     }
 }

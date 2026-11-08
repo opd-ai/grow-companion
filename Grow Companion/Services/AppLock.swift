@@ -21,20 +21,20 @@ enum LockGrace: Int, CaseIterable, Identifiable, Hashable {
 
     var shortTitle: String {
         switch self {
-        case .immediate: return "Immediate"
-        case .oneMinute: return "1 minute"
-        case .fiveMinutes: return "5 minutes"
+        case .immediate: return String(localized: "Immediate")
+        case .oneMinute: return String(localized: "1 minute")
+        case .fiveMinutes: return String(localized: "5 minutes")
         }
     }
 
     var detailText: String {
         switch self {
         case .immediate:
-            return "The app asks for Face ID every time it comes back, however short the break."
+            return String(localized: "The app asks for Face ID every time it comes back, however short the break.")
         case .oneMinute:
-            return "The app stays open for a minute after you leave it, then asks for Face ID."
+            return String(localized: "The app stays open for a minute after you leave it, then asks for Face ID.")
         case .fiveMinutes:
-            return "The app stays open for five minutes after you leave it, then asks for Face ID."
+            return String(localized: "The app stays open for five minutes after you leave it, then asks for Face ID.")
         }
     }
 
@@ -186,10 +186,10 @@ final class AppLock {
         let context = LAContext()
         _ = context.canEvaluatePolicy(.deviceOwnerAuthenticationWithBiometrics, error: nil)
         switch context.biometryType {
-        case .faceID: return "Face ID"
-        case .touchID: return "Touch ID"
-        case .opticID: return "Optic ID"
-        default: return "Passcode"
+        case .faceID: return String(localized: "Face ID")
+        case .touchID: return String(localized: "Touch ID")
+        case .opticID: return String(localized: "Optic ID")
+        default: return String(localized: "Passcode")
         }
     }
 

@@ -17,7 +17,7 @@ struct PlantPhoto: Identifiable {
     let fileName: String
 
     var dateLabel: String {
-        guard let date else { return "Date not recorded" }
+        guard let date else { return String(localized: "Date not recorded") }
         return Format.shortDate(date)
     }
 

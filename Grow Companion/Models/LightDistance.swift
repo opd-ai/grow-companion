@@ -19,8 +19,8 @@ enum LightFixtureType: String, CaseIterable, Codable, Identifiable {
         case .led: return "LED"
         case .hps: return "HPS"
         case .cmh: return "CMH"
-        case .fluorescent: return "Fluorescent"
-        case .other: return "Other"
+        case .fluorescent: return String(localized: "Fluorescent")
+        case .other: return String(localized: "Other")
         }
     }
 
@@ -36,11 +36,11 @@ enum LightFixtureType: String, CaseIterable, Codable, Identifiable {
 
     var guidanceSource: String {
         switch self {
-        case .led: return "General LED manufacturer guidance; verify your fixture manual"
-        case .hps: return "General HPS manufacturer guidance; verify your fixture manual"
-        case .cmh: return "General CMH manufacturer guidance; verify your fixture manual"
-        case .fluorescent: return "General fluorescent fixture guidance; verify your fixture manual"
-        case .other: return "No default target; use the fixture manual"
+        case .led: return String(localized: "General LED manufacturer guidance; verify your fixture manual")
+        case .hps: return String(localized: "General HPS manufacturer guidance; verify your fixture manual")
+        case .cmh: return String(localized: "General CMH manufacturer guidance; verify your fixture manual")
+        case .fluorescent: return String(localized: "General fluorescent fixture guidance; verify your fixture manual")
+        case .other: return String(localized: "No default target; use the fixture manual")
         }
     }
 }

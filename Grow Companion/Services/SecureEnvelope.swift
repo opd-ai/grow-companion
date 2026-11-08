@@ -23,15 +23,15 @@ enum EnvelopeError: LocalizedError {
     var errorDescription: String? {
         switch self {
         case .malformed(let detail):
-            return "The protected envelope could not be read: \(detail)"
+            return String(localized: "The protected envelope could not be read: \(detail)")
         case .unsupportedVersion:
-            return "The protected envelope was written by a newer version of Grow Companion."
+            return String(localized: "The protected envelope was written by a newer version of Grow Companion.")
         case .wrongRecipient:
-            return "The protected envelope is addressed to a different device key."
+            return String(localized: "The protected envelope is addressed to a different device key.")
         case .signatureInvalid:
-            return "The protected envelope is not signed by the expected sender."
+            return String(localized: "The protected envelope is not signed by the expected sender.")
         case .authenticationFailed:
-            return "The protected envelope could not be authenticated. It may have been altered."
+            return String(localized: "The protected envelope could not be authenticated. It may have been altered.")
         }
     }
 }
