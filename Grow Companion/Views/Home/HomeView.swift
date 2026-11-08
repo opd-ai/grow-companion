@@ -292,13 +292,26 @@ struct HomeView: View {
             } label: {
                 quickActionCard(
                     title: "Garden timeline",
-                    subtitle: "Everything in one place",
+                    subtitle: "Every record, dated",
                     symbol: "list.bullet.rectangle.portrait",
                     isProminent: false
                 )
             }
             .buttonStyle(.plain)
             .accessibilityLabel("Garden timeline")
+
+            NavigationLink {
+                GrowCalendarView()
+            } label: {
+                quickActionCard(
+                    title: "Grow calendar",
+                    subtitle: "Reminders and windows",
+                    symbol: "calendar.day.timeline.leading",
+                    isProminent: false
+                )
+            }
+            .buttonStyle(.plain)
+            .accessibilityLabel("Grow calendar")
         }
     }
 
