@@ -21,6 +21,15 @@ version and the snapshot schema version is compared with the newest snapshot.
 An unchanged garden writes nothing, so opening Home or Rules repeatedly does not
 grow the history.
 
+**Status-change notification.** When the newly recorded snapshot's overall level
+is worse than the previous snapshot's, `Services/ComplianceStatusNotifier.swift`
+schedules one time-sensitive local notification under the *Compliance status*
+category, which the grower can disable or re-prioritise like any other category.
+The first snapshot is a baseline and never notifies; moving back inside the
+limits, or to or from an unknown level, is not announced. The copy names only the
+two levels and says the figure is an estimate rather than legal advice, and the
+app lock's generic content hides it like any other notification.
+
 **Rule-change review.** When a saved snapshot carries a different pack version,
 the app appends one `RuleEvaluationEvent` per snapshot. The event records the
 old and new pack versions and verified dates, the changed fields with their

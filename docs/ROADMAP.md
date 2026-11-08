@@ -466,7 +466,7 @@ clone in a rule that excludes clones and one that includes them, the over-limit
 case, a rule with no numeric limit, destroyed plants and a non-cultivable
 jurisdiction.
 
-### 2. Know when a rule has changed — Partial
+### 2. Know when a rule has changed — Shipped
 
 As a grower, I want to be told when the rules for my area change, so I can
 adjust my grow without surprises.
@@ -478,14 +478,22 @@ adjust my grow without surprises.
 - If the rule pack is more than 90 days old, a visible "unverified" badge
   appears on every rule it affects.
 
-*Today:* the pack carries its version and verified date, and each rule shows a
-"Needs re-verification" pill once it is more than 90 days old. The app now also
-records an append-only snapshot of every calculation it displays, and when a
-bundled pack version differs it appends a review event that names the changed
-fields, their citations and a per-metric comparison, which the grower
-acknowledges explicitly. Remote signed packs, status-change notifications and
-per-change legal review of any future pack content remain the remaining work;
-the shipped pack was reviewed on 2026-11-07 (section 1.1).
+*Shipped:* the pack carries its version and verified date, and each rule shows a
+"Needs re-verification" pill once it is more than 90 days old. The app records
+an append-only snapshot of every calculation it displays, and when a bundled pack
+version differs it appends a review event that names the changed fields, their
+citations and a per-metric comparison, which the grower acknowledges explicitly.
+When a calculation moves towards a limit — within limits to close, close to over,
+or straight to over — `Services/ComplianceStatusNotifier.swift` schedules one
+time-sensitive notification under the new *Compliance status* category, so the
+grower can turn it off or change its priority like any other category. The first
+calculation is a baseline and never notifies, returning inside the limits is not
+announced, and the copy names the two levels, carries no plant or room name and
+says the figure is an estimate rather than legal advice. Tests cover the baseline,
+every worsening pair, improvements, unchanged and unknown levels, the copy and
+the per-snapshot identifier. Remote signed packs and per-change legal review of
+any future pack content remain the remaining work; the shipped pack was reviewed
+on 2026-11-07 (section 1.1).
 
 ### 3. Log a watering in under five seconds — Planned
 
