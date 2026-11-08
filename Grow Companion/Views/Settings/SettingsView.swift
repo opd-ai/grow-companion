@@ -234,6 +234,19 @@ struct SettingsView: View {
                 )
             }
             .buttonStyle(.plain)
+
+            Divider().overlay(Theme.hairline)
+
+            NavigationLink {
+                GrowReportView()
+            } label: {
+                SettingsLinkRow(
+                    icon: "doc.text",
+                    title: "Grow report (PDF)",
+                    value: "A printable cycle summary made on this device"
+                )
+            }
+            .buttonStyle(.plain)
         }
         .growCard()
     }

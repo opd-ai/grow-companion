@@ -48,6 +48,9 @@ enum SettingsKey {
     static let lastBackupDate = "lastBackupDate"
     static let lastBackupIncludesPhotos = "lastBackupIncludesPhotos"
 
+    static let quickLogRoomName = "quickLogRoomName"
+    static let quickLogPlantName = "quickLogPlantName"
+
     /// Every preference the app writes, so delete-all can clear all of them.
     static let all: [String] = [
         unitSystem,
@@ -62,7 +65,9 @@ enum SettingsKey {
         careDigestTime,
         careDigestRoomIDs,
         lastBackupDate,
-        lastBackupIncludesPhotos
+        lastBackupIncludesPhotos,
+        quickLogRoomName,
+        quickLogPlantName
     ]
 }
 

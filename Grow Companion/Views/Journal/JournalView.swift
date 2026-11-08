@@ -64,7 +64,12 @@ struct JournalView: View {
                         VStack(alignment: .leading, spacing: 10) {
                             SectionHeader(dayTitle(section.day))
                             ForEach(section.entries) { entry in
-                                JournalEntryCard(entry: entry)
+                                NavigationLink {
+                                    JournalEntryDetailView(entry: entry)
+                                } label: {
+                                    JournalEntryCard(entry: entry)
+                                }
+                                .buttonStyle(.plain)
                             }
                         }
                     }

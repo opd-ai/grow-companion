@@ -17,6 +17,7 @@ struct PlantDetailView: View {
 
     @Query(sort: \Strain.name) private var strains: [Strain]
     @Query(sort: \Plant.plantedAt, order: .reverse) private var allPlants: [Plant]
+    @Query(sort: \GrowProfile.createdAt, order: .reverse) private var profiles: [GrowProfile]
 
     @State private var showingMotherPicker = false
     @State private var showingBackfill = false
@@ -30,7 +31,11 @@ struct PlantDetailView: View {
     @State private var ratingSelection: Int?
     @State private var tastingNotesText = ""
     @State private var showingRatingSaved = false
+    @State private var showingPhotos = false
+    @State private var limitWarningMessage = ""
+    @State private var showingLimitWarning = false
     @AppStorage(SettingsKey.unitSystem) private var unitRaw = "metric"
+    @AppStorage(SettingsKey.warningThreshold) private var warningThreshold: Double = 0.8
 
     private var unit: UnitSystem { UnitSystem(rawValue: unitRaw) ?? .metric }
 
@@ -38,11 +43,16 @@ struct PlantDetailView: View {
         [.harvest, .cure, .storage].contains(plant.stage)
     }
 
+    private var photos: [PlantPhoto] {
+        PhotoTimelineService.photos(from: plant.journalEntries)
+    }
+
     var body: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 20) {
                 headerCard
                 stageCard
+                if !photos.isEmpty { photoTimelineCard }
                 if hasLineageContent { lineageCard }
                 if plant.stage == .flower { floweringCard }
                 PlantTrainingSection(plant: plant)
@@ -79,6 +89,9 @@ struct PlantDetailView: View {
         .sheet(isPresented: $showingHarvestSheet) {
             HarvestPlantSheet(plant: plant)
         }
+        .sheet(isPresented: $showingPhotos) {
+            PhotoTimelineView(title: plant.displayName, photos: photos)
+        }
         .sheet(item: $editingEvent) { event in
             StageLogSheet(plant: plant, event: event)
         }
@@ -105,6 +118,11 @@ struct PlantDetailView: View {
         } message: {
             Text("Its stage history is deleted too. Journal entries stay but lose their plant link.")
         }
+        .alert("Over the plant limit", isPresented: $showingLimitWarning) {
+            Button("OK", role: .cancel) {}
+        } message: {
+            Text(limitWarningMessage)
+        }
         .onAppear {
             loadWeights()
             loadRating()
@@ -112,6 +130,22 @@ struct PlantDetailView: View {
     }
 
     // MARK: Header
+
+    private var photoTimelineCard: some View {
+        VStack(alignment: .leading, spacing: 10) {
+            SectionHeader(
+                "Photos",
+                subtitle: "\(photos.count) photo\(photos.count == 1 ? "" : "s") in date order"
+            )
+            PhotoTimelineStrip(photos: photos) { _ in
+                showingPhotos = true
+            }
+            SecondaryButton("Compare photos", systemImage: "rectangle.split.2x1") {
+                showingPhotos = true
+            }
+        }
+        .growCard(padding: 16)
+    }
 
     private var headerCard: some View {
         VStack(alignment: .leading, spacing: 12) {
@@ -970,6 +1004,23 @@ struct PlantDetailView: View {
     }
 
     private func advance(to stage: PlantStage) {
+        if let rule = profiles.first?.rule {
+            let preview = QuickLogService.countPreview(
+                plant: plant,
+                to: stage,
+                plants: allPlants,
+                rule: rule,
+                warningThreshold: warningThreshold
+            )
+            if preview.isOverLimit {
+                let limitText = preview.plantLimit.map(String.init) ?? "—"
+                let counting = rule.countingNote.isEmpty ? "" : " \(rule.countingNote)"
+                limitWarningMessage = "Moving \(plant.displayName) to \(stage.title) would count \(preview.countedAfter) plants against a limit of \(limitText).\(counting)\n\nNo change has been saved. Verify the current rule where you live."
+                showingLimitWarning = true
+                return
+            }
+        }
+
         let event = StageEvent(stage: stage, date: Date())
         context.insert(event)
         event.plant = plant

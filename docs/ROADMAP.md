@@ -40,6 +40,8 @@ import so location metadata never survives.
 | Face ID lock, privacy screen, export and delete-all | Shipped | `Services/AppLock.swift`, `Services/PrivacyCover.swift`, `Views/Settings/` |
 | Privacy review and remediation of local security findings | Shipped | `docs/PRIVACY_REVIEW.md`, protected local services |
 | Immutable compliance history and rule-change review | Shipped locally; release gates open | `Models/ComplianceSnapshot.swift`, `Models/RuleEvaluationEvent.swift`, `Services/ComplianceHistory.swift`, `Views/Compliance/` |
+| Garden timeline and Quick Log | Shipped | `Services/GardenTimeline.swift`, `Views/Garden/GardenTimelineView.swift`, `Services/QuickLog.swift`, `Views/QuickLog/QuickLogSheet.swift` |
+| Photo timeline, side-by-side compare and PDF grow report | Shipped | `Services/PhotoTimeline.swift`, `Views/Garden/PhotoTimelineView.swift`, `Services/GrowReport.swift`, `Views/Settings/GrowReportView.swift` |
 
 The shipped navigation and current feature surfaces are recorded in section 6.2.
 Future cloud, hardware, extension and community features remain explicitly
@@ -794,10 +796,12 @@ TAB 1: HOME
 ├── Rooms → room detail (environment, feeding, calibration, reminders,
 │            light schedule, scouting, treatments and override log)
 ├── Weekly recap, room comparison, cycle archive and harvest calendar shortcuts
+├── Quick Log (water/feed, reading, note, stage) and the garden timeline
 └── Latest journal entries
 
 TAB 2: JOURNAL
 ├── Day-grouped timeline with room filter
+├── Entry detail with linked plant or room, and delete that removes its photo
 └── New entry (note, observation, photo; linked to plant, room or grow)
 
 TAB 3: STRAINS
@@ -823,12 +827,14 @@ TAB 5: SETTINGS
 │   ├── Sync and privacy (no account and no cloud sync)
 │   ├── Backup and restore (password-protected local backup)
 │   └── Export and delete
+├── Reports (performance trends, grow report PDF)
 ├── Equipment
 ├── Legal notices
 └── About
 
 PLANT DETAIL
 ├── Strain menu, stage badge, stage guidance and one-tap advance
+├── Photo strip and side-by-side compare
 ├── Flowering clock (observed or breeder figure, week strip, overrun warning)
 ├── Scouting, training and treatment history
 ├── Dry, cure and rating sections
@@ -884,6 +890,11 @@ calibrations, light-schedule changes, training, treatments, scouting checks,
 drying checks and burps. Day-grouped, with filters for room, plant and event
 type, and a tap that opens the source record.
 
+**Shipped:** `Services/GardenTimeline.swift` merges all eleven record types as
+one pure, date-ordered list with room and plant attached; the view reads them
+through live queries, filters with local state only, and links each row to its
+journal entry, plant or room. See `docs/GARDEN_TIMELINE_AND_QUICK_LOG.md`.
+
 **Acceptance criteria.**
 
 - Every stored event type that carries a timestamp appears exactly once, in date
@@ -907,6 +918,13 @@ most common actions (water/feed, environment reading, journal note, stage
 change), remembers the last room and plant, pre-fills the last values as
 editable defaults, and confirms in one step.
 
+**Shipped:** `Views/QuickLog/QuickLogSheet.swift` and `Services/QuickLog.swift`
+implement the sheet, prefill, remembered room/plant and the single confirmed
+write. A stage change shows the counted total after the change, and a change
+that would cross the jurisdiction's plant limit is blocked with the counting
+method and citation; the plant detail one-tap advance runs the same check. See
+`docs/GARDEN_TIMELINE_AND_QUICK_LOG.md`.
+
 **Acceptance criteria.**
 
 - Four taps or fewer from Home to a saved watering on a grower's second use.
@@ -925,6 +943,12 @@ mode that puts two selected photos side by side with their dates and stages
 labelled. Photos stay in the existing protected store, re-encoded without
 location metadata.
 
+**Shipped:** `Services/PhotoTimeline.swift` orders photo entries and resolves the
+plant's stage at each photo's date; plant and room detail show the strip and a
+compare screen. A journal entry can now be opened and deleted from the journal,
+and its display file, thumbnail and cache entry go with it. See
+`docs/PHOTO_TIMELINE_AND_GROW_REPORT.md`.
+
 **Acceptance criteria.**
 
 - The compare view labels both dates and both stages, and says when a photo has
@@ -942,6 +966,13 @@ summary of a cycle. Today the only external copy is a data archive.
 app: stage timeline, feed and reading summary, training, treatments and
 scouting, harvest weights and disposition, and the compliance estimate with its
 verification duty and rule-pack version. Saved through the system share sheet.
+
+**Shipped:** Settings → Reports opens `GrowReportView`. The report is built from
+existing records only, names the rule pack and its verification duty, limits
+dispositions to retained, consumed at home and destroyed, excludes the
+cultivation journal unless the grower turns it on, and writes a neutral
+`Grow-Report-<date>.pdf` through the share sheet. See
+`docs/PHOTO_TIMELINE_AND_GROW_REPORT.md`.
 
 **Acceptance criteria.**
 
@@ -1027,8 +1058,8 @@ dates and plural counts, and a data-table alternative for every chart and ring.
 
 | Release | Features | Dependencies |
 | --- | --- | --- |
-| v2.1 | Garden timeline, Quick Log | None; both read existing records |
-| v2.2 | Photo timeline and compare, PDF grow report | Verified export/backup and delete coverage (shipped) |
+| v2.1 | Garden timeline, Quick Log | None; both read existing records. Shipped. |
+| v2.2 | Photo timeline and compare, PDF grow report | Verified export/backup and delete coverage (shipped). Both shipped. |
 | v2.3 | Widgets, calendar, per-cycle goals, Spanish localisation | Widget extension target; a schema migration for goals; localisation review |
 
 Nothing in this section adds sharing, community, sync, sensor firmware, photo

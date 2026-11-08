@@ -104,6 +104,7 @@ struct HomeView: View {
         ScrollView {
             VStack(alignment: .leading, spacing: 22) {
                 header
+                quickActions
                 if !rooms.isEmpty { roomFilter }
                 if !familyRoots.isEmpty { familyFilter }
                 if !pendingRuleChanges.isEmpty {
@@ -128,7 +129,7 @@ struct HomeView: View {
             AddPlantView(preselectedRoom: selectedRoom)
         }
         .sheet(isPresented: $showingQuickLog) {
-            AddJournalEntryView()
+            QuickLogSheet()
         }
         .sheet(isPresented: $showingRoomEditor) {
             RoomEditorView()
@@ -269,6 +270,71 @@ struct HomeView: View {
                 .accessibilityLabel("Harvest calendar")
             }
         }
+    }
+
+    private var quickActions: some View {
+        HStack(spacing: 10) {
+            Button {
+                showingQuickLog = true
+            } label: {
+                quickActionCard(
+                    title: "Quick Log",
+                    subtitle: "Water, reading, note or stage",
+                    symbol: "plus.circle.fill",
+                    isProminent: true
+                )
+            }
+            .buttonStyle(.plain)
+            .accessibilityLabel("Quick Log: water, reading, note or stage change")
+
+            NavigationLink {
+                GardenTimelineView()
+            } label: {
+                quickActionCard(
+                    title: "Garden timeline",
+                    subtitle: "Everything in one place",
+                    symbol: "list.bullet.rectangle.portrait",
+                    isProminent: false
+                )
+            }
+            .buttonStyle(.plain)
+            .accessibilityLabel("Garden timeline")
+        }
+    }
+
+    private func quickActionCard(
+        title: String,
+        subtitle: String,
+        symbol: String,
+        isProminent: Bool
+    ) -> some View {
+        VStack(alignment: .leading, spacing: 6) {
+            Image(systemName: symbol)
+                .font(.system(size: 20, weight: .semibold))
+                .foregroundStyle(isProminent ? Theme.primaryBright : Theme.primary)
+                .padding(.bottom, 2)
+
+            Text(title)
+                .font(Theme.sans(15, weight: .semibold))
+                .foregroundStyle(isProminent ? Theme.onHero : Theme.ink)
+                .fixedSize(horizontal: false, vertical: true)
+
+            Text(subtitle)
+                .font(.system(size: 11))
+                .foregroundStyle(isProminent ? Theme.onHeroSecondary : Theme.secondaryInk)
+                .fixedSize(horizontal: false, vertical: true)
+        }
+        .padding(14)
+        .frame(maxWidth: .infinity, minHeight: 104, alignment: .topLeading)
+        .background(
+            RoundedRectangle(cornerRadius: 20, style: .continuous)
+                .fill(isProminent ? Theme.hero : Theme.surface)
+        )
+        .overlay(
+            RoundedRectangle(cornerRadius: 20, style: .continuous)
+                .strokeBorder(Theme.hairline, lineWidth: 1)
+        )
+        .contentShape(Rectangle())
     }
 
     private var greeting: String {
