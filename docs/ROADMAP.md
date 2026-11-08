@@ -45,6 +45,7 @@ import so location metadata never survives.
 | Per-cycle grow goals: dry yield, flowering time and logging completeness | Shipped | `Models/GrowGoal.swift`, `Services/GrowGoals.swift`, `Views/Home/GrowGoalsSection.swift` |
 | Grow calendar with explicit reminder rescheduling | Shipped | `Services/GrowCalendar.swift`, `Views/Home/GrowCalendarView.swift` |
 | Home Screen and Lock Screen widget with privacy-safe defaults | Shipped | `Grow CompanionWidgetExtension/`, `Services/WidgetSnapshot.swift` |
+| Light-distance guidance with a grower-set target and re-measure prompts | Shipped | `Services/LightDistanceGuidance.swift`, `Views/Rooms/LightDistanceView.swift` |
 
 The shipped navigation and current feature surfaces are recorded in section 6.2.
 Future cloud, hardware, extension and community features remain explicitly
@@ -211,6 +212,22 @@ LiDAR is unavailable on many iPhones, so the manual path must be complete and
 equally good. Re-measure prompts depend on the training log, which does not
 exist yet. Manufacturer guidance is not a substitute for the grower's own
 observations.
+
+**Shipped.** `Services/LightDistanceGuidance.swift` holds the guidance as pure
+value types: the cited band per fixture and stage, the seedling and vegetative
+factors, the grower's target, the status of a reading, and the re-measure rules.
+`Views/Rooms/LightDistanceView.swift` measures (LiDAR where it exists) or takes
+a typed distance, shows the stage band with its source and review date, offers a
+grower-set target labelled as the grower's own, and saves the distance, its
+method and the stage at reading on the room. The room dashboard carries the
+same card, with a re-measure prompt titled by its reason: no measurement yet, a
+stage change since the reading, training recorded after it, or a reading older
+than 14 days. The training dependency is met by `Models/TrainingSession.swift`.
+Both entry paths are complete and unit-aware: metric shows centimetres,
+imperial inches, and a typed value is read in the grower's own unit. Depth
+frames are read in memory and never saved. Tests cover the bands and factors,
+grower targets, status boundaries, every re-measure reason and its order, unit
+parsing and the stored room fields. See `docs/LIGHT_DISTANCE_GUIDANCE.md`.
 
 ### 2.3 Genetics and breeder library
 
@@ -791,6 +808,10 @@ The shipped store uses SwiftData with these models:
   targets, as a second lightweight additive stage after V2. No existing record,
   relationship, identifier, photo or value is rewritten, and a failed save never
   leaves a half-written goal behind.
+- `CultivationSchemaV4` adds no model. It records the light-distance fields
+  added to `Room` — the stage at the reading and the grower's own target — as a
+  third lightweight additive stage. Both are optional, so an existing store
+  opens unchanged and a room with no target keeps the app's cited band.
 - The personal effect journal lives in its own store with its own key and never
   shares identifiers with the cultivation store.
 - Sync is only enabled after a versioned schema migration plan and a conflict
@@ -882,7 +903,8 @@ TAB 1: HOME
 ├── Room filter
 ├── Plants → plant detail → strain library entry
 ├── Rooms → room detail (environment, feeding, calibration, reminders,
-│            light schedule, scouting, treatments and override log)
+│            light schedule, canopy distance and its target, scouting,
+│            treatments and override log)
 ├── Weekly recap (with this cycle's goals), room comparison, cycle archive,
 │   harvest calendar and grow calendar shortcuts
 ├── Quick Log (water/feed, reading, note, stage) and the garden timeline
@@ -935,8 +957,9 @@ PLANT DETAIL
 
 - **Photo analysis:** an "Analyse" action on a journal photo and on the plant
   photo section, with the suggestion reviewed before it is saved.
-- **Light distance:** a card on the room dashboard beside the light schedule,
-  with a measurement sheet and a re-measure reminder.
+- **Light distance:** shipped as a card on the room dashboard beside the light
+  schedule, with a measurement sheet, a grower-set target and a re-measure
+  prompt that names its reason. See `docs/LIGHT_DISTANCE_GUIDANCE.md`.
 - **Breeder and pedigree:** inside the strain detail, above "Your results".
 - **Sharing:** a Settings section, "Sharing", with the device share code, a scoped
   creator and a reader for received files. Delivery is out of band through the
