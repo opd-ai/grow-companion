@@ -99,3 +99,33 @@ The cultivation store and personal effect journal separation described in the sp
 - Whether deleting local records can be represented as “delete everything” when Apple backups, user-created exports, or future cloud copies remain outside app control.
 - Whether rule citations, jurisdiction data, educational content, and future breeder/product references create legal or regulatory exposure.
 - Whether any future sharing, community, recommendation, sensor, or analytics feature could facilitate sales, transfer, interstate transport, or diversion, and what controls/disclaimers are required.
+
+
+## 8. Status of the findings in the current branch
+
+This addendum records what the code does now. It does not change the original
+findings, which describe the state at the time of the review.
+
+- **F-03 — resolved.** `AppLock.requestUnlock` keeps the cover up when device-owner
+  authentication cannot be evaluated; there is no path that clears the lock
+  without a successful authentication.
+- **F-04 — resolved.** Every model in the schema is now covered by export, backup,
+  restore and delete-all through a single inventory (`Services/DataInventory.swift`),
+  and a test fails if a model is added without coverage.
+- **F-05 — resolved in copy.** Delete-all reports a verified zero count and states
+  that Files exports and device or iCloud backups are outside the app.
+- **F-06 — partly resolved.** Photos and the store directory keep complete file
+  protection, and restore writes with `.completeFileProtection`. Verification on a
+  locked device is still a device-level test.
+- **F-08 — resolved.** New archives use a versioned envelope with PBKDF2-HMAC-SHA256
+  at 210,000 iterations, a random salt, AES-GCM and bounded decode parameters;
+  the legacy envelope remains readable.
+- **F-11, F-13 — resolved.** Lock-screen copy stays generic whenever app lock is on,
+  independent of the generic-content preference.
+- **F-17 — resolved by removal.** The unused API-key helper was deleted.
+- **F-01, F-02 — resolved in claims, not in capability.** The sync screen no longer
+  presents a sync state, and sharing no longer creates or revokes "shares"; both
+  screens state that the capability is absent.
+
+The legal questions in section 7 are consolidated, with their dispositions, in
+`docs/LEGAL_REVIEW.md`.

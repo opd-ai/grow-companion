@@ -75,11 +75,11 @@ enum LegalCopy {
 
     static let scope = "Grow Companion is for personal home cultivation only. It has no marketplace, no sales, no payments, no transfers, no gifting and no shipping. A plant or harvest can be marked retained, consumed at home or destroyed — never sold or given away."
 
-    static let verificationDuty = "You are responsible for verifying the current law where you live. Rules change. Every rule shows the date it was last reviewed and links to a primary source where one exists."
+    static let verificationDuty = "You are responsible for verifying the current law where you live. Grow Companion is a record-keeping tool, not a lawyer: a computed total is an estimate from the bundled rule pack, not legal advice. Rules change, and every rule shows the date its text was last updated and links to a primary source where one exists."
 
-    static let ageAttestation = "This app is for adults of legal age to cultivate cannabis where they live — 21 or older in most states that allow home growing. Your confirmation is stored on this device as a flag with a timestamp, nothing more. Grow Companion never scans an ID and never stores a date of birth."
+    static let ageAttestation = "This app is for adults of legal age to cultivate cannabis where they live — 21 or older in most states that allow home growing. This is a self-attestation, not an identity check: your confirmation is stored on this device as a flag with a timestamp, nothing more. Grow Companion never scans an ID, never sends it anywhere and never stores a date of birth."
 
-    static let privacy = "Everything you record stays on this device. Grow Companion has no account, no cloud sync and no analytics, and it works with no network connection at all. Photos are saved with their location metadata removed."
+    static let privacy = "Everything you record stays on this device unless you export it. Grow Companion has no account, no cloud sync and no analytics, and your records work with no network connection. If you ask the app to suggest your state, that one lookup is handled by Apple's location service and the app keeps only a state or locality name, never coordinates. Photos are re-encoded so location metadata is removed."
 
     static let educationOnly = "Your jurisdiction does not permit personal home cultivation, so tracking is turned off. You can still read the rules and the guidance in this app."
 }

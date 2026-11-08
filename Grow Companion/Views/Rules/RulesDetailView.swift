@@ -55,7 +55,7 @@ struct RuleDetailCard: View {
             }
 
             HStack(spacing: 8) {
-                Text("Last verified \(RulePack.displayDate(rule.verifiedOn))")
+                Text("Rules last updated \(RulePack.displayDate(rule.verifiedOn))")
                     .font(.system(size: 11))
                     .foregroundStyle(Theme.tertiaryInk)
                 if rule.recountNeeded {
@@ -81,7 +81,7 @@ struct RulesDetailView: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
-            SectionHeader("What the rule says", subtitle: "Reviewed \(RulePack.displayDate(rule.verifiedOn)) · pack \(RulePack.version)")
+            SectionHeader("What the rule says", subtitle: "Rules last updated \(RulePack.displayDate(rule.verifiedOn)) · pack \(RulePack.version)")
 
             if !rule.summary.isEmpty {
                 Text(rule.summary)

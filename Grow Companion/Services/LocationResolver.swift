@@ -3,7 +3,8 @@
 //  Grow Companion
 //
 //  Optional, off by default. Resolves the device's rough location to a state
-//  and locality on device; no coordinates are stored or sent anywhere.
+//  and locality through Apple's geocoding service. The app keeps only the
+//  resolved names: no coordinates are stored, and nothing is sent to us.
 //
 
 import Foundation

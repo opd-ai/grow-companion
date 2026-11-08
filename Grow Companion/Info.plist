@@ -22,7 +22,7 @@
 	<key>UIUserInterfaceStyle</key>
 	<string>Light</string>
 	<key>NSLocationWhenInUseUsageDescription</key>
-	<string>Grow Companion can use your approximate location to pick your state for the home-cultivation rules. It resolves on this device, keeps only the state name, and never sends coordinates anywhere.</string>
+	<string>Grow Companion can use your approximate location to suggest your state for the home-cultivation rules. The lookup is handled by Apple's geocoding service; the app keeps only a state or locality name, never your coordinates, and nothing is sent to Grow Companion.</string>
 	<key>NSFaceIDUsageDescription</key>
 	<string>Grow Companion uses Face ID to keep your grow records private when the app is locked.</string>
 	<key>NSBluetoothAlwaysUsageDescription</key>

@@ -306,7 +306,7 @@ struct HomeView: View {
                             tint: report.canopyLevel.heroTint
                         )
                         MetricLine(
-                            label: "Last verified",
+                            label: "Rules updated",
                             value: RulePack.displayDate(rule.verifiedOn)
                         )
                     }

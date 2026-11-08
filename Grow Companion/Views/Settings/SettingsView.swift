@@ -73,7 +73,7 @@ struct SettingsView: View {
                 label: "Age confirmed",
                 value: profile.ageAttestedAt.map { Format.shortDate($0) } ?? "Not recorded"
             )
-            InfoRow(label: "Rule pack", value: "\(RulePack.version) · verified \(RulePack.displayDate(RulePack.verifiedOn))")
+            InfoRow(label: "Rule pack", value: "\(RulePack.version) · rules last updated \(RulePack.displayDate(RulePack.verifiedOn))")
 
             SecondaryButton("Change jurisdiction", systemImage: "mappin.and.ellipse") {
                 showingChange = true
@@ -169,8 +169,8 @@ struct SettingsView: View {
             } label: {
                 SettingsLinkRow(
                     icon: "person.badge.shield.checkmark",
-                    title: "Read-only sharing",
-                    value: "Scoped rooms, plants and access expiry"
+                    title: "Sharing",
+                    value: "Not available in this version"
                 )
             }
             .buttonStyle(.plain)
@@ -274,14 +274,14 @@ struct SettingsView: View {
 
     private var syncPrivacyCard: some View {
         VStack(alignment: .leading, spacing: 12) {
-            SectionHeader("Privacy", subtitle: "Encrypted sync and offline behavior")
+            SectionHeader("Privacy", subtitle: "What stays on this device")
             NavigationLink {
                 SyncPrivacyView()
             } label: {
                 SettingsLinkRow(
                     icon: "lock.icloud",
                     title: "Sync and privacy",
-                    value: "Protected content, visible metadata and conflicts"
+                    value: "No account and no cloud sync"
                 )
             }
             .buttonStyle(.plain)

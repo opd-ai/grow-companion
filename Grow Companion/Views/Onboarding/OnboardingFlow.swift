@@ -213,7 +213,7 @@ private struct AgeStepView: View {
             Pill(text: "Private by design", systemImage: "lock.shield")
 
             VStack(alignment: .leading, spacing: 10) {
-                Text("A legal home grow, kept in order.")
+                Text("A home grow, kept in order.")
                     .font(Theme.serif(34))
                     .foregroundStyle(Theme.ink)
                     .fixedSize(horizontal: false, vertical: true)
@@ -302,7 +302,7 @@ private struct LocationStepView: View {
                 Text("Where do you grow?")
                     .font(Theme.serif(32))
                     .foregroundStyle(Theme.ink)
-                Text("We use this only to load your plant limits. Nothing leaves this phone.")
+                Text("We use this only to load your plant limits. Grow Companion does not send it anywhere.")
                     .font(Theme.sans(14))
                     .foregroundStyle(Theme.secondaryInk)
                     .fixedSize(horizontal: false, vertical: true)
@@ -377,7 +377,7 @@ private struct LocationStepView: View {
                         .fixedSize(horizontal: false, vertical: true)
                 }
 
-                Text("Approximate only. Grow Companion keeps a state name and nothing else, and never sends coordinates anywhere.")
+                Text("Approximate only. Grow Companion keeps a state name and nothing else. The one-off lookup is handled by Apple's location service; nothing is sent to Grow Companion.")
                     .font(Theme.sans(11))
                     .foregroundStyle(Theme.tertiaryInk)
                     .fixedSize(horizontal: false, vertical: true)

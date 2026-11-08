@@ -2,30 +2,20 @@
 //  SyncPrivacyView.swift
 //  Grow Companion
 //
-//  Read-only status and privacy explanation for encrypted device sync.
+//  Honest, read-only explanation of what leaves this device. The app has no
+//  account, server or sync engine, so this screen must never imply one exists.
 //
 
 import SwiftUI
 
 struct SyncPrivacyView: View {
-    @AppStorage("encryptedSyncEnabled") private var syncEnabled = false
-    @AppStorage("encryptedSyncLastSuccess") private var lastSyncTimestamp: Double = 0
-    @AppStorage("encryptedSyncPendingConflicts") private var pendingConflicts = 0
-
-    private var lastSyncText: String {
-        guard lastSyncTimestamp > 0 else { return "No successful sync recorded" }
-        let date = Date(timeIntervalSince1970: lastSyncTimestamp)
-        return "Last successful sync \(Format.shortDate(date)) at \(Format.time(date))"
-    }
-
     var body: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 20) {
                 header
                 statusCard
-                protectedCard
-                metadataCard
-                offlineCard
+                leavesCard
+                notAvailableCard
             }
             .padding(20)
             .padding(.bottom, 24)
@@ -41,7 +31,7 @@ struct SyncPrivacyView: View {
             Text("Sync and privacy")
                 .font(Theme.serif(30))
                 .foregroundStyle(Theme.ink)
-            Text("Understand what is protected when your devices sync and what remains visible to the provider.")
+            Text("There is no cloud sync to protect, because there is no cloud sync in this version.")
                 .font(Theme.sans(13))
                 .foregroundStyle(Theme.secondaryInk)
                 .fixedSize(horizontal: false, vertical: true)
@@ -49,70 +39,56 @@ struct SyncPrivacyView: View {
     }
 
     private var statusCard: some View {
-        VStack(alignment: .leading, spacing: 12) {
-            HStack(alignment: .top, spacing: 12) {
-                Image(systemName: syncEnabled ? "lock.icloud.fill" : "iphone")
-                    .font(.system(size: 25, weight: .semibold))
-                    .foregroundStyle(syncEnabled ? Theme.primary : Theme.secondaryInk)
-                VStack(alignment: .leading, spacing: 4) {
-                    Text(syncEnabled ? "Encrypted sync is on" : "Local-only state")
-                        .font(Theme.sans(17, weight: .semibold))
-                        .foregroundStyle(Theme.ink)
-                    Text(syncEnabled ? "Your records are protected before they leave this device." : "Encrypted device sync is not enabled. Your grow record remains available and protected on this device.")
-                        .font(Theme.sans(13))
-                        .foregroundStyle(Theme.secondaryInk)
-                        .fixedSize(horizontal: false, vertical: true)
-                }
+        HStack(alignment: .top, spacing: 14) {
+            Image(systemName: "iphone")
+                .font(.system(size: 26, weight: .semibold))
+                .foregroundStyle(Theme.onHero)
+                .frame(width: 54, height: 54)
+                .background(Circle().fill(Theme.onHero.opacity(0.12)))
+
+            VStack(alignment: .leading, spacing: 5) {
+                Text("This device only")
+                    .font(Theme.serif(22))
+                    .foregroundStyle(Theme.onHero)
+                Text("Grow Companion has no account, no server and no sync. Your records live in a protected store on this device, and every screen works offline.")
+                    .font(Theme.sans(13))
+                    .foregroundStyle(Theme.onHero.opacity(0.88))
+                    .fixedSize(horizontal: false, vertical: true)
             }
-            Divider().overlay(Theme.hairline)
-            InfoRow(label: "Last successful sync", value: syncEnabled ? lastSyncText : "Not applicable")
-            InfoRow(label: "Pending conflicts", value: syncEnabled ? "\(pendingConflicts)" : "0")
         }
-        .growCard(fill: syncEnabled ? Theme.sageSoft : Theme.surfaceSunken)
+        .growCard(fill: Theme.primary, padding: 18)
     }
 
-    private var protectedCard: some View {
+    private var leavesCard: some View {
         VStack(alignment: .leading, spacing: 11) {
-            SectionHeader("Protected content", subtitle: "Encrypted before sync")
-            bullet("Plant, room, journal and harvest record contents")
-            bullet("Environment readings, care history and sensor-sourced values")
-            bullet("Photos and notes included in the synced record")
-            Text("The app keeps the decryption key on your approved devices. The provider cannot read the record contents from the encrypted payload.")
+            SectionHeader("What can leave this device", subtitle: "Only when you choose it")
+
+            bullet("An export or backup you save to Files. Where that copy goes afterwards is outside the app.")
+            bullet("A device or iCloud backup made by iOS. Grow Companion does not control those copies, so delete-all cannot remove them.")
+            bullet("The optional state lookup: one request handled by Apple's location service. The app keeps only a state or locality name.")
+            bullet("Diagnostics you choose to send to support, after a preview you can redact.")
+
+            Text("No analytics, crash reporting, advertising or third-party SDK is included, and nothing is uploaded in the background.")
                 .font(Theme.sans(12))
                 .foregroundStyle(Theme.secondaryInk)
                 .fixedSize(horizontal: false, vertical: true)
+                .padding(.top, 2)
         }
         .growCard()
     }
 
-    private var metadataCard: some View {
-        VStack(alignment: .leading, spacing: 11) {
-            SectionHeader("Visible metadata", subtitle: "Information needed to operate encrypted sync")
-            bullet("Sync timing and whether a device is active")
-            bullet("Encrypted record counts, sizes and change frequency")
-            bullet("Device and account identifiers used to route sync data")
-            bullet("Conflict and share relationships")
-            Text("Metadata can reveal activity patterns even when record contents remain encrypted.")
-                .font(Theme.sans(12))
-                .foregroundStyle(Theme.amber)
-                .fixedSize(horizontal: false, vertical: true)
-                .padding(10)
-                .background(RoundedRectangle(cornerRadius: 12).fill(Theme.amberSoft))
-        }
-        .growCard()
-    }
-
-    private var offlineCard: some View {
+    private var notAvailableCard: some View {
         VStack(alignment: .leading, spacing: 10) {
-            SectionHeader("Offline behavior")
-            HStack(alignment: .top, spacing: 9) {
-                Image(systemName: "wifi.slash")
-                    .foregroundStyle(Theme.primary)
-                Text("The core grow record remains usable without connectivity. New records stay on this device until sync is available, and this screen never creates or changes grow data.")
-                    .font(Theme.sans(12))
-                    .foregroundStyle(Theme.secondaryInk)
-                    .fixedSize(horizontal: false, vertical: true)
-            }
+            SectionHeader("Not in this version")
+            bullet("Cloud sync, encrypted or otherwise")
+            bullet("Accounts, sign-in or device pairing")
+            bullet("Conflict resolution between devices")
+            bullet("Sharing records with another person")
+
+            Text("If any of this is added, it will be an explicit opt-in and this screen will describe it before the feature ships.")
+                .font(Theme.sans(12))
+                .foregroundStyle(Theme.tertiaryInk)
+                .fixedSize(horizontal: false, vertical: true)
         }
         .growCard(fill: Theme.surfaceSunken, padding: 14, radius: 16)
     }

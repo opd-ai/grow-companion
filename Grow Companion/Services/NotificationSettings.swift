@@ -26,7 +26,7 @@ enum NotificationPriority: String, CaseIterable, Identifiable, Hashable {
 
     var subtitle: String {
         switch self {
-        case .critical: return "Breaks through quiet hours and arrives with sound"
+        case .critical: return "Skips the app's quiet hours and arrives with sound"
         case .timeSensitive: return "Arrives with sound, waits for quiet hours to end"
         case .routine: return "Arrives quietly, waits for quiet hours to end"
         }
