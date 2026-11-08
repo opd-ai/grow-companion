@@ -495,7 +495,7 @@ the per-snapshot identifier. Remote signed packs and per-change legal review of
 any future pack content remain the remaining work; the shipped pack was reviewed
 on 2026-11-07 (section 1.1).
 
-### 3. Log a watering in under five seconds — Planned
+### 3. Log a watering in under five seconds — Partial
 
 As a grower with wet hands in the grow room, I want to log a watering from my
 Watch or with Siri.
@@ -506,9 +506,20 @@ Watch or with Siri.
 - If the room is ambiguous, the app asks one clarifying question and does not
   guess.
 
-*Dependency:* this needs a Watch app target and Siri/Shortcuts support. Neither
-is part of the current project setup, so the story is blocked on platform work
-rather than on app code.
+*Shipped — Siri and Shortcuts.* `Intents/LogWateringIntent.swift` exposes a
+"Log a watering" app shortcut with an optional room, and
+`Services/WateringShortcut.swift` decides which room it lands in: an explicit
+room wins, then the room the app remembers, then the only room there is — and
+several rooms with nothing to choose between them is a question that names them,
+never a guess. The watering is written through the same service the Quick Log
+sheet uses, so the timeline, the reminders and the counts see it immediately,
+and nothing is written when the room is missing or unknown. Seven tests cover the
+explicit, remembered, single-room, ambiguous, unknown and empty cases plus the
+resolver on its own.
+
+*Remaining:* the Watch app and complication, which need a Watch target that the
+current project setup does not have, and a device check of the Siri phrases and
+the shortcut's permission on a real iPhone.
 
 ### 4. Get warned before my room leaves its range — Shipped
 

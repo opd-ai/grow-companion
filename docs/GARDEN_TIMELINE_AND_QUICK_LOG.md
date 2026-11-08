@@ -44,6 +44,7 @@ reads type, title, date and time, room and plant as one element.
 
 ## Quick Log
 
+
 **What ships.** One sheet with four actions: water/feed, environment reading,
 journal note and stage change. It remembers the last room and plant and fills
 in the last values as starting points. Nothing is written until the grower taps
