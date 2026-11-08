@@ -1461,6 +1461,10 @@
     "Your observed average matches the breeder's figure, and flower-week counters use it now." : { "localizations" : { "es" : { "stringUnit" : { "state" : "translated", "value" : "Tu promedio observado coincide con la cifra del criador y los contadores de semana de floración ya la usan." } } } },
     "Your own cycles finished %@ faster than the breeder's figure. Flower-week counters now use your observed %@." : { "localizations" : { "es" : { "stringUnit" : { "state" : "translated", "value" : "Tus propios ciclos terminaron %@ más rápido que la cifra del criador. Los contadores de semana de floración usan ahora tu %@ observado." } } } },
     "Your own cycles took %@ longer than the breeder's figure. Flower-week counters now use your observed %@." : { "localizations" : { "es" : { "stringUnit" : { "state" : "translated", "value" : "Tus propios ciclos tardaron %@ más que la cifra del criador. Los contadores de semana de floración usan ahora tu %@ observado." } } } },
+    "Compliance status" : { "localizations" : { "es" : { "stringUnit" : { "state" : "translated", "value" : "Estado de cumplimiento" } } } },
+    "When your status moves towards a limit" : { "localizations" : { "es" : { "stringUnit" : { "state" : "translated", "value" : "Cuando tu estado se acerca a un límite" } } } },
+    "Compliance status changed" : { "localizations" : { "es" : { "stringUnit" : { "state" : "translated", "value" : "El estado de cumplimiento cambió" } } } },
+    "You were %@ and are now %@. This is an estimate from your local records, not legal advice." : { "localizations" : { "es" : { "stringUnit" : { "state" : "translated", "value" : "Antes estabas %@ y ahora %@. Es una estimación de tus registros locales, no asesoría legal." } } } },
     "Last reading %@ at %@" : { "localizations" : { "es" : { "stringUnit" : { "state" : "translated", "value" : "Última lectura %@ a las %@" } } } },
     "Saved %@ at %@" : { "localizations" : { "es" : { "stringUnit" : { "state" : "translated", "value" : "Guardado %@ a las %@" } } } },
     "%@ at %@" : { "localizations" : { "es" : { "stringUnit" : { "state" : "translated", "value" : "%@ a las %@" } } } }

@@ -56,6 +56,7 @@ enum NotificationCategory: String, CaseIterable, Identifiable {
     case readings
     case calibration
     case curing
+    case compliance
 
     var id: String { rawValue }
 
@@ -66,6 +67,7 @@ enum NotificationCategory: String, CaseIterable, Identifiable {
         case .readings: return String(localized: "Environment readings")
         case .calibration: return String(localized: "Meter calibration")
         case .curing: return String(localized: "Curing checks")
+        case .compliance: return String(localized: "Compliance status")
         }
     }
 
@@ -76,6 +78,7 @@ enum NotificationCategory: String, CaseIterable, Identifiable {
         case .readings: return String(localized: "Temperature, humidity and light prompts")
         case .calibration: return String(localized: "pH meter and EC probe reminders")
         case .curing: return String(localized: "Jar burping after harvest")
+        case .compliance: return String(localized: "When your status moves towards a limit")
         }
     }
 
@@ -86,6 +89,7 @@ enum NotificationCategory: String, CaseIterable, Identifiable {
         case .readings: return "thermometer.medium"
         case .calibration: return "gauge.with.dots.needle.50percent"
         case .curing: return "hourglass"
+        case .compliance: return "checkmark.seal"
         }
     }
 
@@ -93,7 +97,7 @@ enum NotificationCategory: String, CaseIterable, Identifiable {
         switch self {
         case .watering, .feeding: return .timeSensitive
         case .readings, .calibration: return .routine
-        case .curing: return .timeSensitive
+        case .curing, .compliance: return .timeSensitive
         }
     }
 

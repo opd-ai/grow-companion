@@ -652,7 +652,13 @@ final class ComplianceHistoryMonitor {
                 rule: rule,
                 warningThreshold: warningThreshold
             )
-            _ = try ComplianceHistoryService.record(report: report, plants: plants, in: context)
+            let previous = try ComplianceHistoryService.latestSnapshot(in: context)
+            let recorded = try ComplianceHistoryService.record(report: report, plants: plants, in: context)
+            if let recorded {
+                // Story 2: a move towards a limit is the one status change the
+                // grower is told about outside the app.
+                ComplianceStatusNotifier.notifyIfNeeded(previous: previous, current: recorded)
+            }
             _ = try ComplianceHistoryService.evaluateRuleChanges(in: context)
             lastSavedAt = try ComplianceHistoryService.latestSnapshot(in: context)?.capturedAt
             pendingChangeCount = try ComplianceHistoryService.pendingEvents(in: context).count
