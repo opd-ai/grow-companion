@@ -102,8 +102,7 @@ when a build or pull request reaches `main`.
 ## Remaining work
 
 - A stored, grower-editable breeder profile would need an additive model and its
-  export, backup and inventory entries.
-- A signed content pack could replace the bundled profiles and lineages, and
-  would need the same review the rule pack gets.
+  export, backup and inventory entries. There is no remote content pack: the
+  reference ships with the app, because the app makes no network request.
 - The catalogue is eleven breeders, matching the bundled templates. A grower's
   own breeder shows no profile until it is added to the bundle.

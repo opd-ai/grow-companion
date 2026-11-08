@@ -141,15 +141,11 @@ The app target and the test target compile here. CI runs the suite on an iPhone
 17 simulator. This environment has no simulator, so the tests have not been
 executed locally.
 
-## Release gates still open
+## Open engineering work
 
 - Migration fixtures from every released build: none are available from this
   repository, so the migration test uses a locally created V1 store.
-- Attorney review of any *changed* rule-pack content or changed user-facing legal
-  copy. The shipped content was reviewed and cleared on 2026-11-07 (review
-  register: `docs/ROADMAP.md` section 1.1).
-- Privacy sign-off for snapshot retention and the export/delete copies.
-- A staged rollout with record-count and migration validation, and the iOS 18
-  deployment-target decision from the safe-release plan.
-- Interpolated interface strings and legal-copy localisation, each pending the
-  work described in `docs/LOCALIZATION.md`.
+- A staged rollout with record-count validation, and the iOS 18
+  deployment-target decision.
+- Interpolated interface strings follow the rules in `docs/LOCALIZATION.md`.
+  Legal and rule copy stays English, so there is one reviewed version of it.

@@ -156,11 +156,9 @@ are.
    fails otherwise.
 3. **Plural strings need plural variations.** Any key with a count gets a
    `plural` variation (`one`/`other`) in Spanish, not a single value.
-4. **Legal, rule and verification text stays English.** Do not translate
-   `LegalCopy`, `RulePack` citations, rule summaries, jurisdiction data or the
-   federal notice until the *Spanish legal copy* passes its own localisation
-   review. The general legal review of the shipped English copy is complete
-   (`docs/ROADMAP.md` section 1.1); it did not clear a translation of it.
+4. **Legal, rule and verification text stays English.** `LegalCopy`,
+   `RulePack` citations, rule summaries, jurisdiction data and the federal
+   notice are not translated, so there is exactly one reviewed version of them.
    `Services/Localization.swift` shows a notice while the app is in Spanish so
    this is explained in the product.
 5. **No machine translation into the catalog unreviewed.** The draft in the
@@ -187,9 +185,8 @@ because Spanish supplies the whole noun instead.
 The interface draft is complete, variable strings and plurals included. What is
 left:
 
-1. **Legal and rule copy**, once the legal localisation review in
-   `docs/ROADMAP.md` 7.8 is signed off. Until then the English text and the
-   notice in the verification-duty card are the correct state.
+1. **Legal and rule copy stays English** by design, so there is no translation
+   step for it. The notice in the verification-duty card explains it.
 2. **A translator review and a device pass** at the largest Dynamic Type size,
    because Spanish runs 15–25% longer and the build alone cannot prove nothing
    clips.

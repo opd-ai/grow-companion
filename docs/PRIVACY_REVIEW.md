@@ -1,5 +1,12 @@
 # Grow Companion Privacy and Security Review
 
+> **Historical record.** This review predates the local-only simplification. The
+> app now has no account, server, sync, community surface or location access, and
+> its fixed privacy boundary is recorded in `docs/PRIVACY_ARCHITECTURE.md` and
+> enforced by `PrivacyBoundaryTests`. The findings below are kept as the record
+> of what was reviewed; any section that talks about a future sync, cloud or
+> location step describes a path the product no longer has.
+
 Review date: 2025-06-14
 Scope: Current repository implementation and the supplied product specification. This is an engineering review, not legal advice. Where the specification promises a mechanism that is absent from the repository, the finding treats that silence or mismatch as a gap rather than assuming an unimplemented service exists.
 
@@ -81,7 +88,7 @@ The cultivation store and personal effect journal separation described in the sp
 
 1. Is the intended product permanently local-only, or is encrypted cloud sync still a committed feature? If committed, what service and who controls keys?
 2. What exact data is included in device backups and iCloud backups, and is exclusion or user-controlled backup required?
-3. Is a separate personal-effect journal still planned? If so, what is its store boundary and access gate?
+3. Is a separate personal-effect journal still planned? If so, what is its store boundary and access policy?
 4. What is the authoritative rule-pack signing key, canonical payload format, rollback policy, and failure UI?
 5. What are the required retention and deletion guarantees for exports saved in Files, crash reports, diagnostics, and backups?
 6. Is approximate location required to store county/locality, or only a jurisdiction code? Is geocoding performed by Apple services under the intended privacy notice?

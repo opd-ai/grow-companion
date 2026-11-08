@@ -120,12 +120,12 @@ suite on an iPhone 17 simulator):
 
 ## Open
 
-- **Spanish legal copy (7.8).** The interface, including the 148 variable
+- **Legal copy stays English.** The interface, including the 148 variable
   strings, 23 plural forms, the model, service and view copy and the widget's
   headline, is a complete Spanish draft (see below and `docs/LOCALIZATION.md`).
-  Legal and rule copy is still English and still needs the legal-translation
-  review recorded in the roadmap, plus a translator review and a device pass at
-  the largest Dynamic Type size.
+  Legal and rule copy is deliberately not translated, so there is one reviewed
+  version of it. A translator review and a device pass at the largest Dynamic
+  Type size are still worth doing.
 - The widget is covered by unit tests for its payload; its rendered appearance
   and the widget gallery need a device or simulator check.
 - The reminder move re-schedules one notification, which is what the app uses
@@ -165,9 +165,8 @@ hears the values. The builders are pure functions, tested without a screen.
 `Text("literal")` and `String(localized:)` throughout, so the work is a String
 Catalog plus a `knownRegions` entry for `es-MX`, not a source rewrite. In order:
 
-1. Resolve the copy through a translator, then through the Spanish legal copy's
-   own localisation review. The general legal review of the English copy is
-   complete (`docs/ROADMAP.md` section 1.1).
+1. Resolve the copy through a translator. Legal and rule copy stays English, so
+   there is no second reviewed version of it.
 2. Add `Localizable.xcstrings` with `en` as the source language and `es-MX`
    translations; leave every legal, rule and verification-duty string in English
    and keep the visible note that says so.

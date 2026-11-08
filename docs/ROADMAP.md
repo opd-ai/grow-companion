@@ -20,7 +20,7 @@ import so location metadata never survives.
 | Capability | State | Lives in |
 | --- | --- | --- |
 | Age attestation, jurisdiction, residence and experience onboarding | Shipped | `Views/Onboarding/OnboardingFlow.swift` |
-| Plain-language rules with citation, primary source, verified date and stale badge | Shipped locally; remote signed packs planned | `Rules/`, `Views/Rules/RulesDetailView.swift` |
+| Plain-language rules with citation, primary source and verified date | Shipped; bundled pack only | `Rules/`, `Views/Rules/RulesDetailView.swift` |
 | Home compliance ring, counting breakdown, task list | Shipped | `Views/Home/HomeView.swift`, `Services/ComplianceEngine.swift` |
 | Rooms, canopy, light type, wattage and room filtering | Shipped | `Views/Rooms/RoomEditorView.swift`, `Views/Home/HomeView.swift` |
 | Light schedules with flowering-plant warning and override log | Shipped | `Views/Rooms/LightScheduleEditor.swift`, `Services/LightSchedule.swift` |
@@ -39,7 +39,7 @@ import so location metadata never survives.
 | Protected, recipient-scoped share files | Shipped (file based; encryption not independently reviewed) | `Services/SecureEnvelope.swift`, `Services/SharePayload.swift`, `Services/SharePackageService.swift`, `Views/Sharing/` |
 | Face ID lock, privacy screen, export and delete-all | Shipped | `Services/AppLock.swift`, `Services/PrivacyCover.swift`, `Views/Settings/` |
 | Privacy review and remediation of local security findings | Shipped | `docs/PRIVACY_REVIEW.md`, protected local services |
-| Immutable compliance history and rule-change review | Shipped locally; release gates open | `Models/ComplianceSnapshot.swift`, `Models/RuleEvaluationEvent.swift`, `Services/ComplianceHistory.swift`, `Views/Compliance/` |
+| Immutable compliance history and rule-change review | Shipped | `Models/ComplianceSnapshot.swift`, `Models/RuleEvaluationEvent.swift`, `Services/ComplianceHistory.swift`, `Views/Compliance/` |
 | Garden timeline and Quick Log | Shipped | `Services/GardenTimeline.swift`, `Views/Garden/GardenTimelineView.swift`, `Services/QuickLog.swift`, `Views/QuickLog/QuickLogSheet.swift` |
 | Photo timeline, side-by-side compare and PDF grow report | Shipped | `Services/PhotoTimeline.swift`, `Views/Garden/PhotoTimelineView.swift`, `Services/GrowReport.swift`, `Views/Settings/GrowReportView.swift` |
 | Per-cycle grow goals: dry yield, flowering time and logging completeness | Shipped | `Models/GrowGoal.swift`, `Services/GrowGoals.swift`, `Views/Home/GrowGoalsSection.swift` |
@@ -54,52 +54,49 @@ planned rather than implied as implemented.
 
 ---
 
-## 1.1 Review status
+## 1.1 Privacy architecture
 
-**Legal review — complete (2026-11-07).** The product owner confirmed the legal
-review of the shipped, local-only app and of the file-based, recipient-scoped
-share flow on 2026-11-07. The review covered onboarding and age attestation,
-rule and compliance copy, the sharing and sync surfaces, the permission strings,
-the export, backup and delete copy, notification wording, and every capability
-this roadmap claims. Its binding product constraints are kept here and in
-`LegalCopy`:
+Grow Companion is a local record and nothing else. The boundary is part of the
+product, not a stage it passes through:
 
-- No sale, gifting, transfer, transport, distribution or diversion pathway may be
-  added. Harvest dispositions stay limited to retained, consumed at home and
-  destroyed.
-- No health, diagnosis or treatment claims; education content stays framed as
-  general guidance.
-- No analytics, advertising, third-party SDK or background upload.
-- Nothing is described as available before it ships.
+- **No account and no server.** There is no sign-in, no identifier and nothing to
+  pair. A record exists on the device that made it.
+- **No network request of the app's own.** No CloudKit, no URL session, no remote
+  rule or content download. Links to a primary source open in the browser, which
+  is outside the app.
+- **No location access.** The grower picks a state from the bundled list. The app
+  never asks for permission, never asks Core Location for a position and never
+  reverse-geocodes one.
+- **No analytics, advertising, crash reporter or third-party SDK.**
+- **Sharing is a file the grower writes and sends themselves.** It is encrypted
+  and signed for one recipient, read-only on the other side, and there is no
+  transport in the app.
 
-The standalone engineering review document that supported this decision was
-retired at the product owner's request now that the review is complete; this
-register, `docs/PRIVACY_REVIEW.md` and the constraints above are the record that
-remains. These standing controls still apply:
+These invariants are enforced by `Grow CompanionTests/PrivacyBoundaryTests.swift`,
+which scans the app sources and the Info.plist for a network, CloudKit or Core
+Location API and fails the suite if one appears. `docs/PRIVACY_ARCHITECTURE.md`
+records the same boundary in product terms.
 
-- Any *changed* rule pack or changed user-facing legal copy is reviewed before it
-  ships. The review covers the copy that ships today, not future wording.
-- Spanish legal and rule copy needs its own localisation review before it is
-  translated, so it stays English with the in-app note until then.
-- App Store privacy labels and a published privacy policy are still required
-  before distribution.
-- Any future sharing, community, sync, sensor or photo-analysis feature needs its
-  own privacy review and threat model before it is described as available.
+The legal and safety copy the app shows is part of this boundary, not a review of
+it: no sale, gift, transfer or diversion pathway; no health, diagnosis or
+treatment claim; harvest dispositions limited to retained, consumed at home and
+destroyed; and the standing statement that the grower must verify current law.
+Spanish legal and rule text stays English, so there is exactly one reviewed
+version of it.
 
 ---
 
-## 2. Completing Tier 3 — v2+ differentiators
+## 2. Tier 3 — v2+ differentiators
 
 Tier 3 extends what is already shipped. Two items are partly in the product
-(the strain library and the rule pack); the rest are new services and surfaces.
-Each section states the value, the flow, the data and storage, the dependencies
-and risks, and — where it applies — what must be true before release.
+(the strain library and the rule pack); the rest are new local services and
+surfaces. Each section states the value, the flow, the data and storage, and the
+dependencies and risks.
 
-**Cross-cutting constraint.** Grow Companion is offline-first and account-free
-today. Sharing, community and cloud sync all require a backend identity and a
-cloud data store, and they change the privacy story. Each of those three items
-must come with a policy and terms update, a migration plan for existing local
-records, and an explicit opt-in that never turns on by default.
+**Privacy boundary.** Every item below ships inside the boundary in section 1.1.
+A feature that needs an account, a server, a sync engine, a remote download or a
+location lookup is not built, not deferred and not awaiting a review: it is
+outside the product, and the sections that used to describe one now record that.
 
 ### 2.1 Advanced photo analysis — validation and governance
 
@@ -123,19 +120,19 @@ written to a plant record without the grower's confirmation.
 - Calibrate confidence: a "likely" suggestion should be right more often than
   a "possible" one, and the UI copy should mirror that difference.
 
-**Proposed release gates**
+**Validation thresholds**
 
-These thresholds are proposals to ratify with the model owner; they are not
-product promises.
+These are the thresholds a suggestion must meet; they are targets, not product
+promises.
 
-| Gate | Proposed threshold |
+| Measure | Threshold |
 | --- | --- |
 | Phone-photo precision, top five classes | ≥ 0.90 |
 | Phone-photo recall, any class surfaced | ≥ 0.75 |
 | Microscope trichome ripeness agreement | ≥ 0.85 |
 | Suggestions a grower marks wrong | ≤ 1 in 10 |
-| Suggestions saved without confirmation | 0 (hard gate) |
-| Photo data leaving the device | 0 (hard gate) |
+| Suggestions saved without confirmation | 0 |
+| Photo data leaving the device | 0 |
 
 **Governance**
 
@@ -145,9 +142,8 @@ product promises.
 - Require confirmation before anything is written to a plant record. Show the
   suggested observation as a proposal, and let the grower edit the text before
   saving.
-- Keep corrections on the device. An opt-in "contribute anonymised corrections"
-  option is deferred until a privacy review approves it, and it stays off by
-  default.
+- Keep corrections on the device. There is no "contribute corrections" option:
+  nothing leaves the phone.
 - Model weights ship in the app bundle and inference runs on device. No photo,
   crop or embedding leaves the phone.
 - Treat safety-adjacent classes (mould, pests, ripeness) as guidance, never as
@@ -155,7 +151,7 @@ product promises.
   read as a diagnosis.
 - Change control: every model release runs the regression suite, records the
   result, and keeps the previous version available for rollback. A model that
-  fails a hard gate does not ship.
+  misses a threshold does not ship.
 
 **Flow**
 
@@ -173,8 +169,8 @@ upload, no analytics. Delete-all removes corrections with the rest of the store.
 
 Model drift between app versions, false confidence, label drift in the test
 set, and growers treating a suggestion as a diagnosis. Mitigations are the
-versioned model card, the confirmation gate, the confidence copy and the
-review cadence.
+versioned model card, the confirmation step, the confidence copy and the review
+cadence.
 
 ### 2.2 Light-distance guidance
 
@@ -287,138 +283,20 @@ comparison copy and the product-claim limits. See `docs/BREEDER_REFERENCE.md`.
 A stored, grower-editable breeder profile and the signed content pack that would
 replace the bundled one remain unbuilt.
 
-### 2.4 Consultant and peer sharing
+### 2.4–2.7 Outside the product
 
-**Value**
+Consultant sharing over iCloud, community and Q&A, a personal effect journal and
+cloud sync are not features of this app and are not waiting on a review. Each one
+needs an account, a server or a cloud store, or a second store with its own
+authentication policy, and each would weaken the guarantee in section 1.1 that
+nothing leaves the device.
 
-An experienced grower or paid consultant can review a problem remotely, and
-peers can compare notes without sharing the entire record.
+The local answer the app already ships for the first of them is the share file: a
+grower chooses the categories, writes an encrypted and signed file, and sends it
+themselves. The recipient opens a read-only copy. There is no server, no account
+and no live link between devices.
 
-**Flow**
-
-Choose rooms or plants → choose categories → set an expiration date (maximum
-90 days, renewable) → send an invitation → the recipient accepts through an
-Apple ID share. The owner sees an access log and can revoke at any time.
-
-**Scope**
-
-- Selectable categories: rooms and plants, environment readings, feed and
-  watering logs, scouting notes, harvest records.
-- Never selectable: the personal effect journal and any location information.
-- The recipient interface has no export button and no "record a transfer"
-  action. Sharing must never include transfer or sale functions.
-
-**Data and storage**
-
-Shared data uses CloudKit shares. Each share's content is encrypted with a
-per-share key, and that key is wrapped to the recipient's public key.
-Revocation rotates the key, so the recipient cannot read content added after
-revocation. The owner's access log is stored on device.
-
-**Dependencies and risks**
-
-Recipients can copy or screenshot data, and no technical control prevents that.
-The terms of service state this limit, and the share screen warns the owner
-before granting access. Sharing also depends on the end-to-end sync layer in
-2.7 and on a policy decision about what a "consultant" role may see.
-
-### 2.5 Community and Q&A
-
-**Value**
-
-Peer answers help beginners, and moderation keeps the space useful rather than
-an unregulated channel for misinformation.
-
-**Flow**
-
-Post a question with optional photos and a jurisdiction tag (state only) →
-automated filters check text and images → new accounts require approval for
-their first three posts → flagged posts go to a moderator queue → verified
-expert badges are reserved for reviewed profiles.
-
-**Moderation policy**
-
-Target spam, unsafe advice, sales solicitation, misinformation and content that
-describes unlawful cultivation. Content that offers cannabis for sale or
-references interstate movement must be blocked and reported. Direct messages
-are out of scope. Moderators need training and a documented escalation path for
-threats or illegal activity.
-
-**Data and storage**
-
-Posts live in a moderated cloud service, separate from the grower's local
-records. Only the public display name and the posted content are stored, and
-users cannot link posts to their on-device records.
-
-**Dependencies and risks**
-
-This is the highest-risk feature for legal exposure. Section 230 protections
-for user content apply only while the moderation policy is enforced
-consistently, so the policy, the queue and the escalation path are part of the
-feature, not an afterthought.
-
-### 2.6 Personal effect journal
-
-**Value**
-
-Some growers track their own experience for reflection. Separating that record
-keeps cultivation analytics clean and limits the sensitivity of the
-cultivation data.
-
-**Flow**
-
-Settings → enable the journal (off by default) → a separate passcode or Face ID
-check every time it opens → entries are not linked to plant or batch IDs in the
-UI, and the journal cannot be linked to a batch through the interface.
-
-**Data and storage**
-
-Stored in a separate encrypted store with its own key, local only, and excluded
-from cloud sync, default exports, reports, analytics, widgets, Siri responses
-and sharing.
-
-**Dependencies and risks**
-
-Consumer health data laws may treat this content as sensitive, so consent and
-notice must be explicit and the feature must avoid health claims and medical
-guidance. Users who delete the grow may still keep the journal, so the
-delete-all flow must offer it as a separate choice.
-
-### 2.7 End-to-end encrypted cloud sync
-
-**Value**
-
-A grower with an iPhone and an iPad can keep one current record without manual
-transfers.
-
-**Flow**
-
-Enable sync → the app creates a sync key in the Keychain (protected by iCloud
-Keychain or a recovery key) → records are encrypted with CryptoKit before
-writing to CloudKit → a second device joins with the recovery key or an
-approved device.
-
-**Data and storage**
-
-Ciphertext in CloudKit. The app cannot read record contents on the server side.
-Record counts, timestamps, zone names and share relationships remain visible to
-the cloud provider, and the privacy policy must say so.
-
-**Conflicts**
-
-- Append-only event logs (stage events, feed events, readings) merge by
-  identity and timestamp; nothing is overwritten.
-- Profile, room settings and strain edits resolve last-writer-wins, with the
-  losing value visible in a conflict note rather than silently discarded.
-- A conflict that cannot be resolved automatically is surfaced to the grower,
-  not guessed.
-
-**Dependencies and risks**
-
-Losing both the device and the recovery key makes the data unrecoverable. This
-is inherent to the design, so onboarding must make the trade-off clear before
-sync is enabled. Sync conflicts require the merge policy above for every entity
-type, and the schema must be versioned before the first sync release.
+All four remain outside the product. The privacy screen says so in the app.
 
 ### 2.8 Educational library
 
@@ -441,8 +319,9 @@ written against.
 
 **Data and storage**
 
-Lessons are bundled read-only content, updated through the same signed content
-pipeline as the rules. Reading progress is stored on device.
+Lessons are bundled read-only content. There is no remote content pipeline:
+the app makes no network request, so an update arrives with an app update.
+Reading progress is stored on device.
 
 **Dependencies and risks**
 
@@ -460,17 +339,17 @@ experience is stable, and several require validation before they ship.
 | Feature | Description | Why it waits | Data and storage | Key risk |
 | --- | --- | --- | --- | --- |
 | SCROG layout planner | Interactive net-and-canopy planner for placing branches in a screen grid. | Depends on the training log and the light-distance feature. | On-device layout records. | Visual complexity on iPhone screens. |
-| Mac companion | Mac Catalyst or native app for detailed reports and bulk data entry. | Requires a stable data model and sync first. | Synced via the same encrypted sync layer. | Doubles the test surface. |
-| Home automation bridges | Connectors for Home Assistant and similar hubs for advanced automation. | Niche audience and a fragmented API landscape. | Connection credentials in the Keychain. | Credential exposure through third-party hubs. |
-| CO2 control automation | Schedules or triggers CO2 supplementation with safety limits. | Requires validated sensor data and safety review. | On-device schedule. | Safety risk if sensors fail; requires interlocks. |
+| Mac companion | Mac Catalyst or native app for detailed reports and bulk data entry. | Needs a stable data model, and there is no sync layer to carry records between devices. | Local only; no sync. | Doubles the test surface. |
+| Home automation bridges | Connectors for Home Assistant and similar hubs for advanced automation. | Would add a network connection the product does not have. | None: outside the privacy boundary. | Credential exposure through third-party hubs. |
+| CO2 control automation | Schedules or triggers CO2 supplementation with safety limits. | Requires validated sensor data and a safety design. | On-device schedule. | Safety risk if sensors fail; requires interlocks. |
 | Lab PDF extraction with OCR | Automated extraction of values from lab reports. | Extraction errors are dangerous, so manual confirmation must be proven first. | Extracted values on-device. | Misread results. |
 | Strain comparison and cultivar analytics | Side-by-side charts across cultivars using the user's own data. | Needs enough history to be meaningful. | On-device. | Small-sample conclusions presented as facts. |
 | Household profiles | Separate profiles on one device for shared grows. | Adds permission complexity. | Per-profile encrypted stores. | Access-control bugs. |
 | visionOS or Vision Pro view | Spatial room view with live sensor overlays. | Small installed base. | On-device. | Limited value relative to effort. |
-| Additional languages | Expanded localization beyond the launch set. | Depends on rule-pack coverage in each language. | Bundled strings. | Translation accuracy for legal text. |
+| Additional languages | Expanded localization beyond the launch set. | Depends on rule coverage in each language. | Bundled strings. | Translation accuracy for legal text. |
 
-Tier 4 is reviewed once Tier 3 is complete. Nothing here starts before the sync
-and sharing layers are stable, because most of it depends on them.
+Tier 4 is reviewed once Tier 3 is complete. Nothing here may add an account, a
+server or a network request; that boundary is fixed for the product.
 
 ---
 
@@ -673,20 +552,21 @@ typed phrase and lists every record type. There is no cloud data to verify
 today; the app returns to onboarding after erasing rather than showing a
 separate "no records remain" screen.
 
-### 10. Share read-only access with my consultant for a limited time — Planned
+### 10. Share read-only access with my consultant — Shipped, as a share file
 
 As a grower working with a consultant, I want to share selected rooms for a set
 period, so they can review my data without full access.
 
-- I select which categories to share, and the personal journal and location are
+- I select which categories to share, and the journal and any location text are
   unavailable to select.
-- The share expires automatically on the date I set, and I can revoke it at any
-  time.
-- The consultant cannot export, edit, or delete data, and I see a log of their
-  access.
+- The share expires on the date I set, and I can revoke it at any time; the file
+  is encrypted and signed for one recipient.
+- The recipient opens a read-only copy, cannot export, edit or delete data, and
+  there is no server, account or live link between devices.
 
-*Dependency:* section 2.4. Requires the identity and sync layers plus a policy
-review before any code is written.
+*Shipped:* `Views/Settings/SharingView.swift`, `Services/SharePackageService.swift`
+and `Services/SecureEnvelope.swift`. The file is written by the grower and sent
+outside the app, which is the only sharing this product has.
 
 ### 4.11 Shipped v1.x additions
 
@@ -960,7 +840,7 @@ TAB 5: SETTINGS
 ├── Privacy and data
 │   ├── App lock
 │   ├── Notifications (priority, quiet hours, lock-screen text)
-│   ├── Sharing (not available in this version)
+│   ├── Sharing (encrypted share files, no server or account)
 │   ├── Sync and privacy (no account and no cloud sync)
 │   ├── Backup and restore (password-protected local backup)
 │   └── Export and delete
@@ -1234,13 +1114,10 @@ messages, the widget's headline and the sentences the views compute — now goes
 through `String(localized:)`, so the catalog applies to all of it; the widget
 receives its localized line in the shared snapshot because it has its own
 bundle. A build asks for 1,218 keys and all but 27 placeholders, unit symbols,
-bare numbers and `Grow Companion %@` carry Spanish text. The remaining
-localisation work is the legal and rule copy, which waits on its own review.
-Legal and rule text stays in English with an
-in-app note until the Spanish legal copy passes its own localisation review —
-the general legal review is complete (section 1.1), but it cleared the English
-copy, not a translation of it. See `docs/LOCALIZATION.md` for the glossary, the
-rules and what is left.
+bare numbers and `Grow Companion %@` carry Spanish text. Legal and rule copy
+stays in English by design, with an in-app note explaining it: there is exactly
+one reviewed version of the copy that matters, not two. See
+`docs/LOCALIZATION.md` for the glossary, the rules and what is left.
 
 **Shipped:** `Services/Format.swift` renders numbers through a locale-aware
 `NumberFormatter` (a Spanish device sees `24,5`, an English one `24.5`) and dates
@@ -1259,8 +1136,8 @@ table builders are pure functions with tests. See
   language.
 - Numbers, dates, weights and areas use the locale's formatters.
 - Every chart has a text or table equivalent reachable with VoiceOver.
-- Legal and rule copy is translated only after qualified legal localisation
-  review; until then it stays in English with a note saying so.
+- Legal and rule copy stays English, so there is exactly one reviewed version of
+  it; the app says so where the copy appears.
 
 ### 7.9 Sequencing and dependencies
 
@@ -1268,26 +1145,21 @@ table builders are pure functions with tests. See
 | --- | --- | --- |
 | v2.1 | Garden timeline, Quick Log | None; both read existing records. Shipped. |
 | v2.2 | Photo timeline and compare, PDF grow report | Verified export/backup and delete coverage (shipped). Both shipped. |
-| v2.3 | Widgets, calendar and per-cycle goals (shipped); locale formatters, chart data tables and the Spanish interface including variable and plural strings (shipped); Spanish legal copy (open) | Widget extension target and the schema V3 migration are in place; legal copy needs its own localisation review (section 1.1) |
+| v2.3 | Widgets, calendar and per-cycle goals (shipped); locale formatters, chart data tables and the Spanish interface including variable and plural strings (shipped) | Widget extension target and the schema V3 migration are in place. Legal copy stays English by design. |
 
-Nothing in this section adds sharing, community, sync, sensor firmware, photo
-analysis or any transaction. The legal review of the shipped scope is complete
-(section 1.1); these features remain unbuilt for engineering and product
-reasons: sync, community and online sharing still need a transport, an identity
-model and a threat model, hardware needs a sensor trust model, and photo
-analysis needs a validated model and governance before a single suggestion can
-ship.
+Nothing in this section adds an account, a server, a sync engine, a sensor
+firmware update, photo analysis or any transaction. Sharing is the share file
+described below; hardware needs a sensor trust model, and photo analysis needs a
+validated model and governance before a single suggestion can ship.
 
-**Shared/sync track status.** Recipient-scoped, encrypted **share files ship**
+**Sharing track status.** Recipient-scoped, encrypted **share files ship**
 (`docs/E2EE_DESIGN.md`, `Services/SecureEnvelope.swift`,
 `Services/SharePayload.swift`, `Services/SharePackageService.swift`,
 `Views/Sharing/`): a versioned, signed AES-GCM envelope, a device key pair and
 share code in the Keychain, and tests for scoping, tampering, addressing, expiry
-and versioning. Sync is **not** implemented: there is no transport, account or
-conflict handling, and the app makes no E2EE claim for sync. Before a public
-launch of sharing, the remaining gates are independent cryptographic review,
-two-device device testing, App Store privacy labels and policy text, and a
-downgrade story for future payload versions.
+and versioning. The grower writes the file and sends it; the app has no transport
+and claims none. Sync is not part of the product and there is no network layer to
+turn on.
 
 ---
 
@@ -1297,17 +1169,16 @@ downgrade story for future payload versions.
 | --- | --- | --- | --- |
 | Rule engine produces wrong limits | Medium | Critical | Human-reviewed rule pipeline, signed packs, rollback, "unverified" badges, and a kill switch that freezes evaluation to the last verified pack. |
 | Counting logic doesn't match a jurisdiction's definition | High | Critical | Counting predicates modeled in the schema, a visible counting breakdown, and a test suite with reference cases per jurisdiction. |
-| Remote rule fetch fails or is tampered with | Low | High | Signature verification on every pack, pinned signing key, and the last verified pack remains usable offline. |
-| Data loss on device failure | Medium | High | Encrypted backup, optional sync, and a recovery-key flow tested before launch. |
-| Sync conflicts between devices | High | Medium | Per-entity merge policy, append-only event logs for stage and feed events, and visible conflict resolution for edits to the same record. |
-| End-to-end encryption claim is overstated | Medium | High | Document the visible metadata (counts, timestamps, zones, shares) in the privacy policy and avoid "fully anonymous" language. |
+| Remote rule fetch fails or is tampered with | Very low | High | No remote fetch exists. The rule pack is bundled with the app and a new pack arrives with an app update. |
+| Data loss on device failure | Medium | High | Encrypted local backup, a verified export, and a recovery path tested before launch. There is no sync copy by design. |
+| Sync conflicts between devices | Very low | Low | There is no second device in the product, so there is no conflict to resolve. |
+| End-to-end encryption claim is overstated | Low | Medium | The share file is the only encrypted surface and its threat model is documented; the app makes no claim about cloud storage. |
 | Sensor integration fragility | High | Medium | A compatibility matrix, manual fallback for every sensor metric, and clear labels for stale readings. |
 | Bluetooth pairing and background limits | High | Medium | Foreground sync by default, background refresh when permitted, and a last-seen timestamp on every sensor. |
 | Live Activity and widget limits | Medium | Low | Use Live Activities only for short active sessions; use widget timelines for multi-week countdowns. |
 | Notification fatigue | High | Medium | Priority tiers, daily digest option, and automatic suppression for repeated acknowledged alerts. |
 | Photo storage growth | High | Low | HEIC compression, thumbnail caching, and an archive-originals option. |
 | Model misclassification in photo analysis | Medium | Medium | Show model version, require confirmation, and display uncertainty instead of single answers. |
-| Community content violates law or policy | Medium | High | Pre-moderation for new accounts, keyword and image filters, moderator queue, and a documented escalation path. |
 | Schema drift across app versions | Medium | Medium | Versioned schema migrations with tests on sample databases from every prior version. |
 | Accessibility regressions in charts | Medium | Medium | Data-table alternative for every chart, tested with VoiceOver in each release. |
 | Vendor SDK exposes data | Medium | High | Audit every SDK's data collection, restrict SDK permissions, and review updates before adoption. |
@@ -1318,8 +1189,8 @@ downgrade story for future payload versions.
 
 Metrics measure whether growers achieve better outcomes and stay compliant.
 They must not reward maximizing plant count or yield at the expense of legal
-limits. Every metric is computed on device for the individual grower, and
-aggregate reporting uses only anonymized, opt-in data.
+limits. Every metric is computed on device for the individual grower and stays
+there: nothing is aggregated, reported or uploaded.
 
 | Category | Metric | Definition | Target (first 12 months) |
 | --- | --- | --- | --- |
@@ -1331,12 +1202,12 @@ aggregate reporting uses only anonymized, opt-in data.
 | Efficiency | Yield per watt trend | Change in dry grams per watt-hour across cycles, using measured watts where available. | Positive trend for users who log for three or more cycles. |
 | Compliance | Limit-breach prevention | Number of planting or harvest actions blocked or warned by the compliance check, per user per cycle. | Tracked as a count; no target, because the goal is awareness. |
 | Compliance | Compliance-related errors | Records later corrected because the counting method was wrong, per 100 active users. | Decrease quarter over quarter. |
-| Compliance | Rule freshness | Share of active users on the latest verified rule pack within 7 days of release. | 95 percent or higher. |
+| Compliance | Rule freshness | Share of active grows whose rule pack matches the installed app version. | 100 percent; no pack can lag without an app update. |
 | Learning | Lesson-to-action rate | Share of users who open an educational lesson and then perform the linked task within 7 days. | 25 percent or higher. |
 | Engagement | Day-30 retention | Share of users who log at least one event in days 25 to 30 after onboarding. | 40 percent or higher. |
 | Engagement | Logging completeness | Share of active cycles with feed, reading, and stage events logged on at least 80 percent of scheduled days. | 60 percent or higher. |
 | Trust | Export and delete usage | Share of users who run an export or delete-all action, and the completion rate for each. | Completion rate of 99 percent or higher for both. |
-| Privacy | Sharing revocation time | Time between a revocation and the completed key rotation. | Under 60 seconds. |
+| Privacy | Revoked share grant | A revoked or expired grant is refused when the next share file is written. | 100 percent; never presented as a live link. |
 
 The **plant loss rate** and **compliance-related errors** metrics are the most
 important indicators of product value. The others support them, and they should

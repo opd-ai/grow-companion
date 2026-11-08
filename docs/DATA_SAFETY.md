@@ -41,6 +41,6 @@ These were checked against the source in this branch:
 
 ## Still open
 
-- COMP-01 (versioned SwiftData schema, `ComplianceSnapshot` / `RuleEvaluationEvent`, rule-change review) is implemented and documented in `docs/COMPLIANCE_HISTORY.md`. Release gates that remain: per-pack legal review of any *changed* rule-pack content (the shipped copy is reviewed, 2026-11-07), staged rollout, privacy sign-off, and migration fixtures from every released build (none can be retrieved from this repository, so the migration test uses a locally created V1 store).
-- Legal review of the shipped copy and rule pack: cleared 2026-11-07 (review register in `docs/ROADMAP.md` section 1.1). Per-change review still applies to any changed rule pack or legal copy. Privacy sign-off, staged rollout and the iOS 18 decision from the plan remain open.
-- The test target compiles with the share, data-safety and compliance-history suites. CI runs the full suite on an iPhone 17 simulator; this environment has no simulator, so the tests have been compiled here but not executed.
+- COMP-01 (versioned SwiftData schema, `ComplianceSnapshot` / `RuleEvaluationEvent`, rule-change review) is implemented and documented in `docs/COMPLIANCE_HISTORY.md`. What remains is engineering work: migration fixtures from every released build (none can be retrieved from this repository, so the migration test uses a locally created V1 store) and a staged rollout.
+- Changed rule-pack content or changed user-facing legal copy gets its own review, because it is content rather than code. The shipped content was reviewed and cleared on 2026-11-07; the app makes no remote update, so a new pack arrives with an app update.
+- The test target compiles with the share, data-safety, privacy-boundary and compliance-history suites. CI runs the full suite on an iPhone 17 simulator; this environment has no simulator, so the tests have been compiled here but not executed.

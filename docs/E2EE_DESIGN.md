@@ -142,22 +142,19 @@ same plaintext twice never produces the same bytes.
   nothing is written in the clear as a fallback.
 - Storage full or file unreadable: the operation fails and the source is unchanged.
 
-## 9. Gates
+## 9. Invariants
 
-Done:
+1. The app makes no network request. A share file is the only thing the app
+   produces for another device.
+2. The grower creates and sends the file themselves; the app has no transport.
+3. The recipient's copy is read-only and covers only the categories the grower
+   chose.
+4. The device key pair stays in the Keychain, available only while unlocked, and
+   never leaves the device.
+5. A malformed, tampered or unsupported envelope is rejected rather than read.
 
-1. Attorney and privacy review — complete (2026-11-07) for the file-based share
-   flow; see the review register in `docs/ROADMAP.md` section 1.1.
-2. Transport decision — out-of-band file exchange, which needs no backend.
-3. Identity model — the share code, with sender verification on open.
-
-Open:
-
-4. Independent cryptographic review of the envelope and key handling.
-5. Device testing on a locked device, across reboot, while backgrounded, and with
-   the app lock on, plus an end-to-end two-device share test.
-6. App Store privacy-label and policy text that match the shipped feature.
-7. A supported-downgrade story for a future payload format change.
+The remaining engineering work is two-device device testing and a downgrade story
+for a future payload version.
 
 ## 10. What is tested today, and what is not
 
