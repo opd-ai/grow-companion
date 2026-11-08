@@ -28,38 +28,11 @@ struct ModelCount: Identifiable, Hashable {
 }
 
 enum DataInventory {
-    /// Every model registered in the container, in the order the schema lists it.
-    static let models: [any PersistentModel.Type] = [
-        GrowProfile.self,
-        Room.self,
-        Plant.self,
-        CycleArchive.self,
-        Strain.self,
-        StageEvent.self,
-        JournalEntry.self,
-        LightScheduleEvent.self,
-        EnvironmentReading.self,
-        SensorDevice.self,
-        ShareGrant.self,
-        ShareAccessLog.self,
-        EnvironmentAlert.self,
-        FeedEvent.self,
-        CalibrationEvent.self,
-        CareReminder.self,
-        DryingSession.self,
-        DryingCheck.self,
-        CureBurp.self,
-        TrainingSession.self,
-        Treatment.self,
-        Equipment.self,
-        ServiceRecord.self,
-        ScoutingCheck.self,
-        FeedSchedule.self,
-        FeedWeek.self,
-        FeedProduct.self
-    ]
+    /// Every model registered in the container, in the order the versioned
+    /// schema lists it. `CultivationSchemaV2` is the single source for the list.
+    static var models: [any PersistentModel.Type] { CultivationSchemaV2.models }
 
-    static var schema: Schema { Schema(models) }
+    static var schema: Schema { Schema(versionedSchema: CultivationSchemaV2.self) }
 
     /// The name each model is counted, exported and reported under.
     static var modelNames: [String] {
@@ -74,6 +47,8 @@ enum DataInventory {
     /// Counts and deletes in the same order: children before parents.
     /// `deleteAll` walks this list, so nothing counted can be left behind.
     static let probes: [ModelProbe] = [
+        probe(ComplianceSnapshot.self),
+        probe(RuleEvaluationEvent.self),
         probe(DryingCheck.self),
         probe(CureBurp.self),
         probe(DryingSession.self),
@@ -143,6 +118,8 @@ enum DataInventory {
     }
 
     private static let labels: [String: String] = [
+        "ComplianceSnapshot": "Compliance history snapshots",
+        "RuleEvaluationEvent": "Rule change reviews",
         "GrowProfile": "Grow profile and onboarding answers",
         "Room": "Rooms",
         "Plant": "Plants",

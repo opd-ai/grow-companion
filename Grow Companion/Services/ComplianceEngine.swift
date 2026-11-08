@@ -8,7 +8,7 @@
 
 import Foundation
 
-enum ComplianceLevel {
+enum ComplianceLevel: String, Codable, CaseIterable {
     case good
     case warning
     case over

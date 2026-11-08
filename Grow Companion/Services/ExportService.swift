@@ -39,6 +39,8 @@ struct ExportSnapshot {
     var cycleArchives: [CycleArchive] = []
     var sensors: [SensorDevice] = []
     var shareGrants: [ShareGrant] = []
+    var complianceSnapshots: [ComplianceSnapshot] = []
+    var ruleEvaluationEvents: [RuleEvaluationEvent] = []
     var counts: [String: Int] = [:]
 }
 
@@ -83,7 +85,8 @@ enum ExportService {
         "EnvironmentAlert", "FeedEvent", "CalibrationEvent", "CareReminder",
         "DryingSession", "DryingCheck", "CureBurp", "TrainingSession",
         "Treatment", "Equipment", "ServiceRecord", "ScoutingCheck",
-        "FeedSchedule", "FeedWeek", "FeedProduct"
+        "FeedSchedule", "FeedWeek", "FeedProduct",
+        "ComplianceSnapshot", "RuleEvaluationEvent"
     ]
 
     static func build(snapshot: ExportSnapshot, options: ExportOptions) throws -> ExportPayload {
@@ -184,6 +187,12 @@ enum ExportService {
             "cycleArchives": snapshot.cycleArchives.map(cycleArchiveDictionary),
             "sensors": snapshot.sensors.map(sensorDictionary),
             "shareGrants": snapshot.shareGrants.map(shareGrantDictionary),
+            "complianceSnapshots": snapshot.complianceSnapshots
+                .sorted { $0.capturedAt < $1.capturedAt }
+                .map(complianceSnapshotDictionary),
+            "ruleEvaluationEvents": snapshot.ruleEvaluationEvents
+                .sorted { $0.evaluatedAt < $1.evaluatedAt }
+                .map(ruleEvaluationEventDictionary),
             "journal": options.includeJournal ? snapshot.journal.map(journalDictionary) : []
         ]
 
@@ -196,9 +205,9 @@ enum ExportService {
             "app": "Grow Companion",
             "version": info?["CFBundleShortVersionString"] as? String ?? "unknown",
             "build": info?["CFBundleVersion"] as? String ?? "unknown",
-            // The unversioned SwiftData model set, frozen as the v1 record
-            // schema for export and backup purposes.
-            "recordSchema": "implicit-v1"
+            // The explicit versioned SwiftData schema this build writes.
+            "recordSchema": "cultivation-v2",
+            "recordSchemaVersion": 2
         ]
     }
 
@@ -531,6 +540,81 @@ enum ExportService {
             "accessLogs": grant.accessLogs.sorted { $0.date < $1.date }.map { log in
                 ["date": iso(log.date), "action": log.action]
             }
+        ]
+    }
+
+    private static func complianceSnapshotDictionary(_ snapshot: ComplianceSnapshot) -> [String: Any] {
+        [
+            "id": snapshot.snapshotID.uuidString,
+            "capturedAt": iso(snapshot.capturedAt),
+            "jurisdictionCode": snapshot.jurisdictionCode,
+            "stateName": snapshot.stateName,
+            "rulePackVersion": snapshot.rulePackVersion,
+            "ruleVerifiedOn": snapshot.ruleVerifiedOn,
+            "citation": snapshot.citation,
+            "sourceURL": snapshot.sourceURL,
+            "countedPlants": snapshot.countedPlantTotal,
+            "stageCounts": Dictionary(
+                uniqueKeysWithValues: snapshot.stageCounts.map { ($0.key.rawValue, $0.value) }
+            ),
+            "retainedDryWeightGrams": snapshot.retainedDryWeightGrams,
+            "canopySquareMeters": snapshot.canopySquareMeters,
+            "plantLimit": boxed(snapshot.plantLimit),
+            "possessionLimitGrams": boxed(snapshot.possessionLimitGrams),
+            "canopyLimitSqM": boxed(snapshot.canopyLimitSqM),
+            "warningThreshold": snapshot.warningThreshold,
+            "cultivable": snapshot.cultivable,
+            "countedStages": snapshot.countedStages.map(\.rawValue),
+            "countsClones": snapshot.countsClones,
+            "limitScope": snapshot.limitScopeRaw,
+            "plantLevel": snapshot.plantLevelRaw,
+            "possessionLevel": snapshot.possessionLevelRaw,
+            "canopyLevel": snapshot.canopyLevelRaw,
+            "overallLevel": snapshot.overallLevelRaw,
+            "fingerprint": snapshot.fingerprint,
+            "isUpgradeBaseline": snapshot.isUpgradeBaseline,
+            "schemaVersion": snapshot.schemaVersion
+        ]
+    }
+
+    private static func ruleEvaluationEventDictionary(_ event: RuleEvaluationEvent) -> [String: Any] {
+        [
+            "id": event.eventID.uuidString,
+            "priorSnapshotID": event.priorSnapshotID.uuidString,
+            "priorPackVersion": event.priorPackVersion,
+            "newPackVersion": event.newPackVersion,
+            "priorRuleVerifiedOn": event.priorRuleVerifiedOn,
+            "newRuleVerifiedOn": event.newRuleVerifiedOn,
+            "jurisdictionCode": event.jurisdictionCode,
+            "evaluatedAt": iso(event.evaluatedAt),
+            "outcome": event.outcomeRaw,
+            "changedSummary": event.changedSummary,
+            "changedFields": event.changedFields.map { change in
+                [
+                    "field": change.field,
+                    "kind": change.kind.rawValue,
+                    "previousNumber": boxed(change.previousNumber),
+                    "newNumber": boxed(change.newNumber),
+                    "previousText": change.previousText,
+                    "newText": change.newText
+                ]
+            },
+            "metrics": event.metrics.map { metric in
+                [
+                    "metric": metric.metric,
+                    "previousValue": metric.previousValue,
+                    "previousLimit": boxed(metric.previousLimit),
+                    "previousLevel": metric.previousLevel,
+                    "currentValue": metric.currentValue,
+                    "currentLimit": boxed(metric.currentLimit),
+                    "currentLevel": metric.currentLevel,
+                    "comparable": metric.comparable
+                ]
+            },
+            "citation": event.citation,
+            "sourceURL": event.sourceURL,
+            "acknowledgedAt": iso(event.acknowledgedAt),
+            "schemaVersion": event.schemaVersion
         ]
     }
 
@@ -946,6 +1030,64 @@ enum ExportService {
                             String(grant.accessLogs.count)
                         ]
                     }
+                )
+            )
+        )
+
+        files.append(
+            CsvFile(
+                name: "compliance_history.csv",
+                data: csvData(
+                    headers: [
+                        "Captured", "Jurisdiction", "State", "Rule pack", "Rule verified",
+                        "Counted plants", "Plant limit", "Stored flower grams",
+                        "Stored flower limit grams", "Canopy square metres",
+                        "Canopy limit square metres", "Overall", "Baseline"
+                    ],
+                    rows: snapshot.complianceSnapshots
+                        .sorted { $0.capturedAt < $1.capturedAt }
+                        .map { item in
+                            [
+                                timestamp(item.capturedAt),
+                                item.jurisdictionCode,
+                                item.stateName,
+                                item.rulePackVersion,
+                                item.ruleVerifiedOn,
+                                String(item.countedPlantTotal),
+                                item.plantLimit.map(String.init) ?? "",
+                                numberText(item.retainedDryWeightGrams),
+                                numberText(item.possessionLimitGrams),
+                                numberText(item.canopySquareMeters),
+                                numberText(item.canopyLimitSqM),
+                                item.overallLevel.title,
+                                item.isUpgradeBaseline ? "Yes" : "No"
+                            ]
+                        }
+                )
+            )
+        )
+
+        files.append(
+            CsvFile(
+                name: "rule_change_reviews.csv",
+                data: csvData(
+                    headers: [
+                        "Evaluated", "Jurisdiction", "Prior pack", "New pack",
+                        "Outcome", "Summary", "Acknowledged"
+                    ],
+                    rows: snapshot.ruleEvaluationEvents
+                        .sorted { $0.evaluatedAt < $1.evaluatedAt }
+                        .map { event in
+                            [
+                                timestamp(event.evaluatedAt),
+                                event.jurisdictionCode,
+                                event.priorPackVersion,
+                                event.newPackVersion,
+                                event.outcome.rawValue,
+                                event.changedSummary,
+                                event.acknowledgedAt.map(timestamp) ?? ""
+                            ]
+                        }
                 )
             )
         )
@@ -1376,9 +1518,12 @@ enum ExportService {
                          environment readings, feeds, calibrations, light
                          schedule changes, treatments, equipment and service
                          history, scouting, drying and curing sessions, and the
-                         journal when it was included. Its manifest states the
-                         format version, the model list and the record count for
-                         every supported record type.
+                         journal when it was included. It also holds the
+                         compliance history snapshots and their rule change
+                         reviews, so a change to the rules can be explained from
+                         the record itself. Its manifest states the format
+                         version, the model list and the record count for every
+                         supported record type.
 
     csv/                 One spreadsheet-friendly file per record type.
 

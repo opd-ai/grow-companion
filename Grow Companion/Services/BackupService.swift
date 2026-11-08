@@ -19,7 +19,8 @@ enum BackupService {
         "calibrations", "lightScheduleEvents", "dryingSessions", "treatments",
         "equipment", "serviceRecords", "scoutingChecks", "environmentAlerts",
         "trainingSessions", "feedSchedules", "cycleArchives", "sensors",
-        "shareGrants", "journal", "photos"
+        "shareGrants", "complianceSnapshots", "ruleEvaluationEvents",
+        "journal", "photos"
     ]
 
     /// Checks a decoded backup before anything on this device is touched.
@@ -104,7 +105,9 @@ enum BackupService {
             ("FeedSchedule", try arrays("feedSchedules", in: root).count),
             ("CycleArchive", try arrays("cycleArchives", in: root).count),
             ("SensorDevice", try arrays("sensors", in: root).count),
-            ("ShareGrant", try arrays("shareGrants", in: root).count)
+            ("ShareGrant", try arrays("shareGrants", in: root).count),
+            ("ComplianceSnapshot", try arrays("complianceSnapshots", in: root).count),
+            ("RuleEvaluationEvent", try arrays("ruleEvaluationEvents", in: root).count)
         ]
 
         for check in checks {
@@ -541,6 +544,97 @@ enum BackupService {
                 context.insert(log)
                 count("ShareAccessLog")
             }
+        }
+
+        // Compliance history snapshots and their rule change reviews
+        for value in try arrays("complianceSnapshots", in: root) {
+            let rawStages = value["stageCounts"] as? [String: Any] ?? [:]
+            var stages: [PlantStage: Int] = [:]
+            for (key, raw) in rawStages {
+                guard let stage = PlantStage(rawValue: key),
+                      let count = raw as? Int else { continue }
+                stages[stage] = count
+            }
+
+            let snapshot = ComplianceSnapshot(
+                snapshotID: UUID(uuidString: string(value["id"])) ?? UUID(),
+                capturedAt: date(value["capturedAt"]) ?? Date(),
+                jurisdictionCode: string(value["jurisdictionCode"]),
+                stateName: string(value["stateName"]),
+                rulePackVersion: string(value["rulePackVersion"]),
+                ruleVerifiedOn: string(value["ruleVerifiedOn"]),
+                citation: string(value["citation"]),
+                sourceURL: string(value["sourceURL"]),
+                countedPlantTotal: value["countedPlants"] as? Int ?? 0,
+                stageCounts: stages,
+                retainedDryWeightGrams: number(value["retainedDryWeightGrams"]) ?? 0,
+                canopySquareMeters: number(value["canopySquareMeters"]) ?? 0,
+                plantLimit: value["plantLimit"] as? Int,
+                possessionLimitGrams: number(value["possessionLimitGrams"]),
+                canopyLimitSqM: number(value["canopyLimitSqM"]),
+                warningThreshold: number(value["warningThreshold"]) ?? 0.8,
+                cultivable: value["cultivable"] as? Bool ?? true,
+                countedStages: (value["countedStages"] as? [String] ?? [])
+                    .compactMap(PlantStage.init(rawValue:)),
+                countsClones: value["countsClones"] as? Bool ?? false,
+                limitScope: LimitScope(rawValue: string(value["limitScope"])) ?? .residence,
+                plantLevel: ComplianceLevel(rawValue: string(value["plantLevel"])) ?? .unknown,
+                possessionLevel: ComplianceLevel(rawValue: string(value["possessionLevel"])) ?? .unknown,
+                canopyLevel: ComplianceLevel(rawValue: string(value["canopyLevel"])) ?? .unknown,
+                overallLevel: ComplianceLevel(rawValue: string(value["overallLevel"])) ?? .unknown,
+                fingerprint: string(value["fingerprint"]),
+                isUpgradeBaseline: value["isUpgradeBaseline"] as? Bool ?? false,
+                schemaVersion: value["schemaVersion"] as? Int ?? ComplianceSnapshot.currentSchemaVersion
+            )
+            context.insert(snapshot)
+            count("ComplianceSnapshot")
+        }
+
+        for value in try arrays("ruleEvaluationEvents", in: root) {
+            let changes = (value["changedFields"] as? [[String: Any]] ?? []).map { item in
+                RuleFieldChange(
+                    field: string(item["field"]),
+                    kind: RuleFieldKind(rawValue: string(item["kind"])) ?? .text,
+                    previousNumber: number(item["previousNumber"]),
+                    newNumber: number(item["newNumber"]),
+                    previousText: string(item["previousText"]),
+                    newText: string(item["newText"])
+                )
+            }
+
+            let metrics = (value["metrics"] as? [[String: Any]] ?? []).map { item in
+                ComplianceMetricComparison(
+                    metric: string(item["metric"]),
+                    previousValue: number(item["previousValue"]) ?? 0,
+                    previousLimit: number(item["previousLimit"]),
+                    previousLevel: string(item["previousLevel"]),
+                    currentValue: number(item["currentValue"]) ?? 0,
+                    currentLimit: number(item["currentLimit"]),
+                    currentLevel: string(item["currentLevel"]),
+                    comparable: item["comparable"] as? Bool ?? false
+                )
+            }
+
+            let event = RuleEvaluationEvent(
+                eventID: UUID(uuidString: string(value["id"])) ?? UUID(),
+                priorSnapshotID: UUID(uuidString: string(value["priorSnapshotID"])) ?? UUID(),
+                priorPackVersion: string(value["priorPackVersion"]),
+                newPackVersion: string(value["newPackVersion"]),
+                priorRuleVerifiedOn: string(value["priorRuleVerifiedOn"]),
+                newRuleVerifiedOn: string(value["newRuleVerifiedOn"]),
+                jurisdictionCode: string(value["jurisdictionCode"]),
+                evaluatedAt: date(value["evaluatedAt"]) ?? Date(),
+                outcome: RuleEvaluationOutcome(rawValue: string(value["outcome"])) ?? .notComparable,
+                changedSummary: string(value["changedSummary"]),
+                changedFields: changes,
+                metrics: metrics,
+                citation: string(value["citation"]),
+                sourceURL: string(value["sourceURL"]),
+                acknowledgedAt: date(value["acknowledgedAt"]),
+                schemaVersion: value["schemaVersion"] as? Int ?? RuleEvaluationEvent.currentSchemaVersion
+            )
+            context.insert(event)
+            count("RuleEvaluationEvent")
         }
 
         // Journal

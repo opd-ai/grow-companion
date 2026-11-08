@@ -48,7 +48,11 @@ final class StoreBoot {
         let configuration = ModelConfiguration("GrowCompanion", schema: DataInventory.schema)
 
         do {
-            container = try ModelContainer(for: DataInventory.schema, configurations: [configuration])
+            container = try ModelContainer(
+                for: DataInventory.schema,
+                migrationPlan: CultivationMigrationPlan.self,
+                configurations: [configuration]
+            )
             failureMessage = nil
         } catch {
             container = nil
