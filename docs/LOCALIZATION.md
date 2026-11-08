@@ -74,6 +74,28 @@ Legal and rule text — `LegalCopy`, `RulePack` citations, rule summaries,
 jurisdiction data and the federal notice — stays English on purpose. Rule 4
 below, and the in-app notice, explain why.
 
+## Model copy is still English at runtime
+
+Found while verifying this batch. Copy held in a model property is a plain
+`String`, and `Text(stage.title)` treats a `String` as verbatim text, so those
+lines are never looked up: the catalog has them (`Vegetative`, the stage
+guidance paragraphs, room types, training methods and so on), but the app shows
+them in English.
+
+It reaches `Models/Enums.swift` (about 120 literals: stage names and guidance,
+plant origin, harvest disposition, room types, residence and experience, journal
+kinds, observation tags, training methods, drying phases and profiles, burp
+modes, fixtures and their guidance, sensor transports, breeder lineage),
+`Services/LightSchedule.swift`, `Services/GardenTimeline.swift` and the display
+copy in `Services/CareLog.swift` and `Services/CareDigest.swift` — and 81 view
+call sites read `.title`, `.subtitle` or `.guidance` off those models.
+
+The fix is mechanical: wrap each *display* literal in `String(localized:)` and
+leave `rawValue`, `symbolName`, file names and export keys alone. It belongs in
+its own pass, behind a test run: a mixed-language draft is worse to review than
+a consistently English one that says so, and the CI that would catch a slip is
+blocked by the account's billing lock.
+
 ## Glossary (use these exact words in later batches)
 
 | English | Spanish |
@@ -151,9 +173,12 @@ because Spanish supplies the whole noun instead.
 The interface draft is complete, variable strings and plurals included. What is
 left:
 
-1. **Legal and rule copy**, once the legal localisation review in
+1. **Model copy**, described above: the enum display properties still hand
+   `String` to `Text`, so the ~180 literals behind them need `String(localized:)`
+   and a test run before they change language.
+2. **Legal and rule copy**, once the legal localisation review in
    `docs/ROADMAP.md` 7.8 is signed off. Until then the English text and the
    notice in the verification-duty card are the correct state.
-2. **A translator review and a device pass** at the largest Dynamic Type size,
+3. **A translator review and a device pass** at the largest Dynamic Type size,
    because Spanish runs 15–25% longer and the build alone cannot prove nothing
    clips.

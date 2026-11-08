@@ -1158,6 +1158,10 @@ get no entry are placeholders (`%@ · %@`), separators and unit symbols (`·`,
 `–`, `W`, `g`), which read the same in both languages.
 `Grow CompanionTests/LocalizationCatalogTests.swift` reads the catalog and fails
 if a Spanish value changes a key's placeholders or a plural form is left out.
+Model-level copy — stage names, the stage-guidance paragraphs and the other enum
+labels the views read off a model and hand to `Text(String)` — is still English
+at runtime; that pass, and the reason it is separate, are recorded in
+`docs/LOCALIZATION.md`.
 Legal and rule text stays in English with an
 in-app note until the Spanish legal copy passes its own localisation review —
 the general legal review is complete (section 1.1), but it cleared the English
