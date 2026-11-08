@@ -23,19 +23,40 @@ incomplete catalog is safe and can grow batch by batch.
 
 ## What is covered
 
-Batch 1 (shipped): the shared vocabulary and chrome — 159 keys.
+The catalog holds 986 Spanish (Mexico) strings and is a complete draft of the
+app's user-facing copy, screen by screen:
 
-- Stage names and short names (`Seed`, `Veg`, `Flowering`, `Curing`, …) and the
-  seven stage guidance paragraphs.
-- Plant origin, harvest disposition and the three disposition explanations.
-- Room types, residence types, experience levels, journal kinds, observation
-  tags, strain types, training methods, drying phases, drying profiles, burp
-  modes, stem snap states, light fixtures and their cited guidance, sensor
-  transports, breeder lineage states.
-- App chrome: tab labels, `Save`, `Cancel`, `Done`, `Delete`, `Edit`, `Close`,
-  `Not recorded`, `Not specified`, `Metric`/`Imperial` and their unit summaries.
-- The Home screen's visible copy and its accessibility labels, plus the
-  verification-duty note that explains that legal text is still English.
+- the shared vocabulary: stage names, short names and the seven stage-guidance
+  paragraphs; plant origin; harvest disposition and explanations; room types;
+  residence and experience levels; journal kinds; observation tags; strain
+  types; training methods; drying phases and profiles; burp modes; stem snap;
+  light fixtures and their cited guidance; sensor transports; breeder lineage;
+- app chrome: tab labels, `Save`, `Cancel`, `Done`, `Delete`, `Edit`, `Close`,
+  `Not recorded`, `Not specified`, `OK`, `Continue`, `Retry`, units and their
+  summaries;
+- every screen: Home, onboarding and lock, plants and plant detail, care
+  (environment, feeding, calibration, reminders, feed schedules), journal,
+  garden timeline and photos, harvest, drying and curing, cycle comparison,
+  strains, equipment, compliance and rule-review interface labels, settings
+  (app lock, notifications, backup, export and delete, sharing, sync and
+  privacy, sensors, reports, widget), the grow calendar, Quick Log, calculators,
+  sharing, the education library and the service-level error and status copy.
+- the verification-duty card's notice that legal text is still English.
+
+A coverage check against the source finds 986 of 999 non-interpolated UI
+literals covered. The 13 that are not are deliberately left as source
+fragments: unit symbols (`g`, `oz`, `cm`, `W`), the arrow, separator and chevron
+glyphs, and short words (`dry`, `plants`, `No dry`) that the code assembles into
+a sentence at runtime.
+
+Interpolated strings (`Text("\(count) plants")`) are not in the catalog on
+purpose: their key is the compiled format pattern (`"%lld plants"`), not the
+source text. They fall back to English, and the next pass reads the patterns
+from the built `Localizable.strings` and adds them with plural variations.
+
+Legal and rule text — `LegalCopy`, `RulePack` citations, rule summaries,
+jurisdiction data and the federal notice — stays English on purpose. Rule 4
+below, and the in-app notice, explain why.
 
 ## Glossary (use these exact words in later batches)
 
@@ -96,24 +117,14 @@ are.
 
 ## Remaining batches
 
-Screens still in English, in the order they should be translated:
+The interface draft is complete. What is left:
 
-1. Onboarding (`OnboardingFlow`), lock overlay, store recovery.
-2. Care: room sections, environment/feed/calibration sheets, reminder editor,
-   feed schedules.
-3. Plants: add plant, plant detail, training, treatments, scouting.
-4. Journal, garden timeline, photo timeline and compare.
-5. Harvest: calendar, drying, curing, cycle comparison.
-6. Strains and equipment.
-7. Compliance and rules screens (interface labels only, see rule 4).
-8. Settings: app lock, notifications, backup, data controls, sharing, sync,
-   sensors, reports, widget.
-9. Quick Log, calculators, weekly recap, room comparison, performance report.
-10. Service copy: error messages in `ExportService`, `BackupService`,
-    `StoreBoot`, `AppLock`, notification titles and bodies, the widget's
-    `configurationDisplayName` and `description`.
-
-The interpolated strings from batch 1's files that still need the compiled
-format keys: plant and room counts, "N of M plants counted", the compliance
-level sentences, `Format.dayCount` and every `Text` that interpolates a
-record's own name.
+1. **Interpolated strings.** Read the compiled `es.lproj/Localizable.strings`
+   from a build, take the format patterns (`"%lld plants"`, `"target %@"`, …)
+   and add each to the catalog with Spanish values and plural variations.
+2. **Legal and rule copy**, once the legal localisation review in
+   `docs/ROADMAP.md` 7.8 is signed off. Until then the English text and the
+   notice in the verification-duty card are the correct state.
+3. **A translator review and a device pass** at the largest Dynamic Type size,
+   because Spanish runs 15–25% longer and the build alone cannot prove nothing
+   clips.

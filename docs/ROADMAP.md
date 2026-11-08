@@ -1083,17 +1083,19 @@ equivalent.
 **What ships.** A full Spanish (Mexico) localization of interface copy, units,
 dates and plural counts, and a data-table alternative for every chart and ring.
 
-**Status: in progress.** The engineering half is in the app: numbers,
-weights, areas, temperatures, volumes, percentages and dates come from the
-device locale's formatters, and every chart and the compliance ring has a text
-table equivalent reachable with VoiceOver. The Spanish copy has started: a
-review-ready first batch of 159 keys (the shared vocabulary, app chrome and the
-Home screen) ships in `Resources/Localizable.xcstrings`, and the mechanism is
-verified — an ordinary build produces `es.lproj/Localizable.strings` with no
-project-file change. The remaining screens are listed, with the glossary and the
-rules for later batches, in `docs/LOCALIZATION.md`. Legal and rule text stays in
-English with an in-app note while the app runs in Spanish, until the legal
-localisation review exists.
+**Status: shipped as a draft for review.** The engineering half is in the app:
+numbers, weights, areas, temperatures, volumes, percentages and dates come from
+the device locale's formatters, and every chart and the compliance ring has a
+text table equivalent reachable with VoiceOver. The Spanish copy is a complete
+draft: 986 strings cover every user-facing screen, the shared vocabulary, the
+chrome and the service-level error copy, and the mechanism is verified — an
+ordinary build produces `es.lproj/Localizable.strings` with no project-file
+change. A coverage check finds 986 of 999 non-interpolated UI literals covered;
+the 13 leftovers are unit symbols and glyphs the code assembles at runtime.
+Interpolated strings fall back to English until their compiled format keys and
+plural variations are added. Legal and rule text stays in English with an
+in-app note, as this section requires, until the legal localisation review
+exists. See `docs/LOCALIZATION.md` for the glossary, the rules and what is left.
 
 **Shipped:** `Services/Format.swift` renders numbers through a locale-aware
 `NumberFormatter` (a Spanish device sees `24,5`, an English one `24.5`) and dates
@@ -1121,7 +1123,7 @@ table builders are pure functions with tests. See
 | --- | --- | --- |
 | v2.1 | Garden timeline, Quick Log | None; both read existing records. Shipped. |
 | v2.2 | Photo timeline and compare, PDF grow report | Verified export/backup and delete coverage (shipped). Both shipped. |
-| v2.3 | Widgets, calendar and per-cycle goals (shipped); locale formatters and chart data tables (shipped); Spanish copy (open) | Widget extension target and the schema V3 migration are in place; the Spanish text needs the review in 7.8 |
+| v2.3 | Widgets, calendar and per-cycle goals (shipped); locale formatters, chart data tables and the Spanish interface draft (shipped); interpolated strings and legal copy (open) | Widget extension target and the schema V3 migration are in place; the remaining text needs the review in 7.8 |
 
 Nothing in this section adds sharing, community, sync, sensor firmware, photo
 analysis or any transaction. Those remain blocked behind the reviews recorded in
