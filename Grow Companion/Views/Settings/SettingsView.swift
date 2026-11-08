@@ -170,7 +170,7 @@ struct SettingsView: View {
                 SettingsLinkRow(
                     icon: "person.badge.shield.checkmark",
                     title: "Sharing",
-                    value: "Not available in this version"
+                    value: "Scoped, encrypted share files"
                 )
             }
             .buttonStyle(.plain)

@@ -150,9 +150,14 @@ struct SyncPrivacyView: View {
             bullet("Cloud sync, encrypted or otherwise")
             bullet("Accounts, sign-in or device pairing")
             bullet("Conflict resolution between devices")
-            bullet("Sharing records with another person")
+            bullet("Group or community sharing")
 
-            Text("If any of this is added, it will be an explicit opt-in and this screen will describe it before the feature ships.")
+            Text("A protected grow can be shared with one person from Sharing: it is a file you send yourself, and their copy is read-only. There is still no server, no account and no live link between devices.")
+                .font(Theme.sans(12))
+                .foregroundStyle(Theme.tertiaryInk)
+                .fixedSize(horizontal: false, vertical: true)
+
+            Text("If cloud sync is added, it will be an explicit opt-in and this screen will describe it before the feature ships.")
                 .font(Theme.sans(12))
                 .foregroundStyle(Theme.tertiaryInk)
                 .fixedSize(horizontal: false, vertical: true)

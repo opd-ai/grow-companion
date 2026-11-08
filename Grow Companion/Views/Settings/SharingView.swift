@@ -2,29 +2,58 @@
 //  SharingView.swift
 //  Grow Companion
 //
-//  Sharing is not available in this version: there is no recipient identity,
-//  no encrypted transport and no access model. This screen says so plainly and
-//  lets the grower remove any local share notes left by earlier builds. It must
-//  never present a local record as a working grant of access.
+//  Protected, recipient-scoped sharing: a share code identifies this device, a
+//  sealed file carries only the chosen categories, and a received file is opened
+//  read-only after its sender is verified. There is no server in this flow.
 //
 
 import SwiftUI
 import SwiftData
+import UniformTypeIdentifiers
+import UIKit
 
 struct SharingView: View {
     @Environment(\.modelContext) private var context
-    @Query(sort: \ShareGrant.createdAt, order: .reverse) private var grants: [ShareGrant]
 
-    @State private var showRemoveConfirmation = false
-    @State private var showRemoved = false
+    @Query(sort: \ShareGrant.createdAt, order: .reverse) private var grants: [ShareGrant]
+    @Query(sort: \Room.createdAt) private var rooms: [Room]
+    @Query(sort: \Plant.plantedAt, order: .reverse) private var plants: [Plant]
+    @Query(sort: \GrowProfile.createdAt, order: .reverse) private var profiles: [GrowProfile]
+
+    @AppStorage(SettingsKey.warningThreshold) private var warningThreshold: Double = 0.8
+
+    private let service = SharePackageService()
+
+    @State private var shareCode: String?
+    @State private var copied = false
+    @State private var removingCode = false
+    @State private var showingCreate = false
+    @State private var showingImporter = false
+    @State private var showingOpenSheet = false
+    @State private var pendingData: Data?
+    @State private var revoking: ShareGrant?
+    @State private var errorMessage: String?
+    @State private var showingError = false
+
+    private var source: SharePayloadBuilder.Source {
+        SharePayloadBuilder.Source(
+            profile: profiles.first,
+            rooms: rooms,
+            plants: plants,
+            rule: profiles.first?.rule,
+            warningThreshold: warningThreshold
+        )
+    }
 
     var body: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 20) {
                 header
-                unavailableCard
+                shareCodeCard
+                createCard
+                openCard
                 if !grants.isEmpty {
-                    localRecordsCard
+                    sharesCard
                 }
             }
             .padding(20)
@@ -34,70 +63,179 @@ struct SharingView: View {
         .background(Theme.background)
         .navigationTitle("")
         .navigationBarTitleDisplayMode(.inline)
+        .task { refreshCode() }
+        .sheet(isPresented: $showingCreate) {
+            CreateShareView(source: source) { copied = false }
+        }
+        .sheet(isPresented: $showingOpenSheet) {
+            if let pendingData {
+                OpenShareSheet(data: pendingData)
+            }
+        }
+        .fileImporter(
+            isPresented: $showingImporter,
+            allowedContentTypes: [.data],
+            allowsMultipleSelection: false
+        ) { result in
+            handleImport(result)
+        }
         .confirmationDialog(
-            "Remove the saved sharing records?",
-            isPresented: $showRemoveConfirmation,
+            "Revoke this share?",
+            isPresented: Binding(
+                get: { revoking != nil },
+                set: { if !$0 { revoking = nil } }
+            ),
             titleVisibility: .visible
         ) {
-            Button("Remove local records", role: .destructive) {
-                removeShareData()
+            Button("Revoke access", role: .destructive) {
+                if let revoking { revoke(revoking) }
+                revoking = nil
             }
-            Button("Keep them", role: .cancel) {}
+            Button("Keep share", role: .cancel) { revoking = nil }
         } message: {
-            Text("These are local notes only. Removing them changes nothing on another person's device, because nothing was ever shared.")
+            Text("This records the revocation here. A file you already sent can still be opened by its recipient until it expires.")
         }
-        .alert("Local records removed", isPresented: $showRemoved) {
+        .alert("Sharing problem", isPresented: $showingError) {
             Button("OK", role: .cancel) {}
         } message: {
-            Text("The saved sharing notes have been removed from this device.")
+            Text(errorMessage ?? "")
         }
     }
+
+    // MARK: Sections
 
     private var header: some View {
         VStack(alignment: .leading, spacing: 6) {
             Text("Sharing")
                 .font(Theme.serif(30))
                 .foregroundStyle(Theme.ink)
-            Text("Not available in this version.")
-                .font(Theme.sans(15, weight: .semibold))
-                .foregroundStyle(Theme.amber)
+            Text("Give one person a scoped, read-only view. Files are encrypted on this device and handed over by you.")
+                .font(Theme.sans(13))
+                .foregroundStyle(Theme.secondaryInk)
+                .fixedSize(horizontal: false, vertical: true)
         }
     }
 
-    private var unavailableCard: some View {
+    private var shareCodeCard: some View {
         VStack(alignment: .leading, spacing: 12) {
-            SectionHeader("Why sharing is not here", subtitle: "Nothing you record is sent to anyone")
+            SectionHeader("Your share code", subtitle: "Send it to the person you share with")
 
-            Text("Sharing a grow view would let another person see records about you and your home. That needs a recipient identity, a secure encrypted transport, clear expiry and revocation, and a legal and privacy review before it can ship.")
-            .font(Theme.sans(13))
-            .foregroundStyle(Theme.secondaryInk)
-            .fixedSize(horizontal: false, vertical: true)
+            if let shareCode {
+                Text(shareCode)
+                    .font(.system(size: 12, design: .monospaced))
+                    .foregroundStyle(Theme.ink)
+                    .textSelection(.enabled)
+                    .fixedSize(horizontal: false, vertical: true)
+                    .padding(12)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .background(
+                        RoundedRectangle(cornerRadius: 12, style: .continuous)
+                            .fill(Theme.surfaceSunken)
+                    )
+                    .accessibilityLabel("Your share code")
 
-            Text("None of that exists today. Grow Companion has no server, no account and no way to send a record to a consultant or a peer.")
+                HStack(spacing: 10) {
+                    SecondaryButton(copied ? "Copied" : "Copy", systemImage: copied ? "checkmark" : "doc.on.doc") {
+                        UIPasteboard.general.string = shareCode
+                        copied = true
+                    }
+
+                    SecondaryButton("Remove", systemImage: "trash") {
+                        removingCode = true
+                    }
+                }
+
+                Text("This code is public information, not a secret. It tells another device how to address a share to you and how to verify what you send.")
+                    .font(Theme.sans(11))
+                    .foregroundStyle(Theme.tertiaryInk)
+                    .fixedSize(horizontal: false, vertical: true)
+            } else {
+                Text("Create a key pair on this device to get a share code. The private half stays in the Keychain and is never sent anywhere.")
+                    .font(Theme.sans(13))
+                    .foregroundStyle(Theme.secondaryInk)
+                    .fixedSize(horizontal: false, vertical: true)
+
+                PrimaryButton("Create my share code", systemImage: "key") {
+                    createCode()
+                }
+            }
+        }
+        .growCard()
+        .confirmationDialog(
+            "Remove your share code?",
+            isPresented: $removingCode,
+            titleVisibility: .visible
+        ) {
+            Button("Remove share code", role: .destructive) { removeCode() }
+            Button("Keep it", role: .cancel) {}
+        } message: {
+            Text("Shares addressed to this code can no longer be opened on this device. Your records are untouched.")
+        }
+    }
+
+    private var createCard: some View {
+        VStack(alignment: .leading, spacing: 10) {
+            SectionHeader("Create a share", subtitle: "Choose scope, categories and expiry")
+            Text("You pick the rooms, plants and categories. The cultivation journal, photos and your county are never included.")
                 .font(Theme.sans(13))
                 .foregroundStyle(Theme.secondaryInk)
                 .fixedSize(horizontal: false, vertical: true)
 
-            Text("Personal notes, location and the cultivation journal are never shareable, and will stay excluded from any future sharing design.")
-                .font(Theme.sans(12))
-                .foregroundStyle(Theme.tertiaryInk)
-                .fixedSize(horizontal: false, vertical: true)
+            PrimaryButton(
+                "Choose scope and prepare",
+                systemImage: "lock.rectangle",
+                isEnabled: shareCode != nil
+            ) {
+                showingCreate = true
+            }
         }
         .growCard()
     }
 
-    private var localRecordsCard: some View {
+    private var openCard: some View {
+        VStack(alignment: .leading, spacing: 10) {
+            SectionHeader("Open a shared grow", subtitle: "Read-only")
+            Text("Open a file someone sent you. You will be asked for their share code so the app can verify who created it before showing anything.")
+                .font(Theme.sans(13))
+                .foregroundStyle(Theme.secondaryInk)
+                .fixedSize(horizontal: false, vertical: true)
+
+            SecondaryButton("Open a shared file", systemImage: "folder") {
+                showingImporter = true
+            }
+        }
+        .growCard()
+    }
+
+    private var sharesCard: some View {
         VStack(alignment: .leading, spacing: 12) {
-            SectionHeader("Saved local notes", subtitle: "From an earlier build — they grant no access")
+            SectionHeader("Shares you created", subtitle: "Records on this device only")
 
             ForEach(grants) { grant in
-                VStack(alignment: .leading, spacing: 4) {
-                    Text(grant.recipientName.isEmpty ? "Unnamed entry" : grant.recipientName)
-                        .font(Theme.sans(15, weight: .semibold))
-                        .foregroundStyle(Theme.ink)
-                    Text("Saved on this device only · nothing was shared")
-                        .font(Theme.sans(12))
-                        .foregroundStyle(Theme.secondaryInk)
+                VStack(alignment: .leading, spacing: 6) {
+                    HStack(alignment: .top) {
+                        VStack(alignment: .leading, spacing: 3) {
+                            Text(grant.recipientName.isEmpty ? "Unnamed recipient" : grant.recipientName)
+                                .font(Theme.sans(15, weight: .semibold))
+                                .foregroundStyle(Theme.ink)
+                            Text("\(grant.scopeSummary) · expires \(Format.shortDate(grant.expiresAt))")
+                                .font(Theme.sans(12))
+                                .foregroundStyle(Theme.secondaryInk)
+                                .fixedSize(horizontal: false, vertical: true)
+                        }
+                        Spacer(minLength: 8)
+                        Pill(
+                            text: statusTitle(for: grant),
+                            systemImage: grant.isActive ? "checkmark.shield" : "clock",
+                            tint: grant.isActive ? Theme.primary : Theme.secondaryInk,
+                            fill: grant.isActive ? Theme.sageSoft : Theme.surfaceSunken
+                        )
+                    }
+
+                    if grant.isActive {
+                        Button("Revoke access", role: .destructive) { revoking = grant }
+                            .font(Theme.sans(13, weight: .semibold))
+                    }
                 }
                 .frame(maxWidth: .infinity, alignment: .leading)
                 .padding(.vertical, 8)
@@ -107,17 +245,75 @@ struct SharingView: View {
                 }
             }
 
-            SecondaryButton("Remove these local records", systemImage: "trash") {
-                showRemoveConfirmation = true
-            }
+            Text("Revoking records the change here. A file that was already handed over cannot be recalled.")
+                .font(Theme.sans(11))
+                .foregroundStyle(Theme.tertiaryInk)
+                .fixedSize(horizontal: false, vertical: true)
         }
         .growCard()
     }
 
-    private func removeShareData() {
-        _ = try? context.delete(model: ShareAccessLog.self)
-        _ = try? context.delete(model: ShareGrant.self)
+    // MARK: Actions
+
+    private func statusTitle(for grant: ShareGrant) -> String {
+        if grant.isRevoked { return "Revoked" }
+        if grant.isExpired { return "Expired" }
+        return "Active"
+    }
+
+    private func refreshCode() {
+        guard let identity = try? DeviceKeyStore.existingIdentity() else {
+            shareCode = nil
+            return
+        }
+        shareCode = ShareCode.encode(identity)
+    }
+
+    private func createCode() {
+        do {
+            let identity = try DeviceKeyStore.identity()
+            shareCode = ShareCode.encode(identity)
+        } catch {
+            show(error)
+        }
+    }
+
+    private func removeCode() {
+        DeviceKeyStore.deleteAll()
+        shareCode = nil
+        copied = false
+    }
+
+    private func revoke(_ grant: ShareGrant) {
+        grant.revokedAt = Date()
+        context.insert(ShareAccessLog(action: "Revoked", grant: grant))
         try? context.save()
-        showRemoved = true
+    }
+
+    private func handleImport(_ result: Result<[URL], Error>) {
+        switch result {
+        case .success(let urls):
+            guard let url = urls.first else { return }
+            let accessed = url.startAccessingSecurityScopedResource()
+            defer { if accessed { url.stopAccessingSecurityScopedResource() } }
+
+            do {
+                pendingData = try Data(contentsOf: url)
+                showingOpenSheet = true
+            } catch {
+                showError("The file could not be read.")
+            }
+        case .failure(let error):
+            show(error)
+        }
+    }
+
+    private func show(_ error: Error) {
+        showError(error.localizedDescription)
+    }
+
+    private func showError(_ message: String) {
+        errorMessage = message
+        showingError = true
     }
 }
