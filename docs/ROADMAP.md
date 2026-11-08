@@ -40,6 +40,7 @@ import so location metadata never survives.
 | Face ID lock, privacy screen, export and delete-all | Shipped | `Services/AppLock.swift`, `Services/PrivacyCover.swift`, `Views/Settings/` |
 | Privacy review and remediation of local security findings | Shipped | `docs/PRIVACY_REVIEW.md`, protected local services |
 | Immutable compliance history and rule-change review | Shipped locally; release gates open | `Models/ComplianceSnapshot.swift`, `Models/RuleEvaluationEvent.swift`, `Services/ComplianceHistory.swift`, `Views/Compliance/` |
+| Garden timeline and Quick Log | Shipped | `Services/GardenTimeline.swift`, `Views/Garden/GardenTimelineView.swift`, `Services/QuickLog.swift`, `Views/QuickLog/QuickLogSheet.swift` |
 
 The shipped navigation and current feature surfaces are recorded in section 6.2.
 Future cloud, hardware, extension and community features remain explicitly
@@ -794,6 +795,7 @@ TAB 1: HOME
 ├── Rooms → room detail (environment, feeding, calibration, reminders,
 │            light schedule, scouting, treatments and override log)
 ├── Weekly recap, room comparison, cycle archive and harvest calendar shortcuts
+├── Quick Log (water/feed, reading, note, stage) and the garden timeline
 └── Latest journal entries
 
 TAB 2: JOURNAL
@@ -884,6 +886,11 @@ calibrations, light-schedule changes, training, treatments, scouting checks,
 drying checks and burps. Day-grouped, with filters for room, plant and event
 type, and a tap that opens the source record.
 
+**Shipped:** `Services/GardenTimeline.swift` merges all eleven record types as
+one pure, date-ordered list with room and plant attached; the view reads them
+through live queries, filters with local state only, and links each row to its
+journal entry, plant or room. See `docs/GARDEN_TIMELINE_AND_QUICK_LOG.md`.
+
 **Acceptance criteria.**
 
 - Every stored event type that carries a timestamp appears exactly once, in date
@@ -906,6 +913,13 @@ the main reason logs go incomplete.
 most common actions (water/feed, environment reading, journal note, stage
 change), remembers the last room and plant, pre-fills the last values as
 editable defaults, and confirms in one step.
+
+**Shipped:** `Views/QuickLog/QuickLogSheet.swift` and `Services/QuickLog.swift`
+implement the sheet, prefill, remembered room/plant and the single confirmed
+write. A stage change shows the counted total after the change, and a change
+that would cross the jurisdiction's plant limit is blocked with the counting
+method and citation; the plant detail one-tap advance runs the same check. See
+`docs/GARDEN_TIMELINE_AND_QUICK_LOG.md`.
 
 **Acceptance criteria.**
 
@@ -1027,7 +1041,7 @@ dates and plural counts, and a data-table alternative for every chart and ring.
 
 | Release | Features | Dependencies |
 | --- | --- | --- |
-| v2.1 | Garden timeline, Quick Log | None; both read existing records |
+| v2.1 | Garden timeline, Quick Log | None; both read existing records. Shipped. |
 | v2.2 | Photo timeline and compare, PDF grow report | Verified export/backup and delete coverage (shipped) |
 | v2.3 | Widgets, calendar, per-cycle goals, Spanish localisation | Widget extension target; a schema migration for goals; localisation review |
 
