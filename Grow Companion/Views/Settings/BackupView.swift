@@ -20,9 +20,13 @@ struct BackupView: View {
     @Query(sort: \CareReminder.nextDueDate) private var reminders: [CareReminder]
     @Query(sort: \DryingSession.startedAt, order: .reverse) private var dryingSessions: [DryingSession]
     @Query(sort: \GrowProfile.createdAt, order: .reverse) private var profiles: [GrowProfile]
+    @Query(sort: \FeedSchedule.name) private var feedSchedules: [FeedSchedule]
+    @Query(sort: \CycleArchive.completedAt, order: .reverse) private var cycleArchives: [CycleArchive]
+    @Query(sort: \SensorDevice.name) private var sensors: [SensorDevice]
+    @Query(sort: \ShareGrant.createdAt, order: .reverse) private var shareGrants: [ShareGrant]
 
-    @AppStorage("lastBackupDate") private var lastBackupDate = ""
-    @AppStorage("lastBackupIncludesPhotos") private var lastBackupIncludesPhotos = false
+    @AppStorage(SettingsKey.lastBackupDate) private var lastBackupDate = ""
+    @AppStorage(SettingsKey.lastBackupIncludesPhotos) private var lastBackupIncludesPhotos = false
     @State private var includePhotos = true
     @State private var showingCreatePassword = false
     @State private var showingRestorePassword = false
@@ -32,8 +36,29 @@ struct BackupView: View {
     @State private var backupDocument: ExportDocument?
     @State private var restoreData: Data?
     @State private var restorePassword = ""
+    @State private var restoreSummary: ExportService.BackupSummary?
     @State private var errorMessage = ""
     @State private var showingError = false
+    @State private var resultTitle = ""
+    @State private var resultMessage = ""
+    @State private var showingResult = false
+
+    private var snapshot: ExportSnapshot {
+        ExportSnapshot(
+            profile: profiles.first,
+            rooms: rooms,
+            plants: plants,
+            strains: strains,
+            reminders: reminders,
+            dryingSessions: dryingSessions,
+            journal: journal,
+            feedSchedules: feedSchedules,
+            cycleArchives: cycleArchives,
+            sensors: sensors,
+            shareGrants: shareGrants,
+            counts: DataInventory.counts(in: context)
+        )
+    }
 
     var body: some View {
         ScrollView {
@@ -80,13 +105,29 @@ struct BackupView: View {
             Button("Restore and replace", role: .destructive) { restore() }
             Button("Cancel", role: .cancel) {}
         } message: {
-            Text("Restoring replaces the records currently on this device. This cannot be undone.")
+            Text(restoreWarning)
         }
         .alert("Backup problem", isPresented: $showingError) {
             Button("OK", role: .cancel) {}
         } message: {
             Text(errorMessage)
         }
+        .alert(resultTitle, isPresented: $showingResult) {
+            Button("OK", role: .cancel) {}
+        } message: {
+            Text(resultMessage)
+        }
+    }
+
+    private var restoreWarning: String {
+        guard let restoreSummary else {
+            return "Restoring replaces the records currently on this device. This cannot be undone."
+        }
+        let photos = restoreSummary.includesPhotos ? " with journal photos" : ""
+        let manifest = restoreSummary.version >= 2
+            ? "\(restoreSummary.totalRecords) records"
+            : "an older backup with no record manifest"
+        return "This backup holds \(manifest) (format version \(restoreSummary.version)\(photos)). Restoring replaces the records currently on this device and cannot be undone."
     }
 
     private var header: some View {
@@ -123,7 +164,7 @@ struct BackupView: View {
     private var createCard: some View {
         VStack(alignment: .leading, spacing: 14) {
             Text("Create a backup").font(Theme.serif(26)).foregroundStyle(Theme.ink)
-            backupRow(icon: "doc.text", title: "Grow records", detail: "Always included") { Image(systemName: "checkmark.circle.fill").foregroundStyle(Theme.primary) }
+            backupRow(icon: "doc.text", title: "Grow records", detail: "Every record type the app stores, with a count manifest") { Image(systemName: "checkmark.circle.fill").foregroundStyle(Theme.primary) }
             Divider().overlay(Theme.hairline)
             HStack(spacing: 12) {
                 Image(systemName: "photo").foregroundStyle(Theme.primary).frame(width: 32, height: 32).background(Circle().fill(Theme.sageSoft))
@@ -132,7 +173,10 @@ struct BackupView: View {
                     Text("Include photos from your journal").font(Theme.sans(12)).foregroundStyle(Theme.secondaryInk)
                 }
                 Spacer()
-                Toggle("", isOn: $includePhotos).labelsHidden().tint(Theme.primary)
+                Toggle("", isOn: $includePhotos)
+                    .labelsHidden()
+                    .tint(Theme.primary)
+                    .accessibilityLabel("Include journal photos")
             }
             Divider().overlay(Theme.hairline)
             backupRow(icon: "lock", title: "Password protection", detail: "Secure your backup with a password") { HStack(spacing: 6) { Text("Required").font(Theme.sans(13)).foregroundStyle(Theme.secondaryInk); Image(systemName: "chevron.right").foregroundStyle(Theme.tertiaryInk) } }
@@ -144,8 +188,9 @@ struct BackupView: View {
     private var restoreCard: some View {
         VStack(alignment: .leading, spacing: 12) {
             Text("Restore").font(Theme.serif(26)).foregroundStyle(Theme.ink)
-            Text("Restoring replaces the records currently on this device.")
+            Text("Restoring replaces the records currently on this device. The backup is checked in a temporary store before anything here is touched.")
                 .font(Theme.sans(13)).foregroundStyle(Theme.secondaryInk)
+                .fixedSize(horizontal: false, vertical: true)
             SecondaryButton("Choose backup from Files", systemImage: "folder") { showingImporter = true }
         }
         .growCard()
@@ -165,31 +210,50 @@ struct BackupView: View {
 
     private func createBackup(password: String) {
         do {
-            let data = try ExportService.buildBackup(profile: profiles.first, rooms: rooms, plants: plants, strains: strains, reminders: reminders, dryingSessions: dryingSessions, journal: journal, includePhotos: includePhotos, password: password)
+            let data = try ExportService.buildBackup(
+                snapshot: snapshot,
+                includeJournal: true,
+                includePhotos: includePhotos,
+                password: password
+            )
             backupDocument = ExportDocument(data: data)
             lastBackupDate = Format.shortDate(Date())
             lastBackupIncludesPhotos = includePhotos
             showingExporter = true
-        } catch { showError("The protected backup could not be created.") }
+        } catch {
+            showError(error.localizedDescription)
+        }
     }
 
     private func validateRestore(password: String) {
         guard let restoreData else { return }
         do {
-            _ = try ExportService.decodeBackup(restoreData, password: password)
+            let root = try ExportService.decodeBackup(restoreData, password: password)
+            try BackupService.validate(root)
+            restoreSummary = try ExportService.summarize(root)
             restorePassword = password
             showingRestoreWarning = true
-        } catch { showError("That password is incorrect or the backup is invalid.") }
+        } catch {
+            showError(error.localizedDescription)
+        }
     }
 
     private func restore() {
         guard let restoreData, !restorePassword.isEmpty else { return }
-        defer { restorePassword = "" }
+        defer {
+            restorePassword = ""
+            restoreSummary = nil
+        }
         do {
             let root = try ExportService.decodeBackup(restoreData, password: restorePassword)
-            try BackupService.restore(root, context: context, appLock: appLock)
+            let report = try BackupService.restore(root, context: context, appLock: appLock)
             self.restoreData = nil
-        } catch { showError("The backup could not be restored. Your current records were not changed safely.") }
+            resultTitle = "Backup restored"
+            resultMessage = "\(report.totalInserted) records were restored from backup version \(report.backupVersion)."
+            showingResult = true
+        } catch {
+            showError(error.localizedDescription)
+        }
     }
 
     private func showError(_ message: String) {

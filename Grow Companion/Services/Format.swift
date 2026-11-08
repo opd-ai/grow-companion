@@ -44,6 +44,26 @@ enum SettingsKey {
     static let careDigestEnabled = "careDigestEnabled"
     static let careDigestTime = "careDigestTime"
     static let careDigestRoomIDs = "careDigestRoomIDs"
+
+    static let lastBackupDate = "lastBackupDate"
+    static let lastBackupIncludesPhotos = "lastBackupIncludesPhotos"
+
+    /// Every preference the app writes, so delete-all can clear all of them.
+    static let all: [String] = [
+        unitSystem,
+        warningThreshold,
+        appLockEnabled,
+        appLockGrace,
+        genericNotificationContent,
+        quietHoursEnabled,
+        quietHoursStart,
+        quietHoursEnd,
+        careDigestEnabled,
+        careDigestTime,
+        careDigestRoomIDs,
+        lastBackupDate,
+        lastBackupIncludesPhotos
+    ]
 }
 
 enum Format {

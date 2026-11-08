@@ -3,7 +3,9 @@
 //  Grow Companion
 //
 //  Export the records the grower chooses to a ZIP in the Files app, and the
-//  double-confirmed route to erasing everything on the device.
+//  double-confirmed route to erasing everything on the device. The manifest is
+//  built from the same model inventory that export and delete walk, so what the
+//  screen says it will take or remove is what actually happens.
 //
 
 import SwiftUI
@@ -22,13 +24,18 @@ struct DataControlsView: View {
     @Query(sort: \CareReminder.nextDueDate) private var reminders: [CareReminder]
     @Query(sort: \DryingSession.startedAt, order: .reverse) private var dryingSessions: [DryingSession]
     @Query(sort: \GrowProfile.createdAt, order: .reverse) private var profiles: [GrowProfile]
-    @Query private var scoutingChecks: [ScoutingCheck]
+    @Query(sort: \FeedSchedule.name) private var feedSchedules: [FeedSchedule]
+    @Query(sort: \CycleArchive.completedAt, order: .reverse) private var cycleArchives: [CycleArchive]
+    @Query(sort: \SensorDevice.name) private var sensors: [SensorDevice]
+    @Query(sort: \ShareGrant.createdAt, order: .reverse) private var shareGrants: [ShareGrant]
 
     @State private var includeJournal = false
     @State private var includePhotos = false
     @State private var protectExport = false
     @State private var password = ""
     @State private var confirmPassword = ""
+
+    @State private var recordCounts: [String: Int] = [:]
 
     @State private var exportDocument: ExportDocument?
     @State private var exportContentType: UTType = .zip
@@ -39,11 +46,19 @@ struct DataControlsView: View {
     @State private var exportResultMessage = ""
     @State private var showingExportResult = false
 
+    @State private var deletionResultTitle = ""
+    @State private var deletionResultMessage = ""
+    @State private var showingDeletionResult = false
+
     @State private var showingFirstConfirm = false
     @State private var showingEraseSheet = false
 
     private var photoCount: Int {
         journal.filter { $0.photoFileName != nil }.count
+    }
+
+    private var totalRecords: Int {
+        DataInventory.total(of: recordCounts)
     }
 
     private var canExport: Bool {
@@ -76,6 +91,7 @@ struct DataControlsView: View {
         .background(Theme.background)
         .navigationTitle("Export and delete")
         .navigationBarTitleDisplayMode(.inline)
+        .task { refreshCounts() }
         .onChange(of: includeJournal) { _, included in
             if !included { includePhotos = false }
         }
@@ -88,7 +104,7 @@ struct DataControlsView: View {
             switch result {
             case .success:
                 exportResultTitle = "Export saved"
-                exportResultMessage = "The archive is in the Files app under the name you chose."
+                exportResultMessage = "The archive is in the Files app under the name you chose. Files copies are outside this app and are not removed by delete-all."
             case .failure(let error):
                 exportResultTitle = "Export failed"
                 exportResultMessage = error.localizedDescription
@@ -99,6 +115,11 @@ struct DataControlsView: View {
             Button("OK", role: .cancel) {}
         } message: {
             Text(exportResultMessage)
+        }
+        .alert(deletionResultTitle, isPresented: $showingDeletionResult) {
+            Button("OK", role: .cancel) {}
+        } message: {
+            Text(deletionResultMessage)
         }
         .confirmationDialog(
             "Delete all data?",
@@ -125,24 +146,18 @@ struct DataControlsView: View {
         VStack(alignment: .leading, spacing: 14) {
             SectionHeader("Export", subtitle: "A copy you keep")
 
-            Text("The archive holds a JSON file with everything in it, CSV files you can open in a spreadsheet, and a photos folder when the journal is included.")
+            Text("The archive holds a JSON file with a record-count manifest, CSV files you can open in a spreadsheet, and a photos folder when the journal is included.")
                 .font(Theme.sans(13))
                 .foregroundStyle(Theme.secondaryInk)
                 .fixedSize(horizontal: false, vertical: true)
 
-            VStack(spacing: 10) {
-                InfoRow(label: "Profile, rooms, plants and logs", value: "Always included")
-                InfoRow(label: "Plants", value: "\(plants.count)")
-                InfoRow(label: "Rooms", value: "\(rooms.count)")
-                InfoRow(label: "Strains", value: "\(strains.count)")
-                InfoRow(label: "Journal entries", value: "\(journal.count)")
-            }
-            .growCard(fill: Theme.surfaceSunken, padding: 14)
+            manifest
 
             Toggle(isOn: $includeJournal) {
-                label("Journal entries", subtitle: "Notes, observations and the photos attached to them")
+                label("Cultivation journal entries", subtitle: "Notes, observations and the photos attached to them")
             }
             .tint(Theme.primary)
+            .accessibilityHint("Adds the cultivation journal to the export")
 
             Toggle(isOn: $includePhotos) {
                 label("Journal photos", subtitle: "Full-size images, without any location data")
@@ -150,6 +165,7 @@ struct DataControlsView: View {
             .tint(Theme.primary)
             .disabled(!includeJournal)
             .opacity(includeJournal ? 1 : 0.5)
+            .accessibilityHint("Adds the imported journal photos to the export")
 
             Divider().overlay(Theme.hairline)
 
@@ -157,6 +173,7 @@ struct DataControlsView: View {
                 label("Password protection", subtitle: "Encrypts the archive with AES-256 and a password you choose")
             }
             .tint(Theme.primary)
+            .accessibilityHint("Encrypts the archive with AES-256 and a password")
 
             if protectExport {
                 SecureField("Password (6 characters or more)", text: $password)
@@ -198,8 +215,48 @@ struct DataControlsView: View {
             PrimaryButton("Create export", systemImage: "square.and.arrow.up", isEnabled: canExport) {
                 createExport()
             }
+            .accessibilityLabel("Export cultivation records")
+            .accessibilityHint("Creates the archive with the categories and counts shown above")
         }
         .growCard()
+    }
+
+    private var manifest: some View {
+        VStack(alignment: .leading, spacing: 10) {
+            HStack(spacing: 6) {
+                Text("Record manifest")
+                    .font(Theme.sans(11, weight: .semibold))
+                    .textCase(.uppercase)
+                    .foregroundStyle(Theme.secondaryInk)
+                Spacer(minLength: 8)
+                Text("format v\(ExportService.currentFormatVersion)")
+                    .font(Theme.sans(11, weight: .semibold))
+                    .foregroundStyle(Theme.tertiaryInk)
+            }
+
+            InfoRow(label: "Records included", value: "\(totalRecords)")
+            InfoRow(label: "Journal entries", value: "\(journal.count)")
+            InfoRow(label: "Journal photos", value: "\(photoCount)")
+
+            let entries = DataInventory.nonEmpty(from: recordCounts)
+            if entries.isEmpty {
+                Text("There are no records yet. An empty grow exports a zero-count manifest.")
+                    .font(Theme.sans(12))
+                    .foregroundStyle(Theme.tertiaryInk)
+                    .fixedSize(horizontal: false, vertical: true)
+            } else {
+                ForEach(entries) { entry in
+                    InfoRow(label: entry.label, value: "\(entry.count)")
+                }
+            }
+
+            Text("Photos are included only when you choose them. No location data is written into the archive.")
+                .font(Theme.sans(11))
+                .foregroundStyle(Theme.tertiaryInk)
+                .fixedSize(horizontal: false, vertical: true)
+        }
+        .growCard(fill: Theme.surfaceSunken, padding: 14)
+        .accessibilityElement(children: .contain)
     }
 
     private func label(_ title: String, subtitle: String) -> some View {
@@ -217,13 +274,20 @@ struct DataControlsView: View {
     private func createExport() {
         do {
             let payload = try ExportService.build(
-                profile: profiles.first,
-                rooms: rooms,
-                plants: plants,
-                strains: strains,
-                reminders: reminders,
-                dryingSessions: dryingSessions,
-                journal: journal,
+                snapshot: ExportSnapshot(
+                    profile: profiles.first,
+                    rooms: rooms,
+                    plants: plants,
+                    strains: strains,
+                    reminders: reminders,
+                    dryingSessions: dryingSessions,
+                    journal: journal,
+                    feedSchedules: feedSchedules,
+                    cycleArchives: cycleArchives,
+                    sensors: sensors,
+                    shareGrants: shareGrants,
+                    counts: recordCounts.isEmpty ? DataInventory.counts(in: context) : recordCounts
+                ),
                 options: ExportOptions(
                     includeJournal: includeJournal,
                     includePhotos: includePhotos,
@@ -248,9 +312,14 @@ struct DataControlsView: View {
         VStack(alignment: .leading, spacing: 14) {
             SectionHeader("Delete everything", subtitle: "No undo")
 
-            Text("Removes the grow profile, rooms, plants and their stage history, journal entries and photos, strains, harvest and curing records, care reminders and their notifications, and the app lock settings.")
+            Text("Removes every record type the app stores, its journal photos and thumbnails, pending notifications, and the app lock and notification preferences.")
                 .font(Theme.sans(13))
                 .foregroundStyle(Theme.secondaryInk)
+                .fixedSize(horizontal: false, vertical: true)
+
+            Text("Copies you exported to Files, copies inside a device or iCloud backup, and screenshots are outside this app and are not removed here.")
+                .font(Theme.sans(12))
+                .foregroundStyle(Theme.tertiaryInk)
                 .fixedSize(horizontal: false, vertical: true)
 
             Button {
@@ -267,27 +336,43 @@ struct DataControlsView: View {
                     )
             }
             .buttonStyle(.plain)
+            .accessibilityLabel("Delete local records")
+            .accessibilityHint("Asks you to type a phrase before anything is removed")
         }
         .growCard()
     }
 
     private var eraseSummary: [String] {
-        [
-            "\(plants.count) plant\(plants.count == 1 ? "" : "s") and their stage history",
-            "\(rooms.count) room\(rooms.count == 1 ? "" : "s") with environment, feed and calibration logs",
-            "\(strains.count) strain\(strains.count == 1 ? "" : "s") and their harvest ratings",
-            "\(journal.count) journal entr\(journal.count == 1 ? "y" : "ies") and \(photoCount) photo\(photoCount == 1 ? "" : "s")",
-            "Drying and curing sessions with their checks and burps",
-            "\(scoutingChecks.count) scouting check\(scoutingChecks.count == 1 ? "" : "s")",
-            "Equipment, treatment and service history",
-            "\(reminders.count) care reminder\(reminders.count == 1 ? "" : "s") and every pending notification",
-            "Your grow profile and the onboarding answers",
-            "App lock settings and notification preferences"
-        ]
+        var lines = DataInventory.nonEmpty(from: recordCounts).map { entry in
+            "\(entry.label): \(entry.count)"
+        }
+        lines.append("Journal photos and their thumbnails")
+        lines.append("Every pending notification")
+        lines.append("App lock, notification and unit preferences")
+        return lines
+    }
+
+    private func refreshCounts() {
+        recordCounts = DataInventory.counts(in: context)
     }
 
     private func eraseEverything() {
-        ExportService.deleteEverything(context: context, appLock: appLock)
+        let before = totalRecords
+        do {
+            let remaining = try ExportService.deleteEverything(context: context, appLock: appLock)
+            let leftover = DataInventory.total(of: remaining)
+            refreshCounts()
+
+            deletionResultTitle = leftover == 0 ? "Local records deleted" : "Delete did not finish"
+            deletionResultMessage = leftover == 0
+                ? "\(before) records were removed from this device, along with journal photos, notifications and app preferences. Copies in Files, device backups and iCloud backups are outside the app and are not removed here."
+                : "\(leftover) records remain on this device. Copies in Files, device backups and iCloud backups were not touched. Try again, and contact support if it keeps happening."
+        } catch {
+            deletionResultTitle = "Delete failed"
+            deletionResultMessage = "\(error.localizedDescription) Your records were kept."
+            refreshCounts()
+        }
+        showingDeletionResult = true
         showingFirstConfirm = false
     }
 }
@@ -315,7 +400,7 @@ struct DeleteEverythingSheet: View {
                         Text("This cannot be undone")
                             .font(Theme.serif(26))
                             .foregroundStyle(Theme.ink)
-                        Text("Everything below is removed from this device. There is no backup unless you exported one.")
+                        Text("Everything below is removed from this device. Copies you exported to Files and copies in device or iCloud backups stay where they are.")
                             .font(Theme.sans(13))
                             .foregroundStyle(Theme.secondaryInk)
                             .fixedSize(horizontal: false, vertical: true)
@@ -362,8 +447,8 @@ struct DeleteEverythingSheet: View {
                     }
 
                     Button {
-                        onErase()
                         dismiss()
+                        onErase()
                     } label: {
                         Text("Erase everything")
                             .font(Theme.sans(17, weight: .semibold))
@@ -377,6 +462,7 @@ struct DeleteEverythingSheet: View {
                     }
                     .buttonStyle(.plain)
                     .disabled(!canErase)
+                    .accessibilityHint("Deletes the local records listed above")
 
                     SecondaryButton("Keep my data") {
                         dismiss()
