@@ -46,6 +46,7 @@ import so location metadata never survives.
 | Grow calendar with explicit reminder rescheduling | Shipped | `Services/GrowCalendar.swift`, `Views/Home/GrowCalendarView.swift` |
 | Home Screen and Lock Screen widget with privacy-safe defaults | Shipped | `Grow CompanionWidgetExtension/`, `Services/WidgetSnapshot.swift` |
 | Light-distance guidance with a grower-set target and re-measure prompts | Shipped | `Services/LightDistanceGuidance.swift`, `Views/Rooms/LightDistanceView.swift` |
+| Breeder reference library with claimed figures kept apart from your results | Shipped | `Models/BreederProfile.swift`, `Services/BreederLibrary.swift`, `Views/Strains/BreederProfileView.swift` |
 
 The shipped navigation and current feature surfaces are recorded in section 6.2.
 Future cloud, hardware, extension and community features remain explicitly
@@ -265,6 +266,26 @@ results stay on device.
 Breeder claims are unverified marketing data. Every breeder figure is labelled
 "claimed", and the app never presents potency or genetic-test claims as
 verified results.
+
+**Shipped.** `Models/BreederProfile.swift` and `Services/BreederLibrary.swift`
+hold the reference as values: a profile for every breeder in the bundled
+template catalogue (summary, notes, an https link only where one is known, a
+source and the shared review date), a lineage claim per cultivar and breeder
+pair, and the comparison between a claimed window and the grower's own finished
+cycles. `BreederLibrary.key(for:)` folds case, accents, punctuation and spacing,
+so several strains that spell a breeder differently point at one profile.
+`Views/Strains/BreederLibraryView.swift` and `BreederProfileView.swift` are
+reached from the strain library and from the strain detail's breeder card; the
+profile screen lists the grower's strains with the claim, their observed average
+and a sentence comparing the two. Lineage belongs to a cultivar rather than a
+breeder, and only the three claims the app already carried are repeated, with
+Jack Herer marked disputed. The strain detail labels the flowering window
+"Claimed", and the editor offers the bundled breeders as suggestions. Nothing
+new is stored, so export, backup, restore, the data inventory and delete-all are
+unchanged. Tests cover matching, profile coverage, every lineage claim, the
+comparison copy and the product-claim limits. See `docs/BREEDER_REFERENCE.md`.
+A stored, grower-editable breeder profile and the signed content pack that would
+replace the bundled one remain unbuilt.
 
 ### 2.4 Consultant and peer sharing
 
@@ -801,9 +822,12 @@ The shipped store uses SwiftData with these models:
   additive stage. No existing model, relationship, identifier, photo or value is
   rewritten, and a store that cannot be opened still enters recovery rather than
   an empty grow.
-- New Tier 3 entities are additive: `Breeder`, parent-line references,
-  `Threshold`, `ShareGrant` and `AccessLog`. Each new relationship is optional
-  so a lightweight migration keeps existing stores readable.
+- New Tier 3 entities are additive: a threshold, an access log and any future
+  stored breeder profile. Each new relationship is optional so a lightweight
+  migration keeps existing stores readable.
+- The breeder reference itself ships as bundled value types
+  (`Models/BreederProfile.swift`), so it adds no model, no export section and no
+  migration stage. A grower-editable breeder record would be the additive entity.
 - `CultivationSchemaV3` adds only `GrowGoal`, the grower's own optional cycle
   targets, as a second lightweight additive stage after V2. No existing record,
   relationship, identifier, photo or value is rewritten, and a failed save never
@@ -917,7 +941,8 @@ TAB 2: JOURNAL
 
 TAB 3: STRAINS
 ├── Library list with observed flowering time and ratings
-├── Strain detail (expected vs observed, ratings, plants, notes)
+├── Breeder reference → profile, claims and the strains that point at it
+├── Strain detail (claimed vs observed, ratings, plants, notes)
 └── Editor (manual, or from a bundled template)
 
 TAB 4: RULES
@@ -960,7 +985,10 @@ PLANT DETAIL
 - **Light distance:** shipped as a card on the room dashboard beside the light
   schedule, with a measurement sheet, a grower-set target and a re-measure
   prompt that names its reason. See `docs/LIGHT_DISTANCE_GUIDANCE.md`.
-- **Breeder and pedigree:** inside the strain detail, above "Your results".
+- **Breeder and pedigree:** shipped as a reference library behind the strain
+  library, with a profile screen per breeder, per-cultivar lineage claims
+  labelled as claims, and the grower's observed timing beside the claim. See
+  `docs/BREEDER_REFERENCE.md`.
 - **Sharing:** a Settings section, "Sharing", with the device share code, a scoped
   creator and a reader for received files. Delivery is out of band through the
   system share sheet; there is no server, and a received copy is read-only.
