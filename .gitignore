@@ -1,4 +1,45 @@
+# macOS
 .DS_Store
-xcuserdata/
-build/
+.AppleDouble
+.LSOverride
+
+# Xcode user state and generated output
 DerivedData/
+build/
+xcuserdata/
+*.xcuserstate
+*.xcuserdatad/
+*.xccheckout
+*.moved-aside
+*.hmap
+*.ipa
+*.xcarchive/
+*.dSYM
+*.dSYM.zip
+
+# Swift Package Manager (keep Package.resolved for reproducible builds)
+.build/
+.swiftpm/configuration/
+.swiftpm/xcode/package.xcworkspace/xcuserdata/
+
+# CocoaPods and Carthage output
+Pods/
+Carthage/Build/
+
+# Signing material and private credentials
+*.p12
+*.pfx
+*.mobileprovision
+*.provisionprofile
+*.cer
+*.crt
+*.certSigningRequest
+*.key
+*.keychain
+*.keychain-db
+*.pem
+*.p8
+**/ENCRYPTED_KEYS.plist
+.env
+.env.*
+!.env.example

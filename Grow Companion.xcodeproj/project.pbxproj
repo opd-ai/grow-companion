@@ -27,10 +27,11 @@
 		0A0000000000000000000003 /* Grow Companion.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Grow Companion.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		0A0000000000000000000023 /* Grow CompanionTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "Grow CompanionTests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
 		0A0000000000000000000033 /* Grow CompanionUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "Grow CompanionUITests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
+		70944C85361318AC1A30A408 /* Grow Companion.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; name = "Grow Companion.entitlements"; path = "Grow Companion/Grow Companion.entitlements"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
-		0A0000000000000000000011 /* Exceptions for "Grow Companion" folder in "Grow Companion" target */ = {
+		0A0000000000000000000011 /* PBXFileSystemSynchronizedBuildFileExceptionSet */ = {
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
 				Info.plist,
@@ -43,7 +44,7 @@
 		0A0000000000000000000005 /* Grow Companion */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
 			exceptions = (
-				0A0000000000000000000011 /* Exceptions for "Grow Companion" folder in "Grow Companion" target */,
+				0A0000000000000000000011 /* PBXFileSystemSynchronizedBuildFileExceptionSet */,
 			);
 			path = "Grow Companion";
 			sourceTree = "<group>";
@@ -92,6 +93,7 @@
 				0A0000000000000000000025 /* Grow CompanionTests */,
 				0A0000000000000000000035 /* Grow CompanionUITests */,
 				0A0000000000000000000004 /* Products */,
+				70944C85361318AC1A30A408 /* Grow Companion.entitlements */,
 			);
 			sourceTree = "<group>";
 		};
@@ -406,6 +408,7 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_ENTITLEMENTS = "Grow Companion/Grow Companion.entitlements";
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				ENABLE_PREVIEWS = YES;
@@ -439,6 +442,7 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_ENTITLEMENTS = "Grow Companion/Grow Companion.entitlements";
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				ENABLE_PREVIEWS = YES;

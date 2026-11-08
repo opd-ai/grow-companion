@@ -5,20 +5,30 @@
 	<key>CFBundleExecutable</key>
 	<string>$(EXECUTABLE_NAME)</string>
 	<key>CFBundleIdentifier</key>
-	<string>com.organizationName.Grow-Companion</string>
+	<string>$(PRODUCT_BUNDLE_IDENTIFIER)</string>
 	<key>CFBundleName</key>
 	<string>$(PRODUCT_NAME)</string>
 	<key>CFBundlePackageType</key>
 	<string>APPL</string>
 	<key>CFBundleShortVersionString</key>
-	<string>1.0</string>
+	<string>$(MARKETING_VERSION)</string>
 	<key>CFBundleVersion</key>
-	<string>1</string>
+	<string>$(CURRENT_PROJECT_VERSION)</string>
 	<key>UIDeviceFamily</key>
 	<array>
 		<integer>1</integer>
 		<integer>2</integer>
 	</array>
+	<key>UIUserInterfaceStyle</key>
+	<string>Light</string>
+	<key>NSLocationWhenInUseUsageDescription</key>
+	<string>Grow Companion can use your approximate location to pick your state for the home-cultivation rules. It resolves on this device, keeps only the state name, and never sends coordinates anywhere.</string>
+	<key>NSFaceIDUsageDescription</key>
+	<string>Grow Companion uses Face ID to keep your grow records private when the app is locked.</string>
+	<key>NSBluetoothAlwaysUsageDescription</key>
+	<string>Grow Companion uses Bluetooth to find and receive readings from environmental sensors you pair to a room.</string>
+	<key>NSCameraUsageDescription</key>
+	<string>Grow Companion uses the camera to measure the distance from your light fixture to the canopy. Depth data is processed on-device and not saved.</string>
 	<key>UILaunchScreen</key>
 	<dict/>
 	<key>UISupportedInterfaceOrientations~ipad</key>

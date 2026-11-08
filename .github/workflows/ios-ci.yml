@@ -1,0 +1,50 @@
+name: iOS CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  build-and-test:
+    name: Build and test (Xcode 26.4.1)
+    runs-on: macos-26
+    timeout-minutes: 45
+
+    steps:
+      - name: Check out source
+        uses: actions/checkout@v4
+
+      - name: Select Xcode 26.4.1
+        uses: maxim-lobanov/setup-xcode@v1
+        with:
+          xcode-version: 26.4.1
+
+      - name: Cache Swift package dependencies
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/org.swift.swiftpm
+          key: ${{ runner.os }}-spm-xcode-26.4.1-${{ hashFiles('**/Package.resolved') || 'no-package-lock' }}
+          restore-keys: |
+            ${{ runner.os }}-spm-xcode-26.4.1-
+
+      - name: Resolve package dependencies
+        run: >-
+          xcodebuild -resolvePackageDependencies
+          -clonedSourcePackagesDirPath "$HOME/.cache/org.swift.swiftpm"
+          -project "Grow Companion.xcodeproj"
+          -scheme "Grow Companion"
+
+      - name: Build and run unit and UI tests
+        run: >-
+          xcodebuild test
+          -clonedSourcePackagesDirPath "$HOME/.cache/org.swift.swiftpm"
+          -project "Grow Companion.xcodeproj"
+          -scheme "Grow Companion"
+          -destination "platform=iOS Simulator,name=iPhone 17"
+          -parallel-testing-enabled NO
+          CODE_SIGNING_ALLOWED=NO
