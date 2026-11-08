@@ -23,7 +23,7 @@ struct RoomEnvironmentSection: View {
 
     private var subtitle: String {
         guard let latest = room.latestEnvironmentReading else { return String(localized: "No readings yet") }
-        return "Last reading \(Format.shortDate(latest.date)) at \(Format.time(latest.date))"
+        return String(localized: "Last reading \(Format.shortDate(latest.date)) at \(Format.time(latest.date))")
     }
 
     var body: some View {

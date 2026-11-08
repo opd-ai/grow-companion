@@ -211,6 +211,18 @@ private func placeholders(in text: String) -> [String] {
             continue
         }
 
+        // A positional argument (`%1$lld`) carries the same conversion as the
+        // plain form, so the check compares conversions, not numbering.
+        if cursor < text.endIndex, text[cursor].isNumber {
+            var probe = cursor
+            while probe < text.endIndex, text[probe].isNumber {
+                probe = text.index(after: probe)
+            }
+            if probe < text.endIndex, text[probe] == "$" {
+                cursor = text.index(after: probe)
+            }
+        }
+
         var conversion: Character?
         while cursor < text.endIndex {
             let next = text[cursor]

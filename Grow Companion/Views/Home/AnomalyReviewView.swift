@@ -126,11 +126,11 @@ struct AnomalyReviewView: View {
     }
 
     private var statusDetail: String {
-        if selectedRoom == nil { return "Choose a room with readings to begin." }
-        if readings.isEmpty { return "No readings were recorded in this range." }
-        if hasSparseData { return "At least six readings for a metric are needed before a change is treated as a signal." }
-        if hasSignal { return "The highlighted readings differ materially from the room's recent average. Review the records below; no alert was created." }
-        return "Temperature and humidity stayed close to the room's recent average in this range."
+        if selectedRoom == nil { return String(localized: "Choose a room with readings to begin.") }
+        if readings.isEmpty { return String(localized: "No readings were recorded in this range.") }
+        if hasSparseData { return String(localized: "At least six readings for a metric are needed before a change is treated as a signal.") }
+        if hasSignal { return String(localized: "The highlighted readings differ materially from the room's recent average. Review the records below; no alert was created.") }
+        return String(localized: "Temperature and humidity stayed close to the room's recent average in this range.")
     }
 
     private func value(_ label: String, _ value: String) -> some View {

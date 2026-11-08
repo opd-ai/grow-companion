@@ -255,8 +255,8 @@ struct HarvestCalendarView: View {
     }
 
     private var nextUpSubtitle: String {
-        guard !forecasts.isEmpty else { return "No plants in flower" }
-        return "\(forecasts.count) window\(forecasts.count == 1 ? "" : "s") ahead"
+        guard !forecasts.isEmpty else { return String(localized: "No plants in flower") }
+        return String(localized: "\(forecasts.count) window\(forecasts.count == 1 ? "" : "s") ahead")
     }
 
     private func forecastCard(_ forecast: HarvestForecast) -> some View {
@@ -343,8 +343,8 @@ struct HarvestCalendarView: View {
     }
 
     private var sessionsSubtitle: String {
-        guard !activeSessions.isEmpty else { return "Nothing in progress" }
-        return "\(activeSessions.count) in progress"
+        guard !activeSessions.isEmpty else { return String(localized: "Nothing in progress") }
+        return String(localized: "\(activeSessions.count) in progress")
     }
 
     @ViewBuilder

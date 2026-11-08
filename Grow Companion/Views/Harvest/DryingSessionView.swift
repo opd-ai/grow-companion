@@ -100,7 +100,7 @@ struct DryingSessionView: View {
         if isCuring {
             return HarvestLog.curingDayText(session)
         }
-        return "Drying · " + HarvestLog.dryingDayText(session)
+        return String(localized: "Drying · \(HarvestLog.dryingDayText(session))")
     }
 
     // MARK: Hero
@@ -163,10 +163,10 @@ struct DryingSessionView: View {
 
     private var targetCaption: String {
         if isCuring {
-            return "\(String(format: "%.0f–%.0f%%", humidityRange.lowerBound, humidityRange.upperBound)) humidity"
+            return String(localized: "\(String(format: "%.0f–%.0f%%", humidityRange.lowerBound, humidityRange.upperBound)) humidity")
         }
         let temperature = session.targetTemperatureRange
-        return "\(String(format: "%.0f–%.0f%%", humidityRange.lowerBound, humidityRange.upperBound)) · \(String(format: "%.0f–%.0f °C", temperature.lowerBound, temperature.upperBound))"
+        return String(localized: "\(String(format: "%.0f–%.0f%%", humidityRange.lowerBound, humidityRange.upperBound)) · \(String(format: "%.0f–%.0f °C", temperature.lowerBound, temperature.upperBound))")
     }
 
     // MARK: Risk
@@ -245,8 +245,8 @@ struct DryingSessionView: View {
 
     private func accessibilityLabel(for date: Date, check: DryingCheck?) -> String {
         let day = Format.shortDate(date)
-        guard let check else { return "\(day), no check" }
-        return "\(day), checked, \(HarvestLog.checkSummary(check, dayNumber: dayNumber(for: check)))"
+        guard let check else { return String(localized: "\(day), no check") }
+        return String(localized: "\(day), checked, \(HarvestLog.checkSummary(check, dayNumber: dayNumber(for: check)))")
     }
 
     // MARK: Recent checks
@@ -517,7 +517,11 @@ struct TargetBandBar: View {
 
     private var accessibilitySummary: String {
         let band = String(format: "%.0f to %.0f", range.lowerBound, range.upperBound)
-        guard let value else { return "Target band \(band). No reading yet." }
-        return "Reading \(String(format: "%.0f", value)), target band \(band)\(isOut ? ", outside the band" : "")"
+        guard let value else { return String(localized: "Target band \(band). No reading yet.") }
+        let reading = String(format: "%.0f", value)
+        if isOut {
+            return String(localized: "Reading \(reading), target band \(band), outside the band")
+        }
+        return String(localized: "Reading \(reading), target band \(band)")
     }
 }

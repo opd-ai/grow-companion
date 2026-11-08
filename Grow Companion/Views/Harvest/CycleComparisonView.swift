@@ -273,9 +273,9 @@ struct CycleComparisonView: View {
 
     private func dateText(_ snapshot: CycleSnapshot) -> String {
         if snapshot.isAverage {
-            return "\(snapshot.sampleCount) cycle\(snapshot.sampleCount == 1 ? "" : "s")"
+            return String(localized: "\(snapshot.sampleCount) cycle\(snapshot.sampleCount == 1 ? "" : "s")")
         }
-        guard let date = snapshot.harvestDate else { return "Harvest date not logged" }
+        guard let date = snapshot.harvestDate else { return String(localized: "Harvest date not logged") }
         return Format.shortDate(date)
     }
 
@@ -586,7 +586,7 @@ struct CycleComparisonView: View {
         }
 
         if parts.isEmpty {
-            return "Two cycles, recorded side by side. Add weights, feed logs and ratings for a fuller comparison."
+            return String(localized: "Two cycles, recorded side by side. Add weights, feed logs and ratings for a fuller comparison.")
         }
         return parts.prefix(2).joined(separator: " ")
     }
@@ -689,10 +689,10 @@ struct CycleComparisonView: View {
     }
 
     private func averageDetail(_ snapshot: CycleSnapshot?) -> String {
-        guard let snapshot else { return "No completed cycles" }
+        guard let snapshot else { return String(localized: "No completed cycles") }
         let cycles = "\(snapshot.sampleCount) cycle\(snapshot.sampleCount == 1 ? "" : "s")"
         guard let dry = snapshot.dryYieldGrams else { return cycles }
-        return "\(cycles) · avg \(Format.weight(dry, unit: unit))"
+        return String(localized: "\(cycles) · avg \(Format.weight(dry, unit: unit))")
     }
 }
 

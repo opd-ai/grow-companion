@@ -111,7 +111,7 @@ struct EnvironmentChartView: View {
 
     private var accessibilitySummary: String {
         guard let first = points.first, let last = points.last else {
-            return "\(metric.title) chart with no readings."
+            return String(localized: "\(metric.title) chart with no readings.")
         }
         let values = points.map { $0.value }
         let minimum = values.min() ?? first.value

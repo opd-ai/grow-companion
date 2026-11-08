@@ -171,9 +171,9 @@ struct FeedScheduleCard: View {
 
     private var appliedLabel: String {
         let rooms = schedule.sortedAppliedRooms
-        guard let first = rooms.first else { return "Applied" }
-        if rooms.count == 1 { return "Applied to \(first.name)" }
-        return "Applied to \(first.name) +\(rooms.count - 1)"
+        guard let first = rooms.first else { return String(localized: "Applied") }
+        if rooms.count == 1 { return String(localized: "Applied to \(first.name)") }
+        return String(localized: "Applied to \(first.name) +\(rooms.count - 1)")
     }
 
     private var statusLine: (text: String, tint: Color)? {

@@ -17,7 +17,7 @@ struct StrainLibraryView: View {
 
     private var subtitle: String {
         if strains.isEmpty {
-            return "Breeder figures, your own flowering times and the harvests you rated."
+            return String(localized: "Breeder figures, your own flowering times and the harvests you rated.")
         }
         return String(localized: "\(strains.count) cultivar\(strains.count == 1 ? "" : "s") on this device")
     }

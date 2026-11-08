@@ -164,14 +164,14 @@ struct RoomComparisonView: View {
 
     private func dryYield(in room: Room) -> String {
         let values = room.plants.filter { $0.harvestedAt.map(inRange) ?? false }.compactMap(\.dryWeightGrams)
-        guard !values.isEmpty else { return "No data" }
+        guard !values.isEmpty else { return String(localized: "No data") }
         return Format.weight(values.reduce(0, +), unit: .metric)
     }
 
     private func gramsPerWatt(in room: Room) -> String {
         let values = room.plants.filter { $0.harvestedAt.map(inRange) ?? false }
             .compactMap { HarvestLog.gramsPerWatt(dryGrams: $0.dryWeightGrams, watts: room.lightWatts) }
-        guard !values.isEmpty else { return "No data" }
+        guard !values.isEmpty else { return String(localized: "No data") }
         return String(format: "%.2f g/W", values.reduce(0, +) / Double(values.count))
     }
 }

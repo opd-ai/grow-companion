@@ -43,9 +43,9 @@ struct HomeView: View {
 
     private var historyCaption: String {
         guard let saved = historyMonitor.lastSavedAt else {
-            return "History starts with this update"
+            return String(localized: "History starts with this update")
         }
-        return "Saved \(Format.shortDate(saved)) at \(Format.time(saved))"
+        return String(localized: "Saved \(Format.shortDate(saved)) at \(Format.time(saved))")
     }
 
     private var report: ComplianceReport? {
@@ -614,11 +614,11 @@ struct HomeView: View {
                 let cycles = expectation.sampleCount == 1
                     ? "your finished cycle"
                     : "your \(expectation.sampleCount) finished cycles"
-                return "\(Format.dayCount(plant.daysInStage)) in flower, past the \(Format.dayCount(expectation.days)) seen across \(cycles). Check trichomes."
+                return String(localized: "\(Format.dayCount(plant.daysInStage)) in flower, past the \(Format.dayCount(expectation.days)) seen across \(cycles). Check trichomes.")
             }
-            return "\(Format.dayCount(plant.daysInStage)) in flower, past the \(Format.dayCount(expectation.days)) expected. Check trichomes."
+            return String(localized: "\(Format.dayCount(plant.daysInStage)) in flower, past the \(Format.dayCount(expectation.days)) expected. Check trichomes.")
         }
-        return "\(Format.dayCount(plant.daysInStage)) in \(plant.stage.title). Move it on if it is ready."
+        return String(localized: "\(Format.dayCount(plant.daysInStage)) in \(plant.stage.title). Move it on if it is ready.")
     }
 
     private func tasksAppend(_ target: inout [HomeTask], _ task: HomeTask) {
@@ -911,17 +911,17 @@ struct PlantRow: View {
     }
 
     private var trainingText: String {
-        guard let date = plant.lastTrainingDate else { return "No training recorded" }
-        return "Last trained \(Format.shortDate(date)) · \(TrainingLog.relativeText(date))"
+        guard let date = plant.lastTrainingDate else { return String(localized: "No training recorded") }
+        return String(localized: "Last trained \(Format.shortDate(date)) · \(TrainingLog.relativeText(date))")
     }
 
     private var secondaryText: String {
         if plant.stage == .flower {
             let expectation = StrainInsights.expectation(for: plant)
             let week = StrainInsights.currentFlowerWeek(for: plant)
-            return "\(plant.displayStrain) · week \(week) of \(expectation.weeks)"
+            return String(localized: "\(plant.displayStrain) · week \(week) of \(expectation.weeks)")
         }
-        return "\(plant.displayStrain) · \(Format.dayCount(plant.daysInStage)) in \(plant.stage.shortTitle)"
+        return String(localized: "\(plant.displayStrain) · \(Format.dayCount(plant.daysInStage)) in \(plant.stage.shortTitle)")
     }
 }
 

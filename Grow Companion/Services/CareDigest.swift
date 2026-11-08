@@ -132,6 +132,7 @@ enum CareDigest {
         if activity == 0 && unfinished == 0 { return String(localized: "No care activity recorded. Nothing is overdue.") }
         if activity == 0 { return String(localized: "No care activity recorded. \(unfinished) scheduled task\(unfinished == 1 ? "" : "s") remain unfinished.") }
         if unfinished == 0 { return String(localized: "\(activity) care record\(activity == 1 ? "" : "s") recorded. No scheduled tasks remain unfinished.") }
-        return String(localized: "\(activity) care record\(activity == 1 ? "" : "s") recorded. \(unfinished) scheduled task\(unfinished == 1 ? "" : "s") remain unfinished.")
+        let tasks = String(localized: "\(unfinished) scheduled task\(unfinished == 1 ? "" : "s") remain unfinished.")
+        return String(localized: "\(activity) care record\(activity == 1 ? "" : "s") recorded. \(tasks)")
     }
 }

@@ -45,7 +45,7 @@ struct LightDistanceView: View {
 
     private var distanceStatus: String? {
         guard let distance = candidateMeters, let targetRange else { return nil }
-        if targetRange.contains(distance) { return "Inside the target range" }
+        if targetRange.contains(distance) { return String(localized: "Inside the target range") }
         return distance < targetRange.lowerBound ? "Closer than the target range" : "Farther than the target range"
     }
 

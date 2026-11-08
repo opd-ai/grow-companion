@@ -123,14 +123,14 @@ struct GrowCalculatorsView: View {
     }
 
     private var vpdValue: String {
-        guard let temperature = latestReading?.temperatureC, let humidity = latestReading?.humidityPercent else { return "Missing inputs" }
+        guard let temperature = latestReading?.temperatureC, let humidity = latestReading?.humidityPercent else { return String(localized: "Missing inputs") }
         let saturation = 0.6108 * exp((17.27 * temperature) / (temperature + 237.3))
         let vpd = saturation * (1 - humidity / 100)
         return String(format: "%.2f kPa", vpd)
     }
 
     private var dliValue: String {
-        guard let ppfd = latestReading?.lightPPFD, let room else { return "Missing inputs" }
+        guard let ppfd = latestReading?.lightPPFD, let room else { return String(localized: "Missing inputs") }
         let dli = ppfd * room.lightHoursPerDay * 3600 / 1_000_000
         return String(format: "%.2f mol/m²/day", dli)
     }

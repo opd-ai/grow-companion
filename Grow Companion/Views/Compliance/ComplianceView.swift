@@ -64,7 +64,7 @@ struct ComplianceView: View {
         guard latest.fingerprint == currentFingerprint else {
             return String(localized: "This calculation is not saved yet")
         }
-        return "Saved \(Format.shortDate(latest.capturedAt)) at \(Format.time(latest.capturedAt))"
+        return String(localized: "Saved \(Format.shortDate(latest.capturedAt)) at \(Format.time(latest.capturedAt))")
     }
 
     var body: some View {

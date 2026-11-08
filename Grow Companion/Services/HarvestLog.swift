@@ -16,7 +16,8 @@ struct DryPrediction {
 
     var basisText: String {
         if sampleCount > 0 {
-            return String(localized: "From your history: \(sampleCount) harvest\(sampleCount == 1 ? "" : "s") averaged \(Int((ratio * 100).rounded()))% dry-to-wet.")
+            let percent = "\(Int((ratio * 100).rounded()))%"
+            return String(localized: "From your history: \(sampleCount) harvest\(sampleCount == 1 ? "" : "s") averaged \(percent) dry-to-wet.")
         }
         return String(localized: "From the default 22% dry-to-wet ratio. Your own ratio takes over as you record harvests.")
     }

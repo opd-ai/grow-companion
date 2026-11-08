@@ -29,7 +29,7 @@ struct RoomFeedScheduleSection: View {
     private var subtitle: String {
         guard let schedule else { return String(localized: "No schedule applied") }
         if let status = FeedScheduleEngine.statusText(schedule: schedule, room: room) {
-            return "\(schedule.displayName) · \(status)"
+            return String(localized: "\(schedule.displayName) · \(status)")
         }
         return schedule.displayName
     }
@@ -77,13 +77,13 @@ struct RoomFeedScheduleSection: View {
     private func emptyWeekMessage(_ schedule: FeedSchedule) -> String {
         if FeedScheduleEngine.isPending(startDate: room.feedScheduleStartDate) {
             let date = room.feedScheduleStartDate.map(Format.shortDate) ?? "soon"
-            return "This schedule starts on \(date)."
+            return String(localized: "This schedule starts on \(date).")
         }
         if FeedScheduleEngine.isFinished(
             startDate: room.feedScheduleStartDate,
             weekCount: schedule.weekCount
         ) {
-            return "All \(schedule.weekCount) weeks are complete. Duplicate the schedule for the next run."
+            return String(localized: "All \(schedule.weekCount) weeks are complete. Duplicate the schedule for the next run.")
         }
         return String(localized: "No mix recorded for this week yet.")
     }

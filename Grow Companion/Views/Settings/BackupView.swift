@@ -129,13 +129,13 @@ struct BackupView: View {
 
     private var restoreWarning: String {
         guard let restoreSummary else {
-            return "Restoring replaces the records currently on this device. This cannot be undone."
+            return String(localized: "Restoring replaces the records currently on this device. This cannot be undone.")
         }
         let photos = restoreSummary.includesPhotos ? " with journal photos" : ""
         let manifest = restoreSummary.version >= 2
             ? "\(restoreSummary.totalRecords) records"
             : "an older backup with no record manifest"
-        return "This backup holds \(manifest) (format version \(restoreSummary.version)\(photos)). Restoring replaces the records currently on this device and cannot be undone."
+        return String(localized: "This backup holds \(manifest) (format version \(restoreSummary.version)\(photos)). Restoring replaces the records currently on this device and cannot be undone.")
     }
 
     private var header: some View {

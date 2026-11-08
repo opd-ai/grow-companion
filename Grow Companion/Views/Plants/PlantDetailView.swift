@@ -527,9 +527,9 @@ struct PlantDetailView: View {
             let cycles = expectation.sampleCount == 1
                 ? "your one finished cycle"
                 : "your \(expectation.sampleCount) finished cycles"
-            return "\(Format.dayCount(daysPast)) past the \(Format.dayCount(expectation.days)) your own records show across \(cycles). Judge it by trichomes and pistils now, not by the countdown."
+            return String(localized: "\(Format.dayCount(daysPast)) past the \(Format.dayCount(expectation.days)) your own records show across \(cycles). Judge it by trichomes and pistils now, not by the countdown.")
         }
-        return "\(Format.dayCount(daysPast)) past the \(Format.dayCount(expectation.days)) expectation. Check trichomes and pistils, then log the harvest so your own timing replaces this figure."
+        return String(localized: "\(Format.dayCount(daysPast)) past the \(Format.dayCount(expectation.days)) expectation. Check trichomes and pistils, then log the harvest so your own timing replaces this figure.")
     }
 
     // MARK: Harvest

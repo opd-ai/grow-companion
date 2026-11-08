@@ -210,9 +210,9 @@ struct GrowCalendarView: View {
 
     private func accessibilityLabel(day: Date, entries: [GrowCalendarEntry]) -> String {
         let date = Format.shortDate(day)
-        guard !entries.isEmpty else { return "\(date), nothing scheduled" }
+        guard !entries.isEmpty else { return String(localized: "\(date), nothing scheduled") }
         let kinds = entries.map(\.kind.title).joined(separator: ", ")
-        return "\(date), \(entries.count) item\(entries.count == 1 ? "" : "s"): \(kinds)"
+        return String(localized: "\(date), \(entries.count) item\(entries.count == 1 ? "" : "s"): \(kinds)")
     }
 
     // MARK: Selected day
@@ -408,7 +408,7 @@ struct RescheduleReminderSheet: View {
             second: 0,
             of: candidateDay
         ) ?? candidateDay
-        return "\(Format.shortDate(date)) at \(Format.time(date))"
+        return String(localized: "\(Format.shortDate(date)) at \(Format.time(date))")
     }
 
     var body: some View {

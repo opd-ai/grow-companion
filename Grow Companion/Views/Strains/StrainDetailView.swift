@@ -117,7 +117,7 @@ struct StrainDetailView: View {
                 }
             }
 
-            Text("\(strain.plants.count) plant\(strain.plants.count == 1 ? "" : "s") recorded · \(observations.count) finished cycle\(observations.count == 1 ? "" : "s")")
+            Text("\(String(localized: "\(strain.plants.count) plant\(strain.plants.count == 1 ? "" : "s") recorded")) · \(String(localized: "\(observations.count) finished cycle\(observations.count == 1 ? "" : "s")"))")
                 .font(Theme.sans(12))
                 .foregroundStyle(Theme.secondaryInk)
                 .fixedSize(horizontal: false, vertical: true)
@@ -234,13 +234,13 @@ struct StrainDetailView: View {
     private func deltaText(_ days: Double) -> String {
         let difference = Int(days.rounded()) - strain.expectedFloweringDays
         if difference == 0 {
-            return "Your observed average matches the breeder's figure, and flower-week counters use it now."
+            return String(localized: "Your observed average matches the breeder's figure, and flower-week counters use it now.")
         }
         let amount = Format.dayCount(abs(difference))
         if difference > 0 {
-            return "Your own cycles took \(amount) longer than the breeder's figure. Flower-week counters now use your observed \(StrainInsights.shortLengthText(days: days))."
+            return String(localized: "Your own cycles took \(amount) longer than the breeder's figure. Flower-week counters now use your observed \(StrainInsights.shortLengthText(days: days)).")
         }
-        return "Your own cycles finished \(amount) faster than the breeder's figure. Flower-week counters now use your observed \(StrainInsights.shortLengthText(days: days))."
+        return String(localized: "Your own cycles finished \(amount) faster than the breeder's figure. Flower-week counters now use your observed \(StrainInsights.shortLengthText(days: days)).")
     }
 
     private func metric(_ label: String, _ value: String, detail: String? = nil) -> some View {
@@ -366,12 +366,12 @@ struct StrainDetailView: View {
 
     private func plantDetail(_ plant: Plant) -> String {
         if let days = StrainInsights.floweringDays(for: plant) {
-            return "Flowered \(StrainInsights.shortLengthText(days: Double(days))) · \(plant.stage.title)"
+            return String(localized: "Flowered \(StrainInsights.shortLengthText(days: Double(days))) · \(plant.stage.title)")
         }
         if plant.stage == .flower {
-            return "Flower week \(StrainInsights.currentFlowerWeek(for: plant)) · day \(plant.daysInStage)"
+            return String(localized: "Flower week \(StrainInsights.currentFlowerWeek(for: plant)) · day \(plant.daysInStage)")
         }
-        return "\(Format.dayCount(plant.daysInStage)) in \(plant.stage.title)"
+        return String(localized: "\(Format.dayCount(plant.daysInStage)) in \(plant.stage.title)")
     }
 
     // MARK: Notes
