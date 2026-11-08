@@ -177,6 +177,32 @@ struct GardenTimelineTests {
         #expect(journalCount == 1)
     }
 
+    @Test func aRoomFilterMatchesEitherTheRecordRoomOrThePlantRoom() throws {
+        let context = try makeContext()
+        let tent = Room(name: "Tent")
+        let shed = Room(name: "Shed")
+        let plant = Plant(name: "One", stage: .veg, room: tent)
+        context.insert(tent)
+        context.insert(shed)
+        context.insert(plant)
+
+        let check = ScoutingCheck(date: Date(), findings: [.pests], plant: plant, room: shed)
+        context.insert(check)
+        try context.save()
+
+        let events = GardenTimelineService.events(
+            from: GardenTimelineSources(scouting: [check])
+        )
+        let row = try #require(events.first)
+        #expect(row.plant?.persistentModelID == plant.persistentModelID)
+        #expect(row.room?.persistentModelID == shed.persistentModelID)
+
+        // The record names the shed, but the plant lives in the tent; either
+        // room filter should find it.
+        #expect(GardenTimelineFilter(roomID: shed.persistentModelID).matches(row))
+        #expect(GardenTimelineFilter(roomID: tent.persistentModelID).matches(row))
+    }
+
     private func makeContext() throws -> ModelContext {
         let container = try ModelContainer(
             for: DataInventory.schema,

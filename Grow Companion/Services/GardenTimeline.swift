@@ -105,9 +105,9 @@ struct GardenTimelineFilter: Equatable {
         }
 
         if let roomID {
-            let eventRoomID = event.room?.persistentModelID
-                ?? event.plant?.room?.persistentModelID
-            guard eventRoomID == roomID else { return false }
+            let matchesRoom = event.room?.persistentModelID == roomID
+                || event.plant?.room?.persistentModelID == roomID
+            guard matchesRoom else { return false }
         }
 
         return true
