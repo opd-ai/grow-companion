@@ -35,6 +35,7 @@ import so location metadata never survives.
 | Plant and room scouting checks | Shipped | `Views/Plants/ScoutingCheckSection.swift`, `Models/ScoutingCheck.swift` |
 | Weekly recap, room comparison and cycle archive | Shipped | `Views/Home/` |
 | Password-protected local backup and restore | Shipped | `Views/Settings/BackupView.swift`, `Services/BackupService.swift` |
+| Store recovery, verified export/backup/restore and delete-all | Shipped | `Services/StoreBoot.swift`, `Views/StoreRecoveryView.swift`, `Services/ExportService.swift`, `Services/DataInventory.swift` |
 | Face ID lock, privacy screen, export and delete-all | Shipped | `Services/AppLock.swift`, `Services/PrivacyCover.swift`, `Views/Settings/` |
 | Privacy review and remediation of local security findings | Shipped | `docs/PRIVACY_REVIEW.md`, protected local services |
 
@@ -800,6 +801,8 @@ TAB 5: SETTINGS
 ├── Privacy and data
 │   ├── App lock
 │   ├── Notifications (priority, quiet hours, lock-screen text)
+│   ├── Sharing (not available in this version)
+│   ├── Sync and privacy (no account and no cloud sync)
 │   ├── Backup and restore (password-protected local backup)
 │   └── Export and delete
 ├── Equipment
@@ -821,8 +824,9 @@ PLANT DETAIL
 - **Light distance:** a card on the room dashboard beside the light schedule,
   with a measurement sheet and a re-measure reminder.
 - **Breeder and pedigree:** inside the strain detail, above "Your results".
-- **Sharing:** a new Settings section, "Sharing", with active grants and the
-  access log.
+- **Sharing:** a Settings section, "Sharing". It currently opens an explanation
+  that sharing is not available in this version; it must not present local notes
+  as a working grant of access.
 - **Community:** a new tab once moderation and the account model exist; it
   cannot ship inside the current account-free build.
 - **Personal effect journal:** a Settings entry, off by default, opening into a
@@ -834,7 +838,185 @@ PLANT DETAIL
 
 ---
 
-## 7. Technical risks and mitigations
+## 7. Next user-facing releases (v2.1–v2.3)
+
+These are new grower-facing features, chosen so they need no account, no server
+and no change to the compliance engine. Every one runs offline, respects app lock,
+and is covered by the data inventory: a feature that adds a stored type must add
+it to `Services/DataInventory.swift` and to the export/delete coverage test in the
+same release.
+
+The constraints from `docs/LEGAL_REVIEW.md` apply to all of them: no sale, gift,
+transfer, transport or distribution pathway; no health, diagnosis or treatment
+claims; no analytics; no third-party SDK; nothing described as available until it
+is.
+
+### 7.1 One garden timeline
+
+**Problem.** The record is already rich, but it is split across tabs. A grower
+who wants "what happened in this room last week" has to visit the journal, the
+room, the plant and the harvest screens.
+
+**What ships.** A chronological Garden view that merges, read-only: stage
+changes, journal entries, feed and watering events, environment readings,
+calibrations, light-schedule changes, training, treatments, scouting checks,
+drying checks and burps. Day-grouped, with filters for room, plant and event
+type, and a tap that opens the source record.
+
+**Acceptance criteria.**
+
+- Every stored event type that carries a timestamp appears exactly once, in date
+  order, with the room and plant it belongs to.
+- Filters are local state and never write to the store.
+- A record created or edited elsewhere appears after returning to the view.
+- VoiceOver reads each row as type, date, room and a short label; no colour-only
+  distinction.
+- No new model and no schema change.
+
+**Not in scope.** No inference, scoring, comparison between growers, or
+suggested action. The timeline is a reading surface.
+
+### 7.2 Quick Log from Home
+
+**Problem.** Logging a routine watering or reading takes too many taps, which is
+the main reason logs go incomplete.
+
+**What ships.** A Quick Log button on Home that opens one sheet with the four
+most common actions (water/feed, environment reading, journal note, stage
+change), remembers the last room and plant, pre-fills the last values as
+editable defaults, and confirms in one step.
+
+**Acceptance criteria.**
+
+- Four taps or fewer from Home to a saved watering on a grower's second use.
+- Nothing is saved until the confirm action; a cancelled sheet writes nothing.
+- Pre-filled values are visibly editable and never presented as measured.
+- The plant-count pre-save preview still runs before a stage change that would
+  cross a limit.
+
+### 7.3 Photo timeline and side-by-side comparison
+
+**Problem.** Growth is visible in photos but the journal shows one image at a
+time, so change over a cycle is hard to see.
+
+**What ships.** A per-plant and per-room photo strip in date order, and a compare
+mode that puts two selected photos side by side with their dates and stages
+labelled. Photos stay in the existing protected store, re-encoded without
+location metadata.
+
+**Acceptance criteria.**
+
+- The compare view labels both dates and both stages, and says when a photo has
+  no linked date.
+- Deleting a journal entry removes its photo, thumbnail and cache entry, and the
+  timeline no longer shows it.
+- No image analysis, diagnosis or treatment suggestion is implied or produced.
+
+### 7.4 Local grow report (PDF)
+
+**Problem.** Growers keep records for themselves and sometimes want a printable
+summary of a cycle. Today the only external copy is a data archive.
+
+**What ships.** A "Grow report" action that renders a cycle summary to PDF in the
+app: stage timeline, feed and reading summary, training, treatments and
+scouting, harvest weights and disposition, and the compliance estimate with its
+verification duty and rule-pack version. Saved through the system share sheet.
+
+**Acceptance criteria.**
+
+- The report states the rule-pack version, the rules-last-updated date and the
+  verification duty on the compliance page.
+- Disposition is described only as consumed at home, destroyed or retained.
+- The report never includes a personal journal entry unless the grower includes
+  it explicitly.
+- The same non-identifying filename rule as export applies, and the confirmation
+  says copies are outside the app.
+
+### 7.5 Widgets with privacy-safe defaults
+
+**Problem.** Checking the day's care tasks means opening the app, which is
+friction for a glanceable task list.
+
+**What ships.** A Home Screen and Lock Screen widget showing either generic
+counts ("3 care tasks today") or, only when the grower turns it on, task titles.
+Defaults are generic. Widget content never shows harvest weights, compliance
+numbers or journal text.
+
+**Acceptance criteria.**
+
+- With app lock on and the detail setting off, no plant, room, product or metric
+  name appears in any widget state, including the Lock Screen.
+- Tapping a widget opens the matching task in the app behind the lock.
+- Timeline refreshes are local; no network and no analytics.
+- The widget target is added with the project tools, not by editing the project
+  file by hand.
+
+### 7.6 Grow calendar with explicit rescheduling
+
+**Problem.** Reminders and stage and harvest windows are spread across screens,
+so conflicts are easy to miss.
+
+**What ships.** A month calendar combining reminders, stage windows, harvest
+forecast windows and drying or curing check dates. A reminder can be moved to
+another day after an explicit confirmation that names the old and new date.
+
+**Acceptance criteria.**
+
+- Moving a reminder writes one new due date and re-schedules exactly one
+  notification; the old request is cancelled.
+- Overlapping tasks are visible without relying on colour.
+- A missed task stays visible until it is completed or explicitly dismissed.
+
+### 7.7 Per-cycle grow goals
+
+**Problem.** The reports show history but there is no way to say what this cycle
+is aiming for.
+
+**What ships.** Optional local targets per cycle: a dry-yield target, a
+flowering-week target and a logging-completeness target, with progress shown on
+the weekly recap. Targets are the grower's own; there is no cross-grower
+comparison, ranking or score.
+
+**Acceptance criteria.**
+
+- Targets are editable and removable, and appear in export, backup and delete.
+- Progress is stated as a value against the grower's target, never as a grade.
+- Missing data is shown as missing, not as zero progress.
+- Adding the stored type extends the data inventory, the coverage test and the
+  delete-all verification before the feature ships.
+
+### 7.8 Spanish localisation and accessible charts
+
+**Problem.** The app is English-only, and several charts have no text
+equivalent.
+
+**What ships.** A full Spanish (Mexico) localization of interface copy, units,
+dates and plural counts, and a data-table alternative for every chart and ring.
+
+**Acceptance criteria.**
+
+- No clipped or truncated string at the largest Dynamic Type size in either
+  language.
+- Numbers, dates, weights and areas use the locale's formatters.
+- Every chart has a text or table equivalent reachable with VoiceOver.
+- Legal and rule copy is translated only after qualified legal localisation
+  review; until then it stays in English with a note saying so.
+
+### 7.9 Sequencing and dependencies
+
+| Release | Features | Dependencies |
+| --- | --- | --- |
+| v2.1 | Garden timeline, Quick Log | None; both read existing records |
+| v2.2 | Photo timeline and compare, PDF grow report | Verified export/backup and delete coverage (shipped) |
+| v2.3 | Widgets, calendar, per-cycle goals, Spanish localisation | Widget extension target; a schema migration for goals; localisation review |
+
+Nothing in this section adds sharing, community, sync, sensor firmware, photo
+analysis or any transaction. Those remain blocked behind the reviews recorded in
+`docs/LEGAL_REVIEW.md`.
+
+---
+
+## 8. Technical risks and mitigations
 
 | Risk | Likelihood | Impact | Mitigation |
 | --- | --- | --- | --- |
@@ -857,7 +1039,7 @@ PLANT DETAIL
 
 ---
 
-## 8. Suggested success metrics
+## 9. Suggested success metrics
 
 Metrics measure whether growers achieve better outcomes and stay compliant.
 They must not reward maximizing plant count or yield at the expense of legal
@@ -887,7 +1069,7 @@ be reviewed together rather than optimized one at a time.
 
 ---
 
-## 9. Maintaining this document
+## 10. Maintaining this document
 
 - Review at every rule-pack release and after every Tier 3 item ships.
 - Update section 1 and section 6.2 whenever a shipped screen changes, so the
