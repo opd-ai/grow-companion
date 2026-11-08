@@ -1148,13 +1148,17 @@ dates and plural counts, and a data-table alternative for every chart and ring.
 numbers, weights, areas, temperatures, volumes, percentages and dates come from
 the device locale's formatters, and every chart and the compliance ring has a
 text table equivalent reachable with VoiceOver. The Spanish copy is a complete
-draft: 986 strings cover every user-facing screen, the shared vocabulary, the
-chrome and the service-level error copy, and the mechanism is verified — an
-ordinary build produces `es.lproj/Localizable.strings` with no project-file
-change. A coverage check finds 986 of 999 non-interpolated UI literals covered;
-the 13 leftovers are unit symbols and glyphs the code assembles at runtime.
-Interpolated strings fall back to English until their compiled format keys and
-plural variations are added. Legal and rule text stays in English with an
+draft: 1,300 strings cover every user-facing screen, the shared vocabulary, the
+chrome and the service-level error copy, including the 148 strings the app
+formats with a count, a name or a date. Their keys are the compiled format
+patterns (`"%lld plants"`), read from the build rather than guessed, and 23 of
+them carry `one`/`other` plural variations that compile into
+`es.lproj/Localizable.stringsdict`. Of the 853 keys a build asks for, the 25 that
+get no entry are placeholders (`%@ · %@`), separators and unit symbols (`·`,
+`–`, `W`, `g`), which read the same in both languages.
+`Grow CompanionTests/LocalizationCatalogTests.swift` reads the catalog and fails
+if a Spanish value changes a key's placeholders or a plural form is left out.
+Legal and rule text stays in English with an
 in-app note until the Spanish legal copy passes its own localisation review —
 the general legal review is complete (section 1.1), but it cleared the English
 copy, not a translation of it. See `docs/LOCALIZATION.md` for the glossary, the
@@ -1186,7 +1190,7 @@ table builders are pure functions with tests. See
 | --- | --- | --- |
 | v2.1 | Garden timeline, Quick Log | None; both read existing records. Shipped. |
 | v2.2 | Photo timeline and compare, PDF grow report | Verified export/backup and delete coverage (shipped). Both shipped. |
-| v2.3 | Widgets, calendar and per-cycle goals (shipped); locale formatters, chart data tables and the Spanish interface draft (shipped); interpolated strings and Spanish legal copy (open) | Widget extension target and the schema V3 migration are in place; legal copy needs its own localisation review (section 1.1) |
+| v2.3 | Widgets, calendar and per-cycle goals (shipped); locale formatters, chart data tables and the Spanish interface including variable and plural strings (shipped); Spanish legal copy (open) | Widget extension target and the schema V3 migration are in place; legal copy needs its own localisation review (section 1.1) |
 
 Nothing in this section adds sharing, community, sync, sensor firmware, photo
 analysis or any transaction. The legal review of the shipped scope is complete

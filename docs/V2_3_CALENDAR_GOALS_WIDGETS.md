@@ -120,10 +120,11 @@ suite on an iPhone 17 simulator):
 
 ## Open
 
-- **Spanish copy (7.8).** The locale plumbing and the chart data tables ship (see
-  below); the Spanish text for every screen does not. It needs a translator and
-  the legal-translation review recorded in the roadmap, because legal and rule
-  copy must stay in English with a note until that review exists.
+- **Spanish legal copy (7.8).** The interface, including the 148 variable
+  strings and 23 plural forms, is a complete Spanish draft (see below and
+  `docs/LOCALIZATION.md`). Legal and rule copy is still English and still needs
+  the legal-translation review recorded in the roadmap, plus a translator review
+  and a device pass at the largest Dynamic Type size.
 - The widget is covered by unit tests for its payload; its rendered appearance
   and the widget gallery need a device or simulator check.
 - The reminder move re-schedules one notification, which is what the app uses
@@ -139,9 +140,10 @@ locale's medium date style (`Nov 7, 2026` / `7 nov 2026`), and `Format.time` the
 locale's short time. The grower's metric or imperial choice still decides which
 unit is shown and converted; the unit symbols (`g`, `kg`, `oz`, `°C`, `m²`,
 `ft²`, `L`, `gal`) are language-neutral. `Format.dayCount` goes through
-`String(localized:)`, so a plural variant can be added in a String Catalog without
-touching the call sites. Tests set `Format.locale` to `en_US`, `es_ES` and
-`es_MX` and assert the separators, conversions and date output.
+`String(localized:)` and now has its `one`/`other` plural variant in the catalog,
+so a Spanish device reads `1 día` and `3 días`. Tests set `Format.locale` to
+`en_US`, `es_ES` and `es_MX` and assert the separators, conversions and date
+output.
 
 **Every chart has a table.** `Services/ChartTables.swift` builds the rows and
 `Design/ChartTableView.swift` renders a `Data table` (or `Values as a table`)

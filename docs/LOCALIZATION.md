@@ -17,14 +17,17 @@ xcodebuild build -project "Grow Companion.xcodeproj" -scheme "Grow Companion" \
 ls "$HOME/build-dd/Build/Products/Debug-iphoneos/Grow Companion.app" | grep lproj
 ```
 
-That prints `es.lproj`, and `plutil -convert json` on the compiled file shows the
-translated keys. Keys that are not in the catalog fall back to English, so an
-incomplete catalog is safe and can grow batch by batch.
+That prints `es.lproj`, and `plutil -convert json` on the compiled
+`Localizable.strings` shows the translated keys. Plural entries are compiled into
+`Localizable.stringsdict` beside it, not into the `.strings` file. Keys that are
+not in the catalog fall back to English, so an incomplete catalog is safe and
+can grow batch by batch.
 
 ## What is covered
 
-The catalog holds 986 Spanish (Mexico) strings and is a complete draft of the
-app's user-facing copy, screen by screen:
+The catalog holds 1,300 Spanish (Mexico) strings and is a complete draft of
+the app's user-facing copy, screen by screen, including every value the app
+formats with a variable:
 
 - the shared vocabulary: stage names, short names and the seven stage-guidance
   paragraphs; plant origin; harvest disposition and explanations; room types;
@@ -43,16 +46,29 @@ app's user-facing copy, screen by screen:
   sharing, the education library and the service-level error and status copy.
 - the verification-duty card's notice that legal text is still English.
 
-A coverage check against the source finds 986 of 999 non-interpolated UI
-literals covered. The 13 that are not are deliberately left as source
-fragments: unit symbols (`g`, `oz`, `cm`, `W`), the arrow, separator and chevron
-glyphs, and short words (`dry`, `plants`, `No dry`) that the code assembles into
-a sentence at runtime.
+**How the variable strings were found.** A string built with interpolation
+(`Text("\(count) plants")`) is looked up by its compiled format pattern
+(`"%lld plants"`), not by the text in the source, so guessing the pattern
+produces keys that silently never match. They were read from the build instead:
+compiling the app writes one `.stringsdata` file per source file into the
+derived data, and each holds the exact keys the app will ask for, with their
+format specifiers. Those 148 patterns are in the catalog now.
 
-Interpolated strings (`Text("\(count) plants")`) are not in the catalog on
-purpose: their key is the compiled format pattern (`"%lld plants"`), not the
-source text. They fall back to English, and the next pass reads the patterns
-from the built `Localizable.strings` and adds them with plural variations.
+**What is deliberately not in the catalog.** A build asks for 853 such keys.
+Twenty-five get no entry because Spanish and English read identically:
+placeholders (`%@`, `%@ · %@`, `%lld`), separators and arrows (`·`, `–`, `→`),
+unit symbols (`W`, `g`, `oz`, `cm`, `ml/L`, `m²`, `sq ft`), plain numbers, and
+`Grow Companion %@`.
+
+**Plurals.** Twenty-three entries carry `one`/`other` plural variations, which a
+build compiles into `es.lproj/Localizable.stringsdict`: counts (`%lld days`,
+`%lld overdue`, `%lld records`), the record, journal, photo and calculation
+lines, and the flowering warnings, whose verb has to agree with the number.
+Where one line holds two counts the first one selects the plural form. A few
+source lines append an English plural suffix to a noun (`"\(count) plant\(count
+== 1 ? "" : "s")"`, compiled to `"%lld plant%@"`); Spanish forms those plurals
+with a trailing `s` too, so the suffix still works, and where it cannot
+(`entr` + `y`/`ies`) the entry supplies the whole noun and its own forms.
 
 Legal and rule text — `LegalCopy`, `RulePack` citations, rule summaries,
 jurisdiction data and the federal notice — stays English on purpose. Rule 4
@@ -98,10 +114,10 @@ are.
 
 1. **The key is the exact source literal.** Copy it from the source file, not
    from memory. A key that does not match simply stays English.
-2. **Interpolated strings are skipped on purpose.** `Text("\(count) plants")`
-   has a compiled format key (`"%lld plants"`), not the source text. They need
-   the compiled pattern; leaving them English is safe. They are listed below so
-   the next batch can pick them up from the built `.strings` file.
+2. **Variable strings use the compiled pattern, not the source text.** Copy the
+   key from a build's `.stringsdata` files, never from the source interpolation.
+   A value must keep the same specifiers, in the same order; the catalog test
+   fails otherwise.
 3. **Plural strings need plural variations.** Any key with a count gets a
    `plural` variation (`one`/`other`) in Spanish, not a single value.
 4. **Legal, rule and verification text stays English.** Do not translate
@@ -117,16 +133,27 @@ are.
    pass at the largest Dynamic Type size; the build alone cannot prove nothing
    clips.
 
+## Verification
+
+`Grow CompanionTests/LocalizationCatalogTests.swift` reads this catalog from the
+source tree and fails the build when:
+
+- an entry has no Spanish text, or an empty value;
+- a Spanish value changes, drops or reorders its key's format specifiers (a
+  mistyped `%@` is a runtime format crash, not a cosmetic slip);
+- a plural entry lacks `one` or `other`.
+
+A value may leave out a trailing `%@` the English plural-suffix trick used,
+because Spanish supplies the whole noun instead.
+
 ## Remaining batches
 
-The interface draft is complete. What is left:
+The interface draft is complete, variable strings and plurals included. What is
+left:
 
-1. **Interpolated strings.** Read the compiled `es.lproj/Localizable.strings`
-   from a build, take the format patterns (`"%lld plants"`, `"target %@"`, …)
-   and add each to the catalog with Spanish values and plural variations.
-2. **Legal and rule copy**, once the legal localisation review in
+1. **Legal and rule copy**, once the legal localisation review in
    `docs/ROADMAP.md` 7.8 is signed off. Until then the English text and the
    notice in the verification-duty card are the correct state.
-3. **A translator review and a device pass** at the largest Dynamic Type size,
+2. **A translator review and a device pass** at the largest Dynamic Type size,
    because Spanish runs 15–25% longer and the build alone cannot prove nothing
    clips.
