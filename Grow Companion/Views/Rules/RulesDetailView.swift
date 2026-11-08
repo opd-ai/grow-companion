@@ -191,6 +191,12 @@ struct VerificationDutyCard: View {
                 .font(Theme.sans(13))
                 .foregroundStyle(Theme.secondaryInk)
                 .fixedSize(horizontal: false, vertical: true)
+            if let notice = Localization.legalTextNotice {
+                Text(notice)
+                    .font(Theme.sans(12, weight: .semibold))
+                    .foregroundStyle(Theme.amber)
+                    .fixedSize(horizontal: false, vertical: true)
+            }
             Text(LegalCopy.scope)
                 .font(Theme.sans(12))
                 .foregroundStyle(Theme.tertiaryInk)
