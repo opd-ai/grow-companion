@@ -3,8 +3,8 @@
 //  Grow Companion
 //
 //  Age attestation, jurisdiction, residence, experience, the rule summary and
-//  an optional first plant. Manual state selection is the default; the
-//  approximate-location shortcut is opt-in and resolves on device.
+//  an optional first plant. The grower picks the state manually; the app never
+//  asks for location and makes no lookup.
 //
 
 import SwiftUI

@@ -2,8 +2,8 @@
 //  JurisdictionPickerSheet.swift
 //  Grow Companion
 //
-//  Manual state selection is the default path; nothing is looked up by
-//  location unless the user asks for the optional approximation.
+//  Manual state selection only: the app never asks for location and makes no
+//  lookup.
 //
 
 import SwiftUI
