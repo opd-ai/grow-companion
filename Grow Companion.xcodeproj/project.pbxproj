@@ -6,6 +6,11 @@
 	objectVersion = 77;
 	objects = {
 
+/* Begin PBXBuildFile section */
+		65C074D7CB2E6A3E763D0B94 /* Grow CompanionWidgetExtension.appex in Embed App Extensions */ = {isa = PBXBuildFile; fileRef = C1714E41936804AE850757AA /* Grow CompanionWidgetExtension.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
+		8A24FE3CDCD17EE4D4C66564 /* Grow CompanionWidgetExtension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2F496B10E0EBD145DFC7D186 /* Grow CompanionWidgetExtension.swift */; };
+/* End PBXBuildFile section */
+
 /* Begin PBXContainerItemProxy section */
 		0A0000000000000000000021 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
@@ -21,13 +26,38 @@
 			remoteGlobalIDString = 0A0000000000000000000006;
 			remoteInfo = "Grow Companion";
 		};
+		7CE1399662CB590A979AC525 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 0A0000000000000000000001 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 3A4E7F7744A32DE19DD9354F;
+			remoteInfo = "Grow CompanionWidgetExtension";
+		};
 /* End PBXContainerItemProxy section */
+
+/* Begin PBXCopyFilesBuildPhase section */
+		6F19DC7C9A143F72A76A6801 /* Embed App Extensions */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 13;
+			files = (
+				65C074D7CB2E6A3E763D0B94 /* Grow CompanionWidgetExtension.appex in Embed App Extensions */,
+			);
+			name = "Embed App Extensions";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
 		0A0000000000000000000003 /* Grow Companion.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Grow Companion.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		0A0000000000000000000023 /* Grow CompanionTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "Grow CompanionTests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
 		0A0000000000000000000033 /* Grow CompanionUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "Grow CompanionUITests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
+		2F496B10E0EBD145DFC7D186 /* Grow CompanionWidgetExtension.swift */ = {isa = PBXFileReference; explicitFileType = sourcecode.swift; lastKnownFileType = sourcecode.swift; name = "Grow CompanionWidgetExtension.swift"; path = "Grow CompanionWidgetExtension.swift"; sourceTree = "<group>"; };
+		48971DDE9838466A0496DDB7 /* Info.plist */ = {isa = PBXFileReference; explicitFileType = text.plist; lastKnownFileType = text.plist.xml; name = Info.plist; path = Info.plist; sourceTree = "<group>"; };
 		70944C85361318AC1A30A408 /* Grow Companion.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; name = "Grow Companion.entitlements"; path = "Grow Companion/Grow Companion.entitlements"; sourceTree = "<group>"; };
+		C1714E41936804AE850757AA /* Grow CompanionWidgetExtension.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; name = "Grow CompanionWidgetExtension.appex"; path = "Grow CompanionWidgetExtension.appex"; sourceTree = BUILT_PRODUCTS_DIR; };
+		FBEEC35BBAEDA763A002AE43 /* Grow CompanionWidgetExtension.entitlements */ = {isa = PBXFileReference; explicitFileType = text.plist.entitlements; lastKnownFileType = text.plist.entitlements; name = "Grow CompanionWidgetExtension.entitlements"; path = "Grow CompanionWidgetExtension.entitlements"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
@@ -83,6 +113,13 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		A6BA275E5EA869F9EBF3B579 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
@@ -94,6 +131,7 @@
 				0A0000000000000000000035 /* Grow CompanionUITests */,
 				0A0000000000000000000004 /* Products */,
 				70944C85361318AC1A30A408 /* Grow Companion.entitlements */,
+				C4D798BF6A240A237676AFF3 /* Grow CompanionWidgetExtension */,
 			);
 			sourceTree = "<group>";
 		};
@@ -103,8 +141,20 @@
 				0A0000000000000000000003 /* Grow Companion.app */,
 				0A0000000000000000000023 /* Grow CompanionTests.xctest */,
 				0A0000000000000000000033 /* Grow CompanionUITests.xctest */,
+				C1714E41936804AE850757AA /* Grow CompanionWidgetExtension.appex */,
 			);
 			name = Products;
+			sourceTree = "<group>";
+		};
+		C4D798BF6A240A237676AFF3 /* Grow CompanionWidgetExtension */ = {
+			isa = PBXGroup;
+			children = (
+				2F496B10E0EBD145DFC7D186 /* Grow CompanionWidgetExtension.swift */,
+				48971DDE9838466A0496DDB7 /* Info.plist */,
+				FBEEC35BBAEDA763A002AE43 /* Grow CompanionWidgetExtension.entitlements */,
+			);
+			name = "Grow CompanionWidgetExtension";
+			path = "Grow CompanionWidgetExtension";
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -117,10 +167,12 @@
 				0A0000000000000000000007 /* Sources */,
 				0A0000000000000000000008 /* Frameworks */,
 				0A0000000000000000000009 /* Resources */,
+				6F19DC7C9A143F72A76A6801 /* Embed App Extensions */,
 			);
 			buildRules = (
 			);
 			dependencies = (
+				23E20CED99F5DB79B1EA0092 /* PBXTargetDependency */,
 			);
 			fileSystemSynchronizedGroups = (
 				0A0000000000000000000005 /* Grow Companion */,
@@ -178,6 +230,25 @@
 			productReference = 0A0000000000000000000033 /* Grow CompanionUITests.xctest */;
 			productType = "com.apple.product-type.bundle.ui-testing";
 		};
+		3A4E7F7744A32DE19DD9354F /* Grow CompanionWidgetExtension */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 6BF06ECF7C2A1490AB95F015 /* Build configuration list for PBXNativeTarget "Grow CompanionWidgetExtension" */;
+			buildPhases = (
+				A0BB2270EBDF2ACD4FE7DBBB /* Sources */,
+				A6BA275E5EA869F9EBF3B579 /* Frameworks */,
+				816E1327C58503AE70ECE320 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = "Grow CompanionWidgetExtension";
+			packageProductDependencies = (
+			);
+			productName = "Grow CompanionWidgetExtension";
+			productReference = C1714E41936804AE850757AA /* Grow CompanionWidgetExtension.appex */;
+			productType = "com.apple.product-type.app-extension";
+		};
 /* End PBXNativeTarget section */
 
 /* Begin PBXProject section */
@@ -218,6 +289,7 @@
 				0A0000000000000000000006 /* Grow Companion */,
 				0A0000000000000000000026 /* Grow CompanionTests */,
 				0A0000000000000000000036 /* Grow CompanionUITests */,
+				3A4E7F7744A32DE19DD9354F /* Grow CompanionWidgetExtension */,
 			);
 		};
 /* End PBXProject section */
@@ -238,6 +310,13 @@
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 		0A0000000000000000000039 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		816E1327C58503AE70ECE320 /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -268,6 +347,14 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		A0BB2270EBDF2ACD4FE7DBBB /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				8A24FE3CDCD17EE4D4C66564 /* Grow CompanionWidgetExtension.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXSourcesBuildPhase section */
 
 /* Begin PBXTargetDependency section */
@@ -280,6 +367,12 @@
 			isa = PBXTargetDependency;
 			target = 0A0000000000000000000006 /* Grow Companion */;
 			targetProxy = 0A0000000000000000000031 /* PBXContainerItemProxy */;
+		};
+		23E20CED99F5DB79B1EA0092 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			name = "Grow CompanionWidgetExtension";
+			target = 3A4E7F7744A32DE19DD9354F /* Grow CompanionWidgetExtension */;
+			targetProxy = 7CE1399662CB590A979AC525 /* PBXContainerItemProxy */;
 		};
 /* End PBXTargetDependency section */
 
@@ -541,6 +634,66 @@
 			};
 			name = Release;
 		};
+		4B66E9B83ACCBB02206E047C /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				APPLICATION_EXTENSION_API_ONLY = YES;
+				CODE_SIGN_ENTITLEMENTS = "Grow CompanionWidgetExtension/Grow CompanionWidgetExtension.entitlements";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_LANGUAGE = en;
+				EXECUTABLE_NAME = "$(PRODUCT_NAME)";
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = "Grow CompanionWidgetExtension/Info.plist";
+				IPHONEOS_DEPLOYMENT_TARGET = 26.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = "com.organizationName.Grow-Companion.growcompanionwidgetextension";
+				PRODUCT_BUNDLE_PACKAGE_TYPE = "XPC!";
+				PRODUCT_MODULE_NAME = Grow_CompanionWidgetExtension;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
+				SKIP_INSTALL = YES;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Release;
+		};
+		A7EAB1065631264F3125CA73 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				APPLICATION_EXTENSION_API_ONLY = YES;
+				CODE_SIGN_ENTITLEMENTS = "Grow CompanionWidgetExtension/Grow CompanionWidgetExtension.entitlements";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_LANGUAGE = en;
+				EXECUTABLE_NAME = "$(PRODUCT_NAME)";
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = "Grow CompanionWidgetExtension/Info.plist";
+				IPHONEOS_DEPLOYMENT_TARGET = 26.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = "com.organizationName.Grow-Companion.growcompanionwidgetextension";
+				PRODUCT_BUNDLE_PACKAGE_TYPE = "XPC!";
+				PRODUCT_MODULE_NAME = Grow_CompanionWidgetExtension;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
+				SKIP_INSTALL = YES;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
@@ -576,6 +729,15 @@
 			buildConfigurations = (
 				0A000000000000000000003F /* Debug */,
 				0A0000000000000000000040 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		6BF06ECF7C2A1490AB95F015 /* Build configuration list for PBXNativeTarget "Grow CompanionWidgetExtension" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				A7EAB1065631264F3125CA73 /* Debug */,
+				4B66E9B83ACCBB02206E047C /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;

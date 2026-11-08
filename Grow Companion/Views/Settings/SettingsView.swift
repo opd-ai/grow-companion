@@ -13,6 +13,9 @@ struct SettingsView: View {
 
     @AppStorage(SettingsKey.unitSystem) private var unitRaw = "metric"
     @AppStorage(SettingsKey.warningThreshold) private var warningThreshold: Double = 0.8
+    @AppStorage(SettingsKey.widgetShowsTaskTitles) private var widgetShowsTaskTitles = false
+
+    @Query(sort: \CareReminder.nextDueDate) private var reminders: [CareReminder]
 
     @State private var showingChange = false
 
@@ -36,6 +39,7 @@ struct SettingsView: View {
 
                 profileCard
                 unitsCard
+                widgetsCard
                 alertsCard
                 privacyCard
                 educationCard
@@ -94,6 +98,38 @@ struct SettingsView: View {
             Text(unit.subtitle)
                 .font(Theme.sans(12))
                 .foregroundStyle(Theme.tertiaryInk)
+        }
+        .growCard()
+    }
+
+    private var widgetsCard: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            SectionHeader("Home Screen widget", subtitle: "Counts by default, names only if you allow them")
+
+            Toggle(isOn: $widgetShowsTaskTitles) {
+                VStack(alignment: .leading, spacing: 2) {
+                    Text("Show task names")
+                        .font(Theme.sans(15, weight: .semibold))
+                        .foregroundStyle(Theme.ink)
+                    Text(
+                        widgetShowsTaskTitles
+                            ? "The widget names up to three due tasks."
+                            : "The widget shows only how many tasks are due."
+                    )
+                    .font(Theme.sans(12))
+                    .foregroundStyle(Theme.secondaryInk)
+                    .fixedSize(horizontal: false, vertical: true)
+                }
+            }
+            .tint(Theme.primary)
+            .onChange(of: widgetShowsTaskTitles) { _, _ in
+                WidgetSnapshotService.refresh(reminders: reminders)
+            }
+
+            Text("A widget never shows harvest weights, compliance numbers, journal text, plant names or room names. Turning this off leaves the counts only.")
+                .font(Theme.sans(12))
+                .foregroundStyle(Theme.tertiaryInk)
+                .fixedSize(horizontal: false, vertical: true)
         }
         .growCard()
     }

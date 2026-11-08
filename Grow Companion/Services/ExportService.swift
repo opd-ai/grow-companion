@@ -1477,6 +1477,7 @@ enum ExportService {
     static func deleteEverything(context: ModelContext, appLock: AppLock) throws -> [String: Int] {
         CareNotifications.cancelAll()
         PhotoStore.deleteAll()
+        WidgetSnapshotStore.clear()
         DataControlPreferences.resetToDefaults()
         DeviceKeyStore.deleteAll()
 

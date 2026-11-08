@@ -51,6 +51,9 @@ enum SettingsKey {
     static let quickLogRoomName = "quickLogRoomName"
     static let quickLogPlantName = "quickLogPlantName"
 
+    /// Widgets show counts only unless the grower turns task names on.
+    static let widgetShowsTaskTitles = "widgetShowsTaskTitles"
+
     /// Every preference the app writes, so delete-all can clear all of them.
     static let all: [String] = [
         unitSystem,
@@ -67,7 +70,8 @@ enum SettingsKey {
         lastBackupDate,
         lastBackupIncludesPhotos,
         quickLogRoomName,
-        quickLogPlantName
+        quickLogPlantName,
+        widgetShowsTaskTitles
     ]
 }
 
