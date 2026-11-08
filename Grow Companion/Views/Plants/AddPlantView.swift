@@ -16,7 +16,24 @@ struct AddPlantView: View {
     @Query(sort: \Strain.name) private var strains: [Strain]
     @Query(sort: \Plant.plantedAt, order: .reverse) private var plants: [Plant]
 
+    @AppStorage(SettingsKey.warningThreshold) private var warningThreshold: Double = 0.8
+
     private var rule: JurisdictionRule? { profiles.first?.rule }
+
+    /// What the jurisdiction would count after saving this plant. Nil when the
+    /// jurisdiction does not permit cultivation or no rule is set, because then
+    /// there is no count to compare.
+    private var countPreview: PlantCountPreview? {
+        guard let rule, rule.cultivable else { return nil }
+        return QuickLogService.countPreview(
+            addingStage: origin.startingStage,
+            plants: plants,
+            rule: rule,
+            warningThreshold: warningThreshold
+        )
+    }
+
+    private var isOverLimit: Bool { countPreview?.isOverLimit == true }
 
     @State private var name = ""
     @State private var selectedStrain: Strain?
@@ -124,6 +141,8 @@ struct AddPlantView: View {
 
                     field("Container (optional)", placeholder: "5 gallon fabric pot", text: $container)
 
+                    countCard
+
                     HStack {
                         Text("Planted on")
                             .font(Theme.sans(14))
@@ -159,10 +178,12 @@ struct AddPlantView: View {
                         .foregroundStyle(Theme.primary)
                 }
                 ToolbarItem(placement: .confirmationAction) {
-                    Button("Save") { save() }
-                        .fontWeight(.semibold)
-                        .foregroundStyle(canSave ? Theme.primary : Theme.tertiaryInk)
-                        .disabled(!canSave)
+                    if !isOverLimit {
+                        Button("Save") { save() }
+                            .fontWeight(.semibold)
+                            .foregroundStyle(canSave ? Theme.primary : Theme.tertiaryInk)
+                            .disabled(!canSave)
+                    }
                 }
             }
         }
@@ -176,6 +197,61 @@ struct AddPlantView: View {
             StrainEditorView(onSaved: { created in
                 selectedStrain = created
             })
+        }
+    }
+
+    // MARK: Count preview
+
+    /// The pre-save count against the jurisdiction's limit, shown before the
+    /// plant exists. When adding it would cross the limit, the Save action is
+    /// withdrawn and the rule, its counting method and its citation are shown
+    /// instead.
+    @ViewBuilder
+    private var countCard: some View {
+        if let preview = countPreview, let rule {
+            VStack(alignment: .leading, spacing: 10) {
+                HStack(alignment: .firstTextBaseline) {
+                    Text("Plant count")
+                        .font(Theme.sans(11, weight: .semibold))
+                        .textCase(.uppercase)
+                        .foregroundStyle(Theme.secondaryInk)
+                    Spacer(minLength: 8)
+                    Pill(
+                        text: preview.level.title,
+                        systemImage: nil,
+                        tint: preview.level.tint,
+                        fill: preview.level.softFill
+                    )
+                }
+
+                Text("\(preview.countedBefore) → \(preview.countedAfter) of \(preview.plantLimit.map(String.init) ?? "—")")
+                    .font(Theme.serif(24))
+                    .foregroundStyle(Theme.ink)
+
+                Text(rule.countingNote)
+                    .font(Theme.sans(12))
+                    .foregroundStyle(Theme.secondaryInk)
+                    .fixedSize(horizontal: false, vertical: true)
+
+                if preview.isOverLimit {
+                    Text("This would go over the plant limit. Saving is blocked here: remove a plant first, or check the rule for your jurisdiction.")
+                        .font(Theme.sans(13, weight: .semibold))
+                        .foregroundStyle(Theme.amber)
+                        .fixedSize(horizontal: false, vertical: true)
+
+                    if !rule.citation.isEmpty {
+                        Text(rule.citation)
+                            .font(Theme.sans(11))
+                            .foregroundStyle(Theme.secondaryInk)
+                            .fixedSize(horizontal: false, vertical: true)
+                    }
+                }
+            }
+            .growCard(fill: preview.isOverLimit ? Theme.amberSoft : Theme.surfaceSunken, padding: 16)
+            .accessibilityElement(children: .combine)
+            .accessibilityLabel(
+                "\(preview.countedBefore) of \(preview.plantLimit.map(String.init) ?? "no") plants counted now, \(preview.countedAfter) after saving. \(preview.level.title). \(rule.countingNote)"
+            )
         }
     }
 
@@ -373,6 +449,9 @@ struct AddPlantView: View {
     private func save() {
         let trimmedName = name.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !trimmedName.isEmpty else { return }
+        // A plant that would cross the jurisdiction's limit is never written,
+        // even if the sheet is somehow saved without the toolbar.
+        guard !isOverLimit else { return }
 
         let room: Room
         if let selectedRoom {

@@ -407,7 +407,7 @@ and sharing layers are stable, because most of it depends on them.
 Each story lists its state in the shipped app: **Shipped**, **Partial** (some of
 the criteria are met), or **Planned**.
 
-### 1. Confirm my plant count is legal before I plant — Partial
+### 1. Confirm my plant count is legal before I plant — Shipped
 
 As a new grower, I want to see whether adding a plant keeps me within my
 jurisdiction's limit, so I don't exceed it by accident.
@@ -419,9 +419,18 @@ jurisdiction's limit, so I don't exceed it by accident.
 - The counting method is shown beside the number, including whether seedlings
   or clones count.
 
-*Today:* the compliance ring, counting note and "How this is counted" breakdown
-ship, and the add-plant screen warns when the jurisdiction does not permit
-cultivation. The pre-save count preview is the remaining work.
+*Shipped:* Add Plant shows a count card before saving — the counted total now,
+the total after saving, the jurisdiction's limit, the rule's level and its
+counting note — computed by `QuickLogService.countPreview(addingStage:…)` without
+writing anything. When the addition would cross the limit the Save action is
+withdrawn, the card turns amber and names the rule, its counting method and its
+citation, and the save path refuses the write even if it is reached another way.
+The same check already guards a stage change in Quick Log and on plant detail,
+and the compliance ring, counting note and "How this is counted" breakdown
+remain the live view of the same calculation. Tests cover a counted seed, a
+clone in a rule that excludes clones and one that includes them, the over-limit
+case, a rule with no numeric limit, destroyed plants and a non-cultivable
+jurisdiction.
 
 ### 2. Know when a rule has changed — Partial
 
@@ -458,7 +467,7 @@ Watch or with Siri.
 is part of the current project setup, so the story is blocked on platform work
 rather than on app code.
 
-### 4. Get warned before my room leaves its range — Planned
+### 4. Get warned before my room leaves its range — Shipped
 
 As a grower, I want an alert when temperature or humidity leaves the target
 range for my stage, so I can act before plants are damaged.
@@ -469,10 +478,18 @@ range for my stage, so I can act before plants are damaged.
   action.
 - Alerts respect quiet hours, except for alerts the user has marked critical.
 
-*Today:* readings are compared with stage targets, out-of-range values are
-highlighted in the chart and data table, and reminders respect priority and
-quiet hours. Sustained-out-of-range detection and its notification are the
-remaining work.
+*Shipped:* `EnvironmentAlertService.excursions` walks the room's readings in
+date order and only treats a run as sustained when consecutive out-of-range
+readings are no more than the threshold apart, so a single spike — or two
+out-of-range readings separated by hours of no measurement — never raises an
+alert. `evaluate` records one alert per excursion, never re-reports an older
+one, and schedules the notification with the room, the reading, the target and a
+suggested action that matches the direction of the excursion. Quiet hours come
+from the readings category's priority, so marking that category critical is the
+grower's way to let an alert through. The room's threshold stays editable on the
+room screen (`sustainedAlertMinutes`, default 10). Tests cover a brief spike, a
+sustained run, a long gap, a return to range, humidity measured separately and
+the direction of the suggested action.
 
 ### 5. Track a plant from seed to storage — Partial
 

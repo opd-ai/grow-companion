@@ -51,10 +51,13 @@ enum CareNotifications {
     }
 
     /// Generic one-off notification used by the curing burp schedule.
-    static func schedule(_ alert: EnvironmentAlert, room: Room) {
+    static func schedule(_ alert: EnvironmentAlert, room: Room, suggestedAction: String? = nil) {
         let metric = alert.metric
         let title = "\(room.name) · \(metric.title) out of range"
-        let body = "\(metric.display(alert.value, unit: .metric)); target \(metric.displayTarget(alert.target, unit: .metric))."
+        var body = "\(metric.display(alert.value, unit: .metric)); target \(metric.displayTarget(alert.target, unit: .metric))."
+        if let suggestedAction {
+            body += " " + suggestedAction
+        }
         NotificationSettings.schedule(identifier: alert.notificationIdentifier, category: .readings, title: title, body: body, at: alert.detectedAt)
     }
 

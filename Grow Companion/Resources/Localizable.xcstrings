@@ -986,7 +986,14 @@
     "What the rule says" : { "localizations" : { "es" : { "stringUnit" : { "state" : "translated", "value" : "Qué dice la norma" } } } },
     "What this means" : { "localizations" : { "es" : { "stringUnit" : { "state" : "translated", "value" : "Qué significa" } } } },
     "Your jurisdiction does not permit personal home cultivation, so Grow Companion will open in education-only mode. The rules and guidance stay available." : { "localizations" : { "es" : { "stringUnit" : { "state" : "translated", "value" : "Tu jurisdicción no permite el cultivo personal en casa, así que Grow Companion se abrirá en modo solo educativo. Las normas y la orientación siguen disponibles." } } } },
-    "Your records could not be opened" : { "localizations" : { "es" : { "stringUnit" : { "state" : "translated", "value" : "No se pudieron abrir tus registros" } } } }
+    "Your records could not be opened" : { "localizations" : { "es" : { "stringUnit" : { "state" : "translated", "value" : "No se pudieron abrir tus registros" } } } },
+    "Plant count" : { "localizations" : { "es" : { "stringUnit" : { "state" : "translated", "value" : "Recuento de plantas" } } } },
+    "This would go over the plant limit. Saving is blocked here: remove a plant first, or check the rule for your jurisdiction." : { "localizations" : { "es" : { "stringUnit" : { "state" : "translated", "value" : "Esto superaría el límite de plantas. Aquí no se puede guardar: quita antes una planta o revisa la norma de tu jurisdicción." } } } },
+    "Humidity is above the target. Increase airflow and check for wet spots; high humidity raises mould risk." : { "localizations" : { "es" : { "stringUnit" : { "state" : "translated", "value" : "La humedad está por encima del objetivo. Aumenta la ventilación y busca puntos húmedos; la humedad alta eleva el riesgo de moho." } } } },
+    "Humidity is below the target. Raise it gradually and keep the room steady." : { "localizations" : { "es" : { "stringUnit" : { "state" : "translated", "value" : "La humedad está por debajo del objetivo. Súbela poco a poco y mantén la sala estable." } } } },
+    "Light is outside the target. Check the fixture height and its schedule." : { "localizations" : { "es" : { "stringUnit" : { "state" : "translated", "value" : "La luz está fuera del objetivo. Revisa la altura de la luminaria y su horario." } } } },
+    "Temperature is above the target. Ventilate the room or raise the light, and check that the fan is running." : { "localizations" : { "es" : { "stringUnit" : { "state" : "translated", "value" : "La temperatura está por encima del objetivo. Ventila la sala o sube la luminaria y comprueba que el ventilador funciona." } } } },
+    "Temperature is below the target. Reduce cooling or add gentle heat, and keep the room out of cold drafts." : { "localizations" : { "es" : { "stringUnit" : { "state" : "translated", "value" : "La temperatura está por debajo del objetivo. Reduce la refrigeración o añade calor suave y mantén la sala lejos de corrientes frías." } } } }
   },
   "version" : "1.0"
 }

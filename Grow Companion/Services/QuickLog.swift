@@ -189,12 +189,35 @@ enum QuickLogService {
         )
     }
 
+    /// What the jurisdiction would count if a plant in this stage were added,
+    /// without writing anything.
+    static func countPreview(
+        addingStage stage: PlantStage,
+        plants: [Plant],
+        rule: JurisdictionRule,
+        warningThreshold: Double
+    ) -> PlantCountPreview {
+        let before = plants.filter { ComplianceEngine.counts($0, rule: rule) }.count
+        let after = before + (counts(stage: stage, rule: rule) ? 1 : 0)
+
+        return PlantCountPreview(
+            countedBefore: before,
+            countedAfter: after,
+            plantLimit: rule.plantLimit,
+            warningThreshold: warningThreshold
+        )
+    }
+
     private static func counts(plant: Plant, stage: PlantStage, rule: JurisdictionRule) -> Bool {
+        guard plant.harvestDisposition != .destroyed else { return false }
+        return counts(stage: stage, rule: rule)
+    }
+
+    private static func counts(stage: PlantStage, rule: JurisdictionRule) -> Bool {
         guard rule.cultivable else { return false }
         guard stage != .storage else { return false }
         guard rule.countedStages.contains(stage) else { return false }
         if stage == .clone && !rule.countsClones { return false }
-        if plant.harvestDisposition == .destroyed { return false }
         return true
     }
 
