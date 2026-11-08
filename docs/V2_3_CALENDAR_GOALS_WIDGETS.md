@@ -121,12 +121,11 @@ suite on an iPhone 17 simulator):
 ## Open
 
 - **Spanish legal copy (7.8).** The interface, including the 148 variable
-  strings, 23 plural forms, the model and service copy and the widget's
+  strings, 23 plural forms, the model, service and view copy and the widget's
   headline, is a complete Spanish draft (see below and `docs/LOCALIZATION.md`).
-  Copy computed inside views is the remaining engineering pass. Legal and rule
-  copy is still English and still needs the legal-translation review recorded in
-  the roadmap, plus a translator review and a device pass at the largest Dynamic
-  Type size.
+  Legal and rule copy is still English and still needs the legal-translation
+  review recorded in the roadmap, plus a translator review and a device pass at
+  the largest Dynamic Type size.
 - The widget is covered by unit tests for its payload; its rendered appearance
   and the widget gallery need a device or simulator check.
 - The reminder move re-schedules one notification, which is what the app uses

@@ -25,7 +25,7 @@ can grow batch by batch.
 
 ## What is covered
 
-The catalog holds 1,400 Spanish (Mexico) strings and is a complete draft of
+The catalog holds 1,456 Spanish (Mexico) strings and is a complete draft of
 the app's user-facing copy, screen by screen, including every value the app
 formats with a variable:
 
@@ -102,12 +102,13 @@ A build confirmed the result: of 1,130 keys the compiled app asks for, 27 get no
 entry, and every one of them is a placeholder, a unit symbol, a bare number or
 `Grow Companion %@` — text that reads identically in both languages.
 
-**What is left here** is copy computed *inside views*: the long sentences in the
-home, harvest, drying, comparison, anomaly and feed-schedule screens. The short
-view-level copy (greetings, onboarding buttons, filters, permission and share
-states, empty states) now goes through `String(localized:)` and has its Spanish
-text; about 90 longer display literals across the remaining view files still
-hand a `String` to `Text` and need the same wrap and their format keys.
+**View copy.** The copy computed inside views — home summaries and stage
+sentences, the cycle comparison, drying and harvest calendar, anomaly review,
+feed schedules, room sections, calculators, backup, strain detail and library
+— now goes through `String(localized:)` too, including the date-and-time
+phrases and the accessibility labels. A build then asks for 1,218 keys and every
+one of them except 27 placeholders, unit symbols, bare numbers and
+`Grow Companion %@` has Spanish text.
 
 ## Glossary (use these exact words in later batches)
 
@@ -186,12 +187,9 @@ because Spanish supplies the whole noun instead.
 The interface draft is complete, variable strings and plurals included. What is
 left:
 
-1. **View-level copy**, described above: about 90 longer display literals
-   computed inside view files still reach `Text` as a `String`, so they need the
-   `String(localized:)` wrap and their format keys added.
-2. **Legal and rule copy**, once the legal localisation review in
+1. **Legal and rule copy**, once the legal localisation review in
    `docs/ROADMAP.md` 7.8 is signed off. Until then the English text and the
    notice in the verification-duty card are the correct state.
-3. **A translator review and a device pass** at the largest Dynamic Type size,
+2. **A translator review and a device pass** at the largest Dynamic Type size,
    because Spanish runs 15–25% longer and the build alone cannot prove nothing
    clips.
