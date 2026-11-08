@@ -17,6 +17,7 @@ struct PlantDetailView: View {
 
     @Query(sort: \Strain.name) private var strains: [Strain]
     @Query(sort: \Plant.plantedAt, order: .reverse) private var allPlants: [Plant]
+    @Query(sort: \GrowProfile.createdAt, order: .reverse) private var profiles: [GrowProfile]
 
     @State private var showingMotherPicker = false
     @State private var showingBackfill = false
@@ -30,7 +31,10 @@ struct PlantDetailView: View {
     @State private var ratingSelection: Int?
     @State private var tastingNotesText = ""
     @State private var showingRatingSaved = false
+    @State private var limitWarningMessage = ""
+    @State private var showingLimitWarning = false
     @AppStorage(SettingsKey.unitSystem) private var unitRaw = "metric"
+    @AppStorage(SettingsKey.warningThreshold) private var warningThreshold: Double = 0.8
 
     private var unit: UnitSystem { UnitSystem(rawValue: unitRaw) ?? .metric }
 
@@ -104,6 +108,11 @@ struct PlantDetailView: View {
             Button("Keep plant", role: .cancel) {}
         } message: {
             Text("Its stage history is deleted too. Journal entries stay but lose their plant link.")
+        }
+        .alert("Over the plant limit", isPresented: $showingLimitWarning) {
+            Button("OK", role: .cancel) {}
+        } message: {
+            Text(limitWarningMessage)
         }
         .onAppear {
             loadWeights()
@@ -970,6 +979,23 @@ struct PlantDetailView: View {
     }
 
     private func advance(to stage: PlantStage) {
+        if let rule = profiles.first?.rule {
+            let preview = QuickLogService.countPreview(
+                plant: plant,
+                to: stage,
+                plants: allPlants,
+                rule: rule,
+                warningThreshold: warningThreshold
+            )
+            if preview.isOverLimit {
+                let limitText = preview.plantLimit.map(String.init) ?? "—"
+                let counting = rule.countingNote.isEmpty ? "" : " \(rule.countingNote)"
+                limitWarningMessage = "Moving \(plant.displayName) to \(stage.title) would count \(preview.countedAfter) plants against a limit of \(limitText).\(counting)\n\nNo change has been saved. Verify the current rule where you live."
+                showingLimitWarning = true
+                return
+            }
+        }
+
         let event = StageEvent(stage: stage, date: Date())
         context.insert(event)
         event.plant = plant
