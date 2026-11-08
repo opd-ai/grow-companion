@@ -22,6 +22,7 @@ struct GardenTimelineView: View {
     @Query(sort: \ScoutingCheck.date, order: .reverse) private var scouting: [ScoutingCheck]
     @Query(sort: \DryingCheck.date, order: .reverse) private var dryingChecks: [DryingCheck]
     @Query(sort: \CureBurp.date, order: .reverse) private var cureBurps: [CureBurp]
+    @Query(sort: \EnvironmentAlert.detectedAt, order: .reverse) private var environmentAlerts: [EnvironmentAlert]
 
     @Query(sort: \Room.createdAt) private var rooms: [Room]
     @Query(sort: \Plant.plantedAt, order: .reverse) private var plants: [Plant]
@@ -55,7 +56,8 @@ struct GardenTimelineView: View {
                 treatments: treatments,
                 scouting: scouting,
                 dryingChecks: dryingChecks,
-                cureBurps: cureBurps
+                cureBurps: cureBurps,
+                environmentAlerts: environmentAlerts
             ),
             unit: unit
         )

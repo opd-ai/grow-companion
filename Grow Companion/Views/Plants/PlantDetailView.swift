@@ -23,6 +23,8 @@ struct PlantDetailView: View {
     @State private var showingBackfill = false
     @State private var editingEvent: StageEvent?
     @State private var showingDeleteConfirm = false
+    @State private var removalError = ""
+    @State private var showingRemovalError = false
     @State private var showingHarvestSheet = false
     @State private var wetText = ""
     @State private var dryText = ""
@@ -107,16 +109,24 @@ struct PlantDetailView: View {
             }
         }
         .confirmationDialog(
-            "Delete this plant?",
+            "Remove this plant?",
             isPresented: $showingDeleteConfirm,
             titleVisibility: .visible
         ) {
-            Button("Delete plant", role: .destructive) {
+            Button("Archive and keep history") {
+                archivePlant()
+            }
+            Button("Delete plant and its history", role: .destructive) {
                 deletePlant()
             }
             Button("Keep plant", role: .cancel) {}
         } message: {
-            Text("Its stage history is deleted too. Journal entries stay but lose their plant link.")
+            Text("Archiving keeps every record and moves the plant out of your active garden. Deleting removes the plant and its stage, training, treatment, scouting and drying records; journal entries stay without a plant link.")
+        }
+        .alert("The plant was not changed", isPresented: $showingRemovalError) {
+            Button("OK", role: .cancel) {}
+        } message: {
+            Text(removalError)
         }
         .alert("Over the plant limit", isPresented: $showingLimitWarning) {
             Button("OK", role: .cancel) {}
@@ -1032,9 +1042,24 @@ struct PlantDetailView: View {
     }
 
     private func deletePlant() {
-        context.delete(plant)
-        try? context.save()
-        dismiss()
+        do {
+            try PlantRemovalService.delete(plant, in: context)
+            dismiss()
+        } catch {
+            removalError = error.localizedDescription
+            showingRemovalError = true
+        }
+    }
+
+    /// Keeps every record and moves the plant out of the active garden.
+    private func archivePlant() {
+        do {
+            try PlantRemovalService.archive(plant, in: context)
+            dismiss()
+        } catch {
+            removalError = error.localizedDescription
+            showingRemovalError = true
+        }
     }
 }
 

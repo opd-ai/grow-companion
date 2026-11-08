@@ -21,6 +21,7 @@ enum GardenEventKind: String, CaseIterable, Identifiable {
     case scouting
     case dryingCheck
     case cureBurp
+    case environmentAlert
 
     var id: String { rawValue }
 
@@ -37,6 +38,7 @@ enum GardenEventKind: String, CaseIterable, Identifiable {
         case .scouting: return "Scouting"
         case .dryingCheck: return "Drying check"
         case .cureBurp: return "Burping"
+        case .environmentAlert: return "Environment alert"
         }
     }
 
@@ -53,6 +55,7 @@ enum GardenEventKind: String, CaseIterable, Identifiable {
         case .scouting: return "eye"
         case .dryingCheck: return "wind"
         case .cureBurp: return "hourglass"
+        case .environmentAlert: return "exclamationmark.triangle"
         }
     }
 }
@@ -89,6 +92,7 @@ struct GardenTimelineSources {
     var scouting: [ScoutingCheck] = []
     var dryingChecks: [DryingCheck] = []
     var cureBurps: [CureBurp] = []
+    var environmentAlerts: [EnvironmentAlert] = []
 }
 
 /// Local filter state. A value type that never touches the store.
@@ -308,6 +312,19 @@ enum GardenTimelineService {
                 detail: burp.note.isEmpty ? nil : burp.note,
                 plant: plant,
                 room: plant?.room,
+                journalEntry: nil
+            )
+        })
+
+        events.append(contentsOf: sources.environmentAlerts.map { alert in
+            GardenEvent(
+                id: identifier(kind: .environmentAlert, model: alert),
+                date: alert.detectedAt,
+                kind: .environmentAlert,
+                title: "\(alert.metric.title) out of range",
+                detail: "\(alert.metric.display(alert.value, unit: unit)); target \(alert.metric.displayTarget(alert.target, unit: unit))",
+                plant: nil,
+                room: alert.room,
                 journalEntry: nil
             )
         })

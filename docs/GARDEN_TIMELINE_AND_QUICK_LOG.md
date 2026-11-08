@@ -106,7 +106,7 @@ filled, so a saved watering is two taps from Home.
 ## Tests
 
 `Grow CompanionTests/GardenTimelineTests.swift`:
-- all eleven timestamped types merged exactly once, in descending order;
+- all twelve timestamped types merged exactly once, in descending order;
 - unique identifiers and room/plant associations;
 - room, plant, type and combined filters, and that filtering writes nothing.
 

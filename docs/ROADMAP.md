@@ -491,7 +491,7 @@ room screen (`sustainedAlertMinutes`, default 10). Tests cover a brief spike, a
 sustained run, a long gap, a return to range, humidity measured separately and
 the direction of the suggested action.
 
-### 5. Track a plant from seed to storage — Partial
+### 5. Track a plant from seed to storage — Shipped
 
 As an experienced grower, I want each plant's stage history and every related
 event in one timeline, so I can review what happened.
@@ -503,10 +503,19 @@ event in one timeline, so I can review what happened.
 - Deleting a plant offers to keep or delete its history, and it never deletes
   batch records without confirmation.
 
-*Today:* stage changes are timestamped, the backfill editor records a missed
-transition, and journal entries link to plants. Feeds and readings are logged per
-room rather than per plant, training events do not exist yet, and deleting a
-plant removes its stage history without offering to keep it.
+*Shipped:* stage changes are timestamped, the backfill editor records a missed
+transition with a reason, and plant detail gathers the stage history, training,
+treatments, scouting checks, photos and harvest record for one plant. The garden
+timeline now merges feeds, readings and environment alerts as well as the eleven
+record types it already carried, and filters by room or plant. Removing a plant
+asks first and offers *Archive and keep history* — every record stays readable
+and the plant leaves the active garden through a cycle archive — or *Delete
+plant and its history*, which removes the plant and its stage, training,
+treatment, scouting and drying records while journal entries stay without a
+plant link. `PlantRemovalService` performs both outcomes with explicit errors,
+and its summary feeds the confirmation. Tests cover archiving, reusing an
+archive, deletion keeping the journal, the summary counts and the environment
+alert entry in the timeline.
 
 ### 6. Compare yield per watt across rooms — Shipped
 
@@ -917,8 +926,8 @@ calibrations, light-schedule changes, training, treatments, scouting checks,
 drying checks and burps. Day-grouped, with filters for room, plant and event
 type, and a tap that opens the source record.
 
-**Shipped:** `Services/GardenTimeline.swift` merges all eleven record types as
-one pure, date-ordered list with room and plant attached; the view reads them
+**Shipped:** `Services/GardenTimeline.swift` merges all twelve record types —
+including environment alerts — as one pure, date-ordered list with room and plant attached; the view reads them
 through live queries, filters with local state only, and links each row to its
 journal entry, plant or room. See `docs/GARDEN_TIMELINE_AND_QUICK_LOG.md`.
 

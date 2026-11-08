@@ -993,7 +993,13 @@
     "Humidity is below the target. Raise it gradually and keep the room steady." : { "localizations" : { "es" : { "stringUnit" : { "state" : "translated", "value" : "La humedad está por debajo del objetivo. Súbela poco a poco y mantén la sala estable." } } } },
     "Light is outside the target. Check the fixture height and its schedule." : { "localizations" : { "es" : { "stringUnit" : { "state" : "translated", "value" : "La luz está fuera del objetivo. Revisa la altura de la luminaria y su horario." } } } },
     "Temperature is above the target. Ventilate the room or raise the light, and check that the fan is running." : { "localizations" : { "es" : { "stringUnit" : { "state" : "translated", "value" : "La temperatura está por encima del objetivo. Ventila la sala o sube la luminaria y comprueba que el ventilador funciona." } } } },
-    "Temperature is below the target. Reduce cooling or add gentle heat, and keep the room out of cold drafts." : { "localizations" : { "es" : { "stringUnit" : { "state" : "translated", "value" : "La temperatura está por debajo del objetivo. Reduce la refrigeración o añade calor suave y mantén la sala lejos de corrientes frías." } } } }
+    "Temperature is below the target. Reduce cooling or add gentle heat, and keep the room out of cold drafts." : { "localizations" : { "es" : { "stringUnit" : { "state" : "translated", "value" : "La temperatura está por debajo del objetivo. Reduce la refrigeración o añade calor suave y mantén la sala lejos de corrientes frías." } } } },
+    "Environment alert" : { "localizations" : { "es" : { "stringUnit" : { "state" : "translated", "value" : "Alerta de ambiente" } } } },
+    "Remove this plant?" : { "localizations" : { "es" : { "stringUnit" : { "state" : "translated", "value" : "¿Quitar esta planta?" } } } },
+    "Archive and keep history" : { "localizations" : { "es" : { "stringUnit" : { "state" : "translated", "value" : "Archivar y conservar el historial" } } } },
+    "Delete plant and its history" : { "localizations" : { "es" : { "stringUnit" : { "state" : "translated", "value" : "Eliminar la planta y su historial" } } } },
+    "Archiving keeps every record and moves the plant out of your active garden. Deleting removes the plant and its stage, training, treatment, scouting and drying records; journal entries stay without a plant link." : { "localizations" : { "es" : { "stringUnit" : { "state" : "translated", "value" : "Archivar conserva todos los registros y saca la planta de tu jardín activo. Eliminar borra la planta y sus registros de etapa, entrenamiento, tratamiento, inspección y secado; las entradas del diario se conservan sin vínculo con la planta." } } } },
+    "The plant was not changed" : { "localizations" : { "es" : { "stringUnit" : { "state" : "translated", "value" : "La planta no se modificó" } } } }
   },
   "version" : "1.0"
 }
