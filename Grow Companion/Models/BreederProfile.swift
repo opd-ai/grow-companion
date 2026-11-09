@@ -18,8 +18,9 @@ struct BreederLink: Hashable, Identifiable {
     var id: String { url.absoluteString }
 }
 
-/// One bundled breeder: who they are, what the catalogue is known for, and
-/// where the reference came from.
+/// One breeder profile, bundled or partly the grower's own. The reference copy
+/// and the grower's notes are separate fields on purpose: the app never blends
+/// a claim with something the grower wrote.
 struct BreederProfile: Hashable, Identifiable {
     let name: String
     let summary: String
@@ -28,9 +29,18 @@ struct BreederProfile: Hashable, Identifiable {
     let source: String
     let reviewedOn: Date
 
+    /// The grower's own notes for this breeder, kept beside the reference.
+    var yourNotes: String?
+    /// When the grower last saved those notes.
+    var yourNotesUpdatedOn: Date?
+    /// True when the profile exists only because the grower added it.
+    var isGrowerOnly: Bool = false
+
     var id: String { name }
 
     var hasLinks: Bool { !links.isEmpty }
+
+    var hasYourNotes: Bool { !(yourNotes ?? "").isEmpty }
 }
 
 /// Reference lineage for one bundled cultivar. Kept per cultivar rather than

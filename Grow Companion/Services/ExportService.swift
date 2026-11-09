@@ -42,6 +42,7 @@ struct ExportSnapshot {
     var complianceSnapshots: [ComplianceSnapshot] = []
     var ruleEvaluationEvents: [RuleEvaluationEvent] = []
     var goals: [GrowGoal] = []
+    var breeders: [GrowerBreeder] = []
     var counts: [String: Int] = [:]
 }
 
@@ -87,7 +88,7 @@ enum ExportService {
         "DryingSession", "DryingCheck", "CureBurp", "TrainingSession",
         "Treatment", "Equipment", "ServiceRecord", "ScoutingCheck",
         "FeedSchedule", "FeedWeek", "FeedProduct",
-        "ComplianceSnapshot", "RuleEvaluationEvent", "GrowGoal"
+        "ComplianceSnapshot", "RuleEvaluationEvent", "GrowGoal", "GrowerBreeder"
     ]
 
     static func build(snapshot: ExportSnapshot, options: ExportOptions) throws -> ExportPayload {
@@ -197,6 +198,9 @@ enum ExportService {
             "goals": snapshot.goals
                 .sorted { $0.createdAt < $1.createdAt }
                 .map(goalDictionary),
+            "breeders": snapshot.breeders
+                .sorted { $0.name.localizedCaseInsensitiveCompare($1.name) == .orderedAscending }
+                .map(breederDictionary),
             "journal": options.includeJournal ? snapshot.journal.map(journalDictionary) : []
         ]
 
@@ -222,6 +226,16 @@ enum ExportService {
             "loggingCompletenessTargetPercent": boxed(goal.loggingCompletenessTargetPercent),
             "createdAt": iso(goal.createdAt),
             "updatedAt": iso(goal.updatedAt)
+        ]
+    }
+
+    private static func breederDictionary(_ breeder: GrowerBreeder) -> [String: Any] {
+        [
+            "name": breeder.name,
+            "notes": breeder.notes,
+            "website": breeder.website ?? "",
+            "createdAt": iso(breeder.createdAt),
+            "updatedAt": iso(breeder.updatedAt)
         ]
     }
 
@@ -1531,8 +1545,9 @@ enum ExportService {
     =====================
 
     grow-companion.json  Everything in one file: profile, rooms, plants with
-                         their stage history, strains, feed schedules, cycle
-                         archives, sensors, sharing configurations, reminders,
+                         their stage history, strains, feed schedules, your
+                         cycle goals and breeder notes, cycle archives, sensors,
+                         sharing configurations, reminders,
                          environment readings, feeds, calibrations, light
                          schedule changes, treatments, equipment and service
                          history, scouting, drying and curing sessions, and the

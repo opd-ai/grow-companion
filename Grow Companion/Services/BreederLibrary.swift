@@ -2,10 +2,10 @@
 //  BreederLibrary.swift
 //  Grow Companion
 //
-//  The read-only breeder reference the strain screens use: bundled profiles
-//  keyed by a normalised breeder name, the lineage claimed for a bundled
-//  cultivar, and the comparison between a cultivar's claimed flowering window
-//  and the grower's own finished cycles.
+//  The breeder reference the strain screens use: bundled profiles keyed by a
+//  normalised breeder name, the grower's own notes attached beside them, the
+//  lineage claimed for a bundled cultivar, and the comparison between a
+//  cultivar's claimed flowering window and the grower's own finished cycles.
 //
 
 import Foundation
@@ -111,23 +111,25 @@ enum BreederLibrary {
         )
     ]
 
-    static func profile(named name: String) -> BreederProfile? {
+    static func profile(named name: String, stored: [GrowerBreeder] = []) -> BreederProfile? {
         let lookup = key(for: name)
         guard !lookup.isEmpty else { return nil }
-        return profiles.first { key(for: $0.name) == lookup }
+        return allProfiles(stored: stored).first { key(for: $0.name) == lookup }
     }
 
     static func profile(for strain: Strain) -> BreederProfile? {
         profile(named: strain.displayBreeder)
     }
 
-    static func profiles(matching query: String) -> [BreederProfile] {
+    static func profiles(matching query: String, stored: [GrowerBreeder] = []) -> [BreederProfile] {
+        let all = allProfiles(stored: stored)
         let lookup = key(for: query)
-        guard !lookup.isEmpty else { return profiles }
-        return profiles.filter {
+        guard !lookup.isEmpty else { return all }
+        return all.filter {
             key(for: $0.name).contains(lookup)
                 || key(for: $0.summary).contains(lookup)
                 || key(for: $0.notes).contains(lookup)
+                || key(for: $0.yourNotes ?? "").contains(lookup)
         }
     }
 
@@ -234,6 +236,75 @@ enum BreederLibrary {
     /// Every bundled breeder's strains, for the index screen.
     static func strainCount(for profile: BreederProfile, in strains: [Strain]) -> Int {
         Self.strains(forBreeder: profile.name, in: strains).count
+    }
+
+    // MARK: The grower's own notes
+
+    /// The source line for notes the grower wrote themselves.
+    static let yourNotesSource = String(localized: "Your notes")
+
+    /// One-line description for a breeder the bundled reference does not carry.
+    static let growerOnlySummary = String(localized: "Added by you")
+
+    /// The bundled profiles with the grower's notes attached, followed by the
+    /// breeders only the grower has. A bundled breeder keeps its canonical name,
+    /// so the reference, the strains and the profile stay matched by one key.
+    static func allProfiles(stored: [GrowerBreeder] = []) -> [BreederProfile] {
+        guard !stored.isEmpty else { return profiles }
+
+        let byKey = Dictionary(
+            stored.map { (key(for: $0.name), $0) },
+            uniquingKeysWith: { first, second in
+                first.updatedAt >= second.updatedAt ? first : second
+            }
+        )
+
+        var merged: [BreederProfile] = profiles.map { profile in
+            guard let record = byKey[key(for: profile.name)], !record.isEmpty else {
+                return profile
+            }
+            let existing = Set(profile.links.map { $0.url.absoluteString.lowercased() })
+            let added = websiteLinks(record).filter {
+                !existing.contains($0.url.absoluteString.lowercased())
+            }
+            return BreederProfile(
+                name: profile.name,
+                summary: profile.summary,
+                notes: profile.notes,
+                links: profile.links + added,
+                source: profile.source,
+                reviewedOn: profile.reviewedOn,
+                yourNotes: record.trimmedNotes.isEmpty ? nil : record.trimmedNotes,
+                yourNotesUpdatedOn: record.updatedAt
+            )
+        }
+
+        let bundledKeys = Set(profiles.map { key(for: $0.name) })
+        let extra = byKey
+            .filter { !bundledKeys.contains($0.key) && !$0.value.isEmpty }
+            .values
+            .map { record in
+                BreederProfile(
+                    name: record.name.trimmingCharacters(in: .whitespacesAndNewlines),
+                    summary: growerOnlySummary,
+                    notes: "",
+                    links: websiteLinks(record),
+                    source: yourNotesSource,
+                    reviewedOn: record.updatedAt,
+                    yourNotes: record.trimmedNotes.isEmpty ? nil : record.trimmedNotes,
+                    yourNotesUpdatedOn: record.updatedAt,
+                    isGrowerOnly: true
+                )
+            }
+            .sorted { $0.name.localizedCaseInsensitiveCompare($1.name) == .orderedAscending }
+
+        merged.append(contentsOf: extra)
+        return merged
+    }
+
+    private static func websiteLinks(_ record: GrowerBreeder) -> [BreederLink] {
+        guard let address = record.trimmedWebsite, let link = link(address) else { return [] }
+        return [link]
     }
 
     private static func date(year: Int, month: Int, day: Int) -> Date {

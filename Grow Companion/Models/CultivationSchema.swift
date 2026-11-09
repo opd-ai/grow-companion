@@ -4,9 +4,9 @@
 //
 //  The explicit, versioned cultivation store. V1 freezes the model set that
 //  shipped before compliance history; V2 adds the two append-only compliance
-//  records; V3 adds the grower's own cycle goals. Every migration is additive
-//  and lightweight: no existing model, relationship, identifier or value is
-//  rewritten.
+//  records; V3 adds the grower's own cycle goals; V5 adds the grower's own
+//  breeder notes. Every migration is additive and lightweight: no existing
+//  model, relationship, identifier or value is rewritten.
 //
 
 import Foundation
@@ -79,13 +79,25 @@ enum CultivationSchemaV4: VersionedSchema {
     }
 }
 
+/// V5 adds the grower's own breeder notes as one additive model, so a breeder
+/// the bundled reference does not carry can be kept, and a bundled profile can
+/// carry the grower's notes beside it. Nothing existing is rewritten.
+enum CultivationSchemaV5: VersionedSchema {
+    static let versionIdentifier = Schema.Version(5, 0, 0)
+
+    static var models: [any PersistentModel.Type] {
+        CultivationSchemaV4.models + [GrowerBreeder.self]
+    }
+}
+
 enum CultivationMigrationPlan: SchemaMigrationPlan {
     static var schemas: [any VersionedSchema.Type] {
         [
             CultivationSchemaV1.self,
             CultivationSchemaV2.self,
             CultivationSchemaV3.self,
-            CultivationSchemaV4.self
+            CultivationSchemaV4.self,
+            CultivationSchemaV5.self
         ]
     }
 
@@ -102,6 +114,10 @@ enum CultivationMigrationPlan: SchemaMigrationPlan {
             .lightweight(
                 fromVersion: CultivationSchemaV3.self,
                 toVersion: CultivationSchemaV4.self
+            ),
+            .lightweight(
+                fromVersion: CultivationSchemaV4.self,
+                toVersion: CultivationSchemaV5.self
             )
         ]
     }

@@ -108,7 +108,8 @@ enum BackupService {
             ("ShareGrant", try arrays("shareGrants", in: root).count),
             ("ComplianceSnapshot", try arrays("complianceSnapshots", in: root).count),
             ("RuleEvaluationEvent", try arrays("ruleEvaluationEvents", in: root).count),
-            ("GrowGoal", try arrays("goals", in: root).count)
+            ("GrowGoal", try arrays("goals", in: root).count),
+            ("GrowerBreeder", try arrays("breeders", in: root).count)
         ]
 
         for check in checks {
@@ -652,6 +653,22 @@ enum BackupService {
             goal.updatedAt = date(value["updatedAt"]) ?? goal.createdAt
             context.insert(goal)
             count("GrowGoal")
+        }
+
+        // The grower's own breeder notes
+        for value in try arrays("breeders", in: root) {
+            let name = string(value["name"]).trimmingCharacters(in: .whitespacesAndNewlines)
+            guard !name.isEmpty else { continue }
+            let website = string(value["website"])
+            let breeder = GrowerBreeder(
+                name: name,
+                notes: string(value["notes"]),
+                website: website.isEmpty ? nil : website,
+                createdAt: date(value["createdAt"]) ?? Date()
+            )
+            breeder.updatedAt = date(value["updatedAt"]) ?? breeder.createdAt
+            context.insert(breeder)
+            count("GrowerBreeder")
         }
 
         // Journal

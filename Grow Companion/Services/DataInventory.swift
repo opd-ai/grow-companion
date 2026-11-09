@@ -29,10 +29,10 @@ struct ModelCount: Identifiable, Hashable {
 
 enum DataInventory {
     /// Every model registered in the container, in the order the versioned
-    /// schema lists it. `CultivationSchemaV4` is the single source for the list.
-    static var models: [any PersistentModel.Type] { CultivationSchemaV4.models }
+    /// schema lists it. `CultivationSchemaV5` is the single source for the list.
+    static var models: [any PersistentModel.Type] { CultivationSchemaV5.models }
 
-    static var schema: Schema { Schema(versionedSchema: CultivationSchemaV4.self) }
+    static var schema: Schema { Schema(versionedSchema: CultivationSchemaV5.self) }
 
     /// The name each model is counted, exported and reported under.
     static var modelNames: [String] {
@@ -48,6 +48,7 @@ enum DataInventory {
     /// `deleteAll` walks this list, so nothing counted can be left behind.
     static let probes: [ModelProbe] = [
         probe(GrowGoal.self),
+        probe(GrowerBreeder.self),
         probe(ComplianceSnapshot.self),
         probe(RuleEvaluationEvent.self),
         probe(DryingCheck.self),
@@ -120,6 +121,7 @@ enum DataInventory {
 
     private static let labels: [String: String] = [
         "GrowGoal": "Cycle goals",
+        "GrowerBreeder": "Your breeder notes",
         "ComplianceSnapshot": "Compliance history snapshots",
         "RuleEvaluationEvent": "Rule change reviews",
         "GrowProfile": "Grow profile and onboarding answers",
