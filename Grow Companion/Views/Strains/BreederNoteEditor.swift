@@ -37,8 +37,18 @@ struct BreederNoteEditor: View {
         draftName.trimmingCharacters(in: .whitespacesAndNewlines)
     }
 
+    /// True when nothing but a name would be saved.
+    private var isBlankDraft: Bool {
+        notes.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+            && website.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+    }
+
+    /// A new breeder needs something to keep. An existing record may be saved
+    /// with everything cleared, which removes it.
     private var canSave: Bool {
-        !trimmedName.isEmpty && websiteProblem == nil
+        guard !trimmedName.isEmpty, websiteProblem == nil else { return false }
+        if existing == nil && isBlankDraft { return false }
+        return true
     }
 
     private var websiteProblem: String? {
@@ -52,14 +62,15 @@ struct BreederNoteEditor: View {
     var body: some View {
         NavigationStack {
             Form {
-                if !isBundledBreeder {
-                    Section {
-                        TextField("Breeder name", text: $draftName)
-                    } header: {
-                        Text("Breeder")
-                    } footer: {
-                        Text("Matched with your strains by name, ignoring case, accents and punctuation.")
-                    }
+                Section {
+                    TextField("Breeder name", text: $draftName)
+                        .disabled(isNameFixed)
+                } header: {
+                    Text("Breeder")
+                } footer: {
+                    Text(isNameFixed
+                        ? String(localized: "The name matches your strains, so it stays as it is.")
+                        : String(localized: "Matched with your strains by name, ignoring case, accents and punctuation."))
                 }
 
                 Section {
@@ -69,7 +80,9 @@ struct BreederNoteEditor: View {
                 } header: {
                     Text("Your notes")
                 } footer: {
-                    Text("Kept on this device. The bundled reference stays exactly as it is.")
+                    Text(isBlankDraft
+                        ? String(localized: "Add a note or a link so there is something to keep.")
+                        : String(localized: "Kept on this device. The bundled reference stays exactly as it is."))
                 }
 
                 Section {
@@ -136,6 +149,13 @@ struct BreederNoteEditor: View {
                 Text("The bundled reference, if there is one, stays available.")
             }
         }
+    }
+
+    /// The name is fixed once a record exists, because it is how the strains in
+    /// the library keep pointing at this breeder. A bundled breeder keeps its
+    /// canonical name as well.
+    private var isNameFixed: Bool {
+        existing != nil || isBundledBreeder
     }
 
     private func save() {

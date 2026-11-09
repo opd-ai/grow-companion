@@ -256,6 +256,21 @@ struct GrowerBreederStorageTests {
         #expect(DataInventory.counts(in: context)["GrowerBreeder"] == 0)
     }
 
+    @Test func aNewBreederWithNothingToKeepIsNotStored() throws {
+        let context = try breederContext()
+
+        let record = try GrowerBreederService.save(
+            name: "Corner Closet Seeds",
+            notes: "   ",
+            website: "  ",
+            existing: nil,
+            in: context
+        )
+
+        #expect(record == nil)
+        #expect(DataInventory.counts(in: context)["GrowerBreeder"] == 0)
+    }
+
     @Test func anInvalidSaveChangesNothing() throws {
         let context = try breederContext()
 

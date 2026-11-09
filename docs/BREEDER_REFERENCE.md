@@ -39,7 +39,9 @@ the SwiftData store, and the grower's results stay in the store with them.
   reference stay matched, updates an existing record instead of inserting a
   duplicate, removes the record when the last note and link are cleared, and
   validates before writing: a required name, 80- and 4,000-character limits, and
-  https only (an address typed without a scheme is read as https).
+  https only (an address typed without a scheme is read as https). The editor
+  keeps a saved name fixed — it is what the strains point at — and a new breeder
+  needs a note or a link before it can be saved.
 - **Lineage per cultivar.** `CultivarLineage` attaches parent lines to one
   cultivar and breeder pair rather than to a breeder. Only the bundled templates
   with an existing claim appear: Blue Dream (documented), Jack Herer (disputed)

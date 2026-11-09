@@ -1652,7 +1652,9 @@
     "Delete this breeder" : { "localizations" : { "es" : { "stringUnit" : { "state" : "translated", "value" : "Eliminar este criador" } } } },
     "This breeder is no longer in your library" : { "localizations" : { "es" : { "stringUnit" : { "state" : "translated", "value" : "Este criador ya no está en tu biblioteca" } } } },
     "Its notes were removed. Strains that name it keep the name, and you can add notes again from the breeder library." : { "localizations" : { "es" : { "stringUnit" : { "state" : "translated", "value" : "Se eliminaron sus notas. Las variedades que lo nombran conservan el nombre y puedes volver a añadir notas desde la biblioteca de criadores." } } } },
-    "Tap a breeder to use it, bundled or one you added in the breeder library. Type any other name if yours is not listed." : { "localizations" : { "es" : { "stringUnit" : { "state" : "translated", "value" : "Toca un criador para usarlo, incluido o uno que añadiste en la biblioteca de criadores. Escribe otro nombre si el tuyo no aparece." } } } }
+    "Tap a breeder to use it, bundled or one you added in the breeder library. Type any other name if yours is not listed." : { "localizations" : { "es" : { "stringUnit" : { "state" : "translated", "value" : "Toca un criador para usarlo, incluido o uno que añadiste en la biblioteca de criadores. Escribe otro nombre si el tuyo no aparece." } } } },
+    "The name matches your strains, so it stays as it is." : { "localizations" : { "es" : { "stringUnit" : { "state" : "translated", "value" : "El nombre se relaciona con tus variedades, así que se mantiene tal cual." } } } },
+    "Add a note or a link so there is something to keep." : { "localizations" : { "es" : { "stringUnit" : { "state" : "translated", "value" : "Añade una nota o un enlace para que haya algo que guardar." } } } }
   },
   "version" : "1.0"
 }
