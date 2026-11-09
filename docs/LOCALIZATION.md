@@ -23,9 +23,34 @@ That prints `es.lproj`, and `plutil -convert json` on the compiled
 not in the catalog fall back to English, so an incomplete catalog is safe and
 can grow batch by batch.
 
+## The interface language
+
+English is the language the app opens in, on every device and whatever the
+phone is set to. Onboarding opens with a language step that offers English (the
+default) and Español, and the same choice sits in Settings, so it can be changed
+later.
+
+`Services/AppLanguage.swift` holds it. Each language carries its own name
+(`endonym`, never translated, so a grower who cannot read the current interface
+still finds their own language) and a one-line description that *is* translated,
+so each choice is explained in the interface language being read. `AppLanguageStore`
+keeps the choice in `UserDefaults` under `appLanguage` (which is in
+`SettingsKey.all`, so delete-all clears it), writes `AppleLanguages` for the
+bundle, and the root view hands the matching `Locale` to SwiftUI and sets
+`Format.locale`, so dates and numbers follow it as well. The onboarding step
+headers go through `String(localized:)` with the rest of the copy.
+
+`Text("…")` and the rest of the copy SwiftUI localizes through the environment
+locale follow the choice in the same session. Copy that already arrives as a
+plain `String` — `String(localized:)` in a model or a service — resolves through
+the bundle instead, which reads `AppleLanguages` at launch, so it finishes
+applying the next time the app is opened. `AppLanguageStore.needsRelaunch` is
+true until then, and both selectors say so rather than leaving half of the copy
+in the other language.
+
 ## What is covered
 
-The catalog holds 1,456 Spanish (Mexico) strings and is a complete draft of
+The catalog holds 1,606 Spanish (Mexico) strings and is a complete draft of
 the app's user-facing copy, screen by screen, including every value the app
 formats with a variable:
 
@@ -159,8 +184,8 @@ are.
 4. **Legal, rule and verification text stays English.** `LegalCopy`,
    `RulePack` citations, rule summaries, jurisdiction data and the federal
    notice are not translated, so there is exactly one reviewed version of them.
-   `Services/Localization.swift` shows a notice while the app is in Spanish so
-   this is explained in the product.
+   `Services/Localization.swift` shows a notice while the interface language is
+   Spanish so this is explained in the product.
 5. **No machine translation into the catalog unreviewed.** The draft in the
    catalog is for review; a reviewer signs off each batch before release.
 6. **Check the layout.** Spanish runs 15–25% longer. Every batch needs a device

@@ -11,7 +11,8 @@ to open or close.
 Everything the app does is on the device that made the record:
 
 - onboarding with age attestation, a manually chosen state and a residence
-  answer;
+  answer, opening with the interface language: English by default, Español
+  selectable there and later in Settings;
 - compliance rules from the bundled pack, a live count and an immutable local
   history of each calculation;
 - rooms, plants, stages, environment readings, feeds, calibrations, reminders,

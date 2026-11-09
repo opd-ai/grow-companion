@@ -47,6 +47,7 @@ import so location metadata never survives.
 | Home Screen and Lock Screen widget with privacy-safe defaults | Shipped | `Grow CompanionWidgetExtension/`, `Services/WidgetSnapshot.swift` |
 | Light-distance guidance with a grower-set target and re-measure prompts | Shipped | `Services/LightDistanceGuidance.swift`, `Views/Rooms/LightDistanceView.swift` |
 | Breeder reference library with claimed figures kept apart from your results | Shipped | `Models/BreederProfile.swift`, `Services/BreederLibrary.swift`, `Views/Strains/BreederProfileView.swift` |
+| Interface language: English by default, Español selectable in onboarding and Settings | Shipped | `Services/AppLanguage.swift`, `Views/Onboarding/OnboardingFlow.swift`, `Views/Settings/SettingsView.swift` |
 
 The shipped navigation and current feature surfaces are recorded in section 6.2.
 Future cloud, hardware, extension and community features remain explicitly
@@ -716,6 +717,11 @@ The shipped store uses SwiftData with these models:
   added to `Room` — the stage at the reading and the grower's own target — as a
   third lightweight additive stage. Both are optional, so an existing store
   opens unchanged and a room with no target keeps the app's cited band.
+- The interface language is a preference, not a model: `AppLanguageStore`
+  keeps the grower's choice in `UserDefaults` under `appLanguage` and writes
+  `AppleLanguages` for the bundle. It adds no schema stage, and because the key
+  is in `SettingsKey.all` delete-all clears it with the other preferences, so
+  the next launch opens in English.
 - The personal effect journal lives in its own store with its own key and never
   shares identifiers with the cultivation store.
 - Sync is only enabled after a versioned schema migration plan and a conflict
@@ -798,6 +804,8 @@ a home and room surface rather than a new tab.
 
 ```text
 ONBOARDING (first launch, and after delete-all)
+├── Interface language (English by default, Español), then age attestation,
+│   jurisdiction, residence, experience, rule summary and an optional plant
 Apps locks over everything when app lock is on
 
 TAB 1: HOME
@@ -835,7 +843,7 @@ TAB 4: RULES
 
 TAB 5: SETTINGS
 ├── Grow profile
-├── Units and compliance warning
+├── Units, language and the compliance warning
 ├── Home Screen widget (counts only unless task names are allowed)
 ├── Privacy and data
 │   ├── App lock
@@ -1130,6 +1138,30 @@ go through `String(localized:)` so a plural variant can be supplied later. The
 table builders are pure functions with tests. See
 `docs/V2_3_CALENDAR_GOALS_WIDGETS.md`.
 
+**Shipped — choosing the language.** The app opens in English on every device,
+whatever the phone is set to, and offers Español on the first onboarding step
+and in Settings, so the choice can be made at first launch or changed later.
+`Services/AppLanguage.swift` holds the choice: a value type carrying the
+language's own name (`endonym`, deliberately never translated so a grower who
+cannot read the current interface can still find their language), a one-line
+description localized into the interface in use, and the `en`/`es` locale the
+formatters use. `AppLanguageStore` remembers it in `UserDefaults` under
+`appLanguage` — the key is in `SettingsKey.all`, so delete-all clears it like
+the other preferences — and writes `AppleLanguages`, which is how a choice made
+in the app reaches `String(localized:)` in a model or a service. The root view
+hands SwiftUI the matching locale, so `Text`, dates and numbers follow at once;
+the copy the bundle resolves follows from the next launch, and while the two
+disagree both selectors say the rest arrives after a relaunch rather than
+leaving half the interface in the other language. The English-legal-text notice
+now follows the interface language instead of the device language, so it appears
+exactly when English legal copy would otherwise look like an oversight, and the
+onboarding step headers go through `String(localized:)` with the rest of the
+copy. `Grow CompanionTests/AppLanguageTests.swift` covers the English default
+whatever the device is set to, a stored choice, an unknown value, the bundle
+hand-off and its single entry, identifier mapping, the relaunch state in both
+directions, the delete-all coverage, each language's description and the legal
+notice. See `docs/LOCALIZATION.md`.
+
 **Acceptance criteria.**
 
 - No clipped or truncated string at the largest Dynamic Type size in either
@@ -1138,6 +1170,9 @@ table builders are pure functions with tests. See
 - Every chart has a text or table equivalent reachable with VoiceOver.
 - Legal and rule copy stays English, so there is exactly one reviewed version of
   it; the app says so where the copy appears.
+- The app opens in English whatever the phone is set to, and a grower who
+  chooses Español keeps that choice across launches while the numbers, dates
+  and legal-text notice follow it.
 
 ### 7.9 Sequencing and dependencies
 
