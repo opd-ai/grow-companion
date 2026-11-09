@@ -30,6 +30,8 @@ Before replacing, the restore dialog states what the backup holds: record count 
 
 **Cycle goals are part of the data controls.** `GrowGoal` (schema V3) is in the model inventory and in `ExportService.exportedModelNames`, so it is counted, labelled, exported as the JSON `goals` section, verified by the backup manifest, restored and deleted with everything else. Delete-all also clears the widget's shared snapshot and its preference. See `docs/V2_3_CALENDAR_GOALS_WIDGETS.md`.
 
+**Your own breeder notes are part of the data controls.** `GrowerBreeder` (schema V5) holds the notes and optional https link a grower keeps for a breeder, matched to the bundled reference by name. It is in the model inventory and in `ExportService.exportedModelNames`, so it is counted, labelled, exported as the JSON `breeders` section, verified by the backup manifest, restored and deleted with everything else. A save with no notes and no link removes the record, so nothing empty is exported. See `docs/BREEDER_REFERENCE.md`.
+
 ## Corrections to earlier planning assumptions
 
 These were checked against the source in this branch:

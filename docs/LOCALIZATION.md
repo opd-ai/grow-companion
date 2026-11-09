@@ -50,7 +50,7 @@ in the other language.
 
 ## What is covered
 
-The catalog holds 1,606 Spanish (Mexico) strings and is a complete draft of
+The catalog holds 1,642 Spanish (Mexico) strings and is a complete draft of
 the app's user-facing copy, screen by screen, including every value the app
 formats with a variable:
 

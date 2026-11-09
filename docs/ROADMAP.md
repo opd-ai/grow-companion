@@ -46,7 +46,7 @@ import so location metadata never survives.
 | Grow calendar with explicit reminder rescheduling | Shipped | `Services/GrowCalendar.swift`, `Views/Home/GrowCalendarView.swift` |
 | Home Screen and Lock Screen widget with privacy-safe defaults | Shipped | `Grow CompanionWidgetExtension/`, `Services/WidgetSnapshot.swift` |
 | Light-distance guidance with a grower-set target and re-measure prompts | Shipped | `Services/LightDistanceGuidance.swift`, `Views/Rooms/LightDistanceView.swift` |
-| Breeder reference library with claimed figures kept apart from your results | Shipped | `Models/BreederProfile.swift`, `Services/BreederLibrary.swift`, `Views/Strains/BreederProfileView.swift` |
+| Breeder reference library with claimed figures kept apart from your results, plus your own notes per breeder | Shipped | `Models/BreederProfile.swift`, `Models/GrowerBreeder.swift`, `Services/BreederLibrary.swift`, `Views/Strains/BreederProfileView.swift` |
 | Interface language: English by default, Español selectable in onboarding and Settings | Shipped | `Services/AppLanguage.swift`, `Views/Onboarding/OnboardingFlow.swift`, `Views/Settings/SettingsView.swift` |
 
 The shipped navigation and current feature surfaces are recorded in section 6.2.
@@ -281,8 +281,28 @@ Jack Herer marked disputed. The strain detail labels the flowering window
 new is stored, so export, backup, restore, the data inventory and delete-all are
 unchanged. Tests cover matching, profile coverage, every lineage claim, the
 comparison copy and the product-claim limits. See `docs/BREEDER_REFERENCE.md`.
-A stored, grower-editable breeder profile and the signed content pack that would
-replace the bundled one remain unbuilt.
+**Shipped — your own breeder notes.** `Models/GrowerBreeder.swift` stores the
+grower's notes and an optional https link for one breeder, as an additive
+`GrowerBreeder` model in `CultivationSchemaV5` (one lightweight stage after V4).
+The record is matched to the reference by `BreederLibrary.key(for:)`, so
+`sensi seeds`, `Sensi Seeds` and `  sensi   SEEDS ` all point at one breeder,
+and a bundled breeder keeps its canonical name so the strains and the reference
+stay matched by one key. `BreederLibrary.allProfiles(stored:)` returns the
+bundled profiles in their own order with the grower's notes attached as
+separate fields (`yourNotes`, `yourNotesUpdatedOn`), then the breeders only the
+grower has, alphabetically. The reference copy is never edited: the profile
+screen shows *Your notes* as its own card beside the bundled summary, notes and
+links, and says the notes are the grower's. The library screen can add a
+breeder, the profile screen can add, edit or delete notes, and the strain
+editor offers both bundled and grower-added breeders as suggestions.
+`GrowerBreederService` validates before writing (a required name, 80 and 4,000
+character limits, https only), keeps one record per breeder, removes the record
+when the last note and link are cleared, and throws a specific error instead of
+saving half of it. The model is in the data inventory, export (`breeders`
+section), the backup manifest, restore and delete-all, with tests. The signed
+content pack that would replace the bundled reference remains out of the
+product: the app makes no network request, so reference content ships with the
+app and arrives with an app update. See `docs/BREEDER_REFERENCE.md`.
 
 ### 2.4–2.7 Outside the product
 
@@ -683,6 +703,7 @@ The shipped store uses SwiftData with these models:
 | `ComplianceSnapshot` | ComplianceSnapshot | Append-only calculation record: jurisdiction, pack version, stage buckets, retained weight, canopy, limits, warning threshold and per-metric result. No plant or room names. |
 | `RuleEvaluationEvent` | RuleEvaluationEvent | One re-check of a saved snapshot under a different pack, with changed fields, citations, per-metric outcomes and an acknowledgment timestamp. |
 | `GrowGoal` | — | The grower's own optional cycle targets: a dry yield in grams, a flowering time in weeks and a logging-completeness share. One record; saving with every target off deletes it. |
+| `GrowerBreeder` | Breeder (grower's own) | The grower's notes and optional https link for one breeder, matched to the bundled reference by the same folded name key. The reference copy is never edited; an empty save removes the record. |
 
 ### 5.3 Design decisions
 
@@ -706,9 +727,12 @@ The shipped store uses SwiftData with these models:
 - New Tier 3 entities are additive: a threshold, an access log and any future
   stored breeder profile. Each new relationship is optional so a lightweight
   migration keeps existing stores readable.
-- The breeder reference itself ships as bundled value types
-  (`Models/BreederProfile.swift`), so it adds no model, no export section and no
-  migration stage. A grower-editable breeder record would be the additive entity.
+- The bundled breeder reference ships as value types
+  (`Models/BreederProfile.swift`) and adds no model. `CultivationSchemaV5` adds
+  one model, `GrowerBreeder`, as a fourth lightweight additive stage: the
+  grower's own notes and optional https link for a breeder, matched by the same
+  folded name key and never blended into the bundled copy. A save with no notes
+  and no link removes the record rather than exporting an empty row.
 - `CultivationSchemaV3` adds only `GrowGoal`, the grower's own optional cycle
   targets, as a second lightweight additive stage after V2. No existing record,
   relationship, identifier, photo or value is rewritten, and a failed save never
@@ -829,7 +853,8 @@ TAB 2: JOURNAL
 
 TAB 3: STRAINS
 ├── Library list with observed flowering time and ratings
-├── Breeder reference → profile, claims and the strains that point at it
+├── Breeder reference → profile, claims, your own notes and the strains that
+│   point at it
 ├── Strain detail (claimed vs observed, ratings, plants, notes)
 └── Editor (manual, or from a bundled template)
 
@@ -875,8 +900,9 @@ PLANT DETAIL
   prompt that names its reason. See `docs/LIGHT_DISTANCE_GUIDANCE.md`.
 - **Breeder and pedigree:** shipped as a reference library behind the strain
   library, with a profile screen per breeder, per-cultivar lineage claims
-  labelled as claims, and the grower's observed timing beside the claim. See
-  `docs/BREEDER_REFERENCE.md`.
+  labelled as claims, the grower's observed timing beside the claim, and the
+  grower's own notes per breeder stored beside the reference rather than inside
+  it. See `docs/BREEDER_REFERENCE.md`.
 - **Sharing:** a Settings section, "Sharing", with the device share code, a scoped
   creator and a reader for received files. Delivery is out of band through the
   system share sheet; there is no server, and a received copy is read-only.
