@@ -2,7 +2,8 @@
 //  EducationLibraryView.swift
 //  Grow Companion
 //
-//  Offline learning library with local reading progress.
+//  Offline learning library with local reading progress: which lessons have
+//  been read, when, and a way to mark one unread again.
 //
 
 import SwiftUI
@@ -13,11 +14,11 @@ struct EducationLibraryView: View {
     @Query(sort: \Room.createdAt) private var rooms: [Room]
     @Query(sort: \Plant.plantedAt, order: .reverse) private var plants: [Plant]
 
-    @State private var completedIDs: Set<String> = []
+    @State private var progress = EducationReadingProgress.empty
 
-    private var completedCount: Int {
-        EducationLibrary.lessons.filter { completedIDs.contains($0.id) }.count
-    }
+    private var lessons: [EducationLesson] { EducationLibrary.lessons }
+
+    private var readCount: Int { progress.count(in: lessons) }
 
     var body: some View {
         ScrollView {
@@ -36,7 +37,7 @@ struct EducationLibraryView: View {
         .background(Theme.background)
         .navigationTitle("")
         .navigationBarTitleDisplayMode(.inline)
-        .onAppear { completedIDs = EducationProgress.completedLessonIDs }
+        .onAppear { progress = EducationProgressStore.load() }
     }
 
     private var header: some View {
@@ -55,7 +56,7 @@ struct EducationLibraryView: View {
             HStack {
                 VStack(alignment: .leading, spacing: 3) {
                     SectionHeader("Your progress")
-                    Text("\(completedCount) of \(EducationLibrary.lessons.count) lessons completed")
+                    Text("\(readCount) of \(lessons.count) lessons read")
                         .font(Theme.sans(14, weight: .semibold))
                         .foregroundStyle(Theme.ink)
                 }
@@ -63,23 +64,28 @@ struct EducationLibraryView: View {
                 ZStack {
                     Circle().stroke(Theme.sage.opacity(0.4), lineWidth: 6)
                     Circle()
-                        .trim(from: 0, to: EducationLibrary.lessons.isEmpty ? 0 : CGFloat(completedCount) / CGFloat(EducationLibrary.lessons.count))
+                        .trim(from: 0, to: lessons.isEmpty ? 0 : CGFloat(readCount) / CGFloat(lessons.count))
                         .stroke(Theme.primary, style: StrokeStyle(lineWidth: 6, lineCap: .round))
                         .rotationEffect(.degrees(-90))
-                    Text("\(completedCount)")
+                    Text("\(readCount)")
                         .font(Theme.sans(14, weight: .semibold))
                         .foregroundStyle(Theme.primary)
                 }
                 .frame(width: 48, height: 48)
+                .accessibilityHidden(true)
             }
-            ProgressView(value: Double(completedCount), total: Double(max(EducationLibrary.lessons.count, 1)))
+            ProgressView(value: Double(readCount), total: Double(max(lessons.count, 1)))
                 .tint(Theme.primary)
+                .accessibilityLabel(String(localized: "Your progress"))
+                .accessibilityValue(String(localized: "\(readCount) of \(lessons.count) lessons read"))
         }
         .growCard(fill: Theme.sageSoft)
     }
 
     private func topicSection(_ topic: EducationTopic) -> some View {
-        VStack(alignment: .leading, spacing: 10) {
+        let topicLessons = EducationLibrary.lessons(for: topic)
+        let topicRead = EducationLibrary.readCount(for: topic, in: progress)
+        return VStack(alignment: .leading, spacing: 10) {
             HStack(spacing: 10) {
                 Image(systemName: topic.systemImage)
                     .font(.system(size: 17, weight: .semibold))
@@ -91,23 +97,28 @@ struct EducationLibraryView: View {
                     Text(topic.subtitle)
                         .font(Theme.sans(12))
                         .foregroundStyle(Theme.secondaryInk)
+                    Text("\(topicRead) of \(topicLessons.count) read")
+                        .font(Theme.sans(11, weight: .semibold))
+                        .foregroundStyle(Theme.tertiaryInk)
                 }
             }
+            .accessibilityElement(children: .combine)
 
             VStack(spacing: 0) {
-                ForEach(EducationLibrary.lessons(for: topic)) { lesson in
+                ForEach(topicLessons) { lesson in
                     NavigationLink {
                         EducationLessonView(
                             lesson: lesson,
-                            isComplete: completedIDs.contains(lesson.id),
-                            markComplete: { markComplete(lesson) },
+                            isRead: progress.isRead(lesson.id),
+                            readAt: progress.date(for: lesson.id),
+                            toggleRead: { toggle(lesson) },
                             destination: destination(for: lesson)
                         )
                     } label: {
                         lessonRow(lesson)
                     }
                     .buttonStyle(.plain)
-                    if lesson.id != EducationLibrary.lessons(for: topic).last?.id {
+                    if lesson.id != topicLessons.last?.id {
                         Divider().overlay(Theme.hairline)
                     }
                 }
@@ -117,10 +128,12 @@ struct EducationLibraryView: View {
     }
 
     private func lessonRow(_ lesson: EducationLesson) -> some View {
-        HStack(spacing: 12) {
-            Image(systemName: completedIDs.contains(lesson.id) ? "checkmark.circle.fill" : "circle")
+        let isRead = progress.isRead(lesson.id)
+        let readOn = progress.date(for: lesson.id)
+        return HStack(spacing: 12) {
+            Image(systemName: isRead ? "checkmark.circle.fill" : "circle")
                 .font(.system(size: 20, weight: .semibold))
-                .foregroundStyle(completedIDs.contains(lesson.id) ? Theme.primary : Theme.tertiaryInk)
+                .foregroundStyle(isRead ? Theme.primary : Theme.tertiaryInk)
             VStack(alignment: .leading, spacing: 3) {
                 Text(lesson.title)
                     .font(Theme.sans(14, weight: .semibold))
@@ -129,6 +142,11 @@ struct EducationLibraryView: View {
                     .font(Theme.sans(12))
                     .foregroundStyle(Theme.secondaryInk)
                     .lineLimit(2)
+                if let readOn {
+                    Text("Read on \(Format.shortDate(readOn))")
+                        .font(Theme.sans(10, weight: .semibold))
+                        .foregroundStyle(Theme.tertiaryInk)
+                }
             }
             Spacer(minLength: 4)
             Image(systemName: "chevron.right")
@@ -138,6 +156,7 @@ struct EducationLibraryView: View {
         .padding(.vertical, 10)
         .contentShape(Rectangle())
         .accessibilityElement(children: .combine)
+        .accessibilityValue(readValue(isRead: isRead, readOn: readOn))
     }
 
     private var offlineNote: some View {
@@ -152,9 +171,18 @@ struct EducationLibraryView: View {
         .growCard(fill: Theme.surfaceSunken, padding: 14, radius: 16)
     }
 
-    private func markComplete(_ lesson: EducationLesson) {
-        completedIDs.insert(lesson.id)
-        EducationProgress.setCompleted(lesson.id, completed: true)
+    private func readValue(isRead: Bool, readOn: Date?) -> String {
+        guard isRead else { return String(localized: "Not read yet") }
+        guard let readOn else { return String(localized: "Read") }
+        return String(localized: "Read on \(Format.shortDate(readOn))")
+    }
+
+    private func toggle(_ lesson: EducationLesson) {
+        if progress.isRead(lesson.id) {
+            progress = EducationProgressStore.markUnread(lesson.id)
+        } else {
+            progress = EducationProgressStore.markRead(lesson.id)
+        }
     }
 
     private func destination(for lesson: EducationLesson) -> AnyView {
@@ -183,9 +211,15 @@ struct EducationLibraryView: View {
 
 private struct EducationLessonView: View {
     let lesson: EducationLesson
-    let isComplete: Bool
-    let markComplete: () -> Void
+    let isRead: Bool
+    let readAt: Date?
+    let toggleRead: () -> Void
     let destination: AnyView
+
+    private var readLabel: String {
+        guard let readAt else { return String(localized: "Read") }
+        return String(localized: "Read on \(Format.shortDate(readAt))")
+    }
 
     var body: some View {
         ScrollView {
@@ -202,6 +236,21 @@ private struct EducationLessonView: View {
                     Text("Reviewed \(lesson.reviewedLabel)")
                         .font(Theme.sans(11, weight: .semibold))
                         .foregroundStyle(Theme.tertiaryInk)
+                }
+
+                if let citation = lesson.rulePackCitation {
+                    HStack(alignment: .top, spacing: 10) {
+                        Image(systemName: "checkmark.shield")
+                            .font(.system(size: 15, weight: .semibold))
+                            .foregroundStyle(Theme.primary)
+                        Text(citation)
+                            .font(Theme.sans(12))
+                            .foregroundStyle(Theme.secondaryInk)
+                            .fixedSize(horizontal: false, vertical: true)
+                    }
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .growCard(fill: Theme.amberSoft, padding: 14)
+                    .accessibilityElement(children: .combine)
                 }
 
                 VStack(alignment: .leading, spacing: 12) {
@@ -237,11 +286,12 @@ private struct EducationLessonView: View {
                 .buttonStyle(.plain)
 
                 Button {
-                    markComplete()
+                    toggleRead()
                 } label: {
-                    HStack {
-                        Image(systemName: isComplete ? "checkmark.circle.fill" : "circle")
-                        Text(isComplete ? "Lesson completed" : "Mark lesson complete")
+                    HStack(spacing: 8) {
+                        Image(systemName: isRead ? "checkmark.circle.fill" : "circle")
+                        Text(isRead ? readLabel : String(localized: "Mark lesson complete"))
+                        Spacer(minLength: 0)
                     }
                     .font(Theme.sans(14, weight: .semibold))
                     .foregroundStyle(Theme.primary)
@@ -250,6 +300,9 @@ private struct EducationLessonView: View {
                     .background(RoundedRectangle(cornerRadius: 16).stroke(Theme.primary.opacity(0.25)))
                 }
                 .buttonStyle(.plain)
+                .accessibilityHint(isRead
+                    ? String(localized: "Marks this lesson unread again.")
+                    : String(localized: "Marks this lesson as read and records the date."))
             }
             .padding(20)
         }
@@ -257,19 +310,5 @@ private struct EducationLessonView: View {
         .background(Theme.background)
         .navigationTitle("")
         .navigationBarTitleDisplayMode(.inline)
-    }
-}
-
-enum EducationProgress {
-    private static let key = SettingsKey.educationCompletedLessons
-
-    static var completedLessonIDs: Set<String> {
-        Set(UserDefaults.standard.stringArray(forKey: key) ?? [])
-    }
-
-    static func setCompleted(_ id: String, completed: Bool) {
-        var ids = completedLessonIDs
-        if completed { ids.insert(id) } else { ids.remove(id) }
-        UserDefaults.standard.set(Array(ids).sorted(), forKey: key)
     }
 }

@@ -61,6 +61,9 @@ enum SettingsKey {
     /// clears it with every other preference.
     static let educationCompletedLessons = "education.completedLessonIDs"
 
+    /// When each read lesson was marked read, keyed by lesson id.
+    static let educationLessonReadAt = "education.lessonReadAt"
+
     /// Every preference the app writes, so delete-all can clear all of them.
     static let all: [String] = [
         unitSystem,
@@ -80,7 +83,8 @@ enum SettingsKey {
         quickLogRoomName,
         quickLogPlantName,
         widgetShowsTaskTitles,
-        educationCompletedLessons
+        educationCompletedLessons,
+        educationLessonReadAt
     ]
 }
 
