@@ -57,6 +57,10 @@ enum SettingsKey {
     /// Widgets show counts only unless the grower turns task names on.
     static let widgetShowsTaskTitles = "widgetShowsTaskTitles"
 
+    /// The lessons the grower has marked as read. Listed here so delete-all
+    /// clears it with every other preference.
+    static let educationCompletedLessons = "education.completedLessonIDs"
+
     /// Every preference the app writes, so delete-all can clear all of them.
     static let all: [String] = [
         unitSystem,
@@ -75,7 +79,8 @@ enum SettingsKey {
         lastBackupIncludesPhotos,
         quickLogRoomName,
         quickLogPlantName,
-        widgetShowsTaskTitles
+        widgetShowsTaskTitles,
+        educationCompletedLessons
     ]
 }
 

@@ -77,6 +77,13 @@ struct DataDeletionTests {
     }
 }
 
+struct DataControlPreferenceTests {
+    @Test func readingProgressIsClearedByDeleteAll() {
+        #expect(SettingsKey.all.contains(SettingsKey.educationCompletedLessons))
+        #expect(SettingsKey.all.contains(SettingsKey.appLanguage))
+    }
+}
+
 struct BackupFormatTests {
     @Test func v2BackupRoundTripsWithAManifest() throws {
         let snapshot = ExportSnapshot(counts: ["Room": 0, "Plant": 0])

@@ -261,7 +261,7 @@ private struct EducationLessonView: View {
 }
 
 enum EducationProgress {
-    private static let key = "education.completedLessonIDs"
+    private static let key = SettingsKey.educationCompletedLessons
 
     static var completedLessonIDs: Set<String> {
         Set(UserDefaults.standard.stringArray(forKey: key) ?? [])
