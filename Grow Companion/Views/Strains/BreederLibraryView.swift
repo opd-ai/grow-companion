@@ -11,11 +11,13 @@ import SwiftData
 
 struct BreederLibraryView: View {
     @Query(sort: \Strain.name) private var strains: [Strain]
+    @Query(sort: \GrowerBreeder.name) private var storedBreeders: [GrowerBreeder]
 
     @State private var query = ""
+    @State private var showingNewBreeder = false
 
     private var profiles: [BreederProfile] {
-        BreederLibrary.profiles(matching: query)
+        BreederLibrary.profiles(matching: query, stored: storedBreeders)
     }
 
     var body: some View {
@@ -39,6 +41,19 @@ struct BreederLibraryView: View {
         .navigationTitle("Breeders")
         .navigationBarTitleDisplayMode(.inline)
         .searchable(text: $query, prompt: Text("Search breeders"))
+        .toolbar {
+            ToolbarItem(placement: .topBarTrailing) {
+                Button {
+                    showingNewBreeder = true
+                } label: {
+                    Image(systemName: "plus")
+                }
+                .accessibilityLabel(String(localized: "Add a breeder"))
+            }
+        }
+        .sheet(isPresented: $showingNewBreeder) {
+            BreederNoteEditor(name: "", existing: nil, isBundledBreeder: false)
+        }
     }
 
     private var header: some View {
@@ -46,7 +61,7 @@ struct BreederLibraryView: View {
             Text("Breeder reference")
                 .font(Theme.serif(30))
                 .foregroundStyle(Theme.ink)
-            Text(String(localized: "Bundled profiles for the breeders in your library, reviewed \(Format.shortDate(BreederLibrary.reviewedOn))."))
+            Text(String(localized: "Bundled profiles for the breeders in your library, reviewed \(Format.shortDate(BreederLibrary.reviewedOn)), and the notes you keep yourself."))
                 .font(Theme.sans(13))
                 .foregroundStyle(Theme.secondaryInk)
                 .fixedSize(horizontal: false, vertical: true)
@@ -58,7 +73,7 @@ struct BreederLibraryView: View {
             Image(systemName: "book.closed")
                 .font(.system(size: 15, weight: .semibold))
                 .foregroundStyle(Theme.primary)
-            Text("Reference material kept separate from your results. Nothing here is uploaded, and no live lookup is made.")
+            Text("Reference material kept separate from your results. Add your own notes to any breeder, or add one the bundle does not list. Nothing here is uploaded, and no live lookup is made.")
                 .font(Theme.sans(12))
                 .foregroundStyle(Theme.secondaryInk)
                 .fixedSize(horizontal: false, vertical: true)
@@ -72,7 +87,7 @@ struct BreederLibraryView: View {
         VStack(spacing: 0) {
             ForEach(profiles) { profile in
                 NavigationLink {
-                    BreederProfileView(profile: profile)
+                    BreederProfileView(name: profile.name)
                 } label: {
                     row(profile)
                 }
@@ -93,15 +108,30 @@ struct BreederLibraryView: View {
                 Circle()
                     .fill(Theme.sageSoft)
                     .frame(width: 40, height: 40)
-                Image(systemName: "person.crop.circle")
+                Image(systemName: profile.isGrowerOnly ? "person.crop.circle.badge.plus" : "person.crop.circle")
                     .font(.system(size: 17, weight: .semibold))
                     .foregroundStyle(Theme.primary)
             }
 
             VStack(alignment: .leading, spacing: 3) {
-                Text(profile.name)
-                    .font(Theme.sans(15, weight: .semibold))
-                    .foregroundStyle(Theme.ink)
+                HStack(spacing: 6) {
+                    Text(profile.name)
+                        .font(Theme.sans(15, weight: .semibold))
+                        .foregroundStyle(Theme.ink)
+                    if profile.isGrowerOnly {
+                        Pill(
+                            text: String(localized: "Yours"),
+                            systemImage: "person.fill",
+                            tint: Theme.primary,
+                            fill: Theme.sageSoft
+                        )
+                    } else if profile.hasYourNotes {
+                        Image(systemName: "note.text")
+                            .font(.system(size: 11, weight: .semibold))
+                            .foregroundStyle(Theme.primary)
+                            .accessibilityLabel(String(localized: "You have notes for this breeder"))
+                    }
+                }
                 Text(profile.summary)
                     .font(Theme.sans(12))
                     .foregroundStyle(Theme.secondaryInk)

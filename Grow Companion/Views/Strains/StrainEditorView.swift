@@ -16,6 +16,8 @@ struct StrainEditorView: View {
     @Environment(\.modelContext) private var context
     @Environment(\.dismiss) private var dismiss
 
+    @Query(sort: \GrowerBreeder.name) private var storedBreeders: [GrowerBreeder]
+
     @State private var name = ""
     @State private var breeder = ""
     @State private var type: StrainType = .hybrid
@@ -144,12 +146,13 @@ struct StrainEditorView: View {
     }
 
     private var breederSuggestions: some View {
-        VStack(alignment: .leading, spacing: 8) {
-            label("Bundled breeders")
+        let profiles = BreederLibrary.allProfiles(stored: storedBreeders)
+        return VStack(alignment: .leading, spacing: 8) {
+            label("Breeders")
 
             ScrollView(.horizontal, showsIndicators: false) {
                 HStack(spacing: 8) {
-                    ForEach(BreederLibrary.profiles) { profile in
+                    ForEach(profiles) { profile in
                         Button {
                             breeder = profile.name
                         } label: {
@@ -170,7 +173,7 @@ struct StrainEditorView: View {
                 .padding(.vertical, 2)
             }
 
-            Text("Choosing a bundled breeder links this strain to its reference profile. Type any other name if yours is not listed.")
+            Text("Tap a breeder to use it, bundled or one you added in the breeder library. Type any other name if yours is not listed.")
                 .font(Theme.sans(11))
                 .foregroundStyle(Theme.tertiaryInk)
                 .fixedSize(horizontal: false, vertical: true)

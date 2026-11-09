@@ -15,6 +15,8 @@ struct StrainDetailView: View {
     @Environment(\.modelContext) private var context
     @Environment(\.dismiss) private var dismiss
 
+    @Query(sort: \GrowerBreeder.name) private var storedBreeders: [GrowerBreeder]
+
     @State private var showingEditor = false
     @State private var showingDeleteConfirm = false
 
@@ -27,7 +29,7 @@ struct StrainDetailView: View {
     }
 
     private var breederProfile: BreederProfile? {
-        BreederLibrary.profile(for: strain)
+        BreederLibrary.profile(named: strain.displayBreeder, stored: storedBreeders)
     }
 
     private var lineage: CultivarLineage? {
@@ -140,7 +142,7 @@ struct StrainDetailView: View {
 
             if let breederProfile {
                 NavigationLink {
-                    BreederProfileView(profile: breederProfile)
+                    BreederProfileView(name: breederProfile.name)
                 } label: {
                     HStack(alignment: .top, spacing: 10) {
                         Image(systemName: "person.crop.circle.badge.checkmark")

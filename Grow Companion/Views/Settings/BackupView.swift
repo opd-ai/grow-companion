@@ -29,6 +29,7 @@ struct BackupView: View {
     @Query(sort: \RuleEvaluationEvent.evaluatedAt, order: .reverse)
     private var ruleEvaluationEvents: [RuleEvaluationEvent]
     @Query(sort: \GrowGoal.updatedAt, order: .reverse) private var goals: [GrowGoal]
+    @Query(sort: \GrowerBreeder.name) private var breeders: [GrowerBreeder]
 
     @AppStorage(SettingsKey.lastBackupDate) private var lastBackupDate = ""
     @AppStorage(SettingsKey.lastBackupIncludesPhotos) private var lastBackupIncludesPhotos = false
@@ -64,6 +65,7 @@ struct BackupView: View {
             complianceSnapshots: complianceSnapshots,
             ruleEvaluationEvents: ruleEvaluationEvents,
             goals: goals,
+            breeders: breeders,
             counts: DataInventory.counts(in: context)
         )
     }
