@@ -32,6 +32,9 @@ enum SettingsKey {
     static let unitSystem = "unitSystem"
     static let warningThreshold = "warningThreshold"
 
+    /// The interface language. English until the grower chooses Spanish.
+    static let appLanguage = "appLanguage"
+
     static let appLockEnabled = "appLockEnabled"
     static let appLockGrace = "appLockGrace"
 
@@ -58,6 +61,7 @@ enum SettingsKey {
     static let all: [String] = [
         unitSystem,
         warningThreshold,
+        appLanguage,
         appLockEnabled,
         appLockGrace,
         genericNotificationContent,
@@ -76,9 +80,10 @@ enum SettingsKey {
 }
 
 enum Format {
-    /// The locale numbers and dates are rendered in. Defaults to the device
-    /// locale, so a Spanish device sees Spanish separators, month names and
-    /// date order; tests set it to prove that another language is honoured.
+    /// The locale numbers and dates are rendered in. It follows the interface
+    /// language the grower chose, so a Spanish interface sees Spanish
+    /// separators, month names and date order whatever the phone is set to;
+    /// tests set it to prove that a language is honoured.
     static var locale: Locale = .current
 
     static func weight(_ grams: Double, unit: UnitSystem) -> String {

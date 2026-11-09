@@ -2,9 +2,11 @@
 //  OnboardingFlow.swift
 //  Grow Companion
 //
-//  Age attestation, jurisdiction, residence, experience, the rule summary and
-//  an optional first plant. The grower picks the state manually; the app never
-//  asks for location and makes no lookup.
+//  Interface language, age attestation, jurisdiction, residence, experience,
+//  the rule summary and an optional first plant. English is the language the
+//  app opens in, and Spanish is offered on the very first step. The grower
+//  picks the state manually; the app never asks for location and makes no
+//  lookup.
 //
 
 import SwiftUI
@@ -31,30 +33,25 @@ struct OnboardingFlow: View {
     @State private var draft = OnboardingDraft()
     @State private var step = 0
 
-    private let stepCount = 6
+    private let stepCount = 7
 
     private var rule: JurisdictionRule? { RulePack.rule(forStateName: draft.stateName) }
 
     private var canContinue: Bool {
         switch step {
-        case 0: return draft.ageConfirmed
-        case 1: return rule != nil
-        case 2: return true
-        case 3: return true
-        case 4: return draft.jurisdictionConfirmed
-        case 5: return true
-        default: return false
+        case 1: return draft.ageConfirmed
+        case 2: return rule != nil
+        case 5: return draft.jurisdictionConfirmed
+        default: return true
         }
     }
 
     private var primaryTitle: String {
         switch step {
-        case 0: return String(localized: "I understand — continue")
-        case 1: return String(localized: "Continue")
-        case 2: return String(localized: "Continue")
-        case 3: return String(localized: "Continue")
-        case 4: return String(localized: "Looks right")
-        case 5: return String(localized: "Start growing")
+        case 0: return String(localized: "Continue")
+        case 1: return String(localized: "I understand — continue")
+        case 5: return String(localized: "Looks right")
+        case 6: return String(localized: "Start growing")
         default: return String(localized: "Continue")
         }
     }
@@ -81,14 +78,16 @@ struct OnboardingFlow: View {
     private var stepContent: some View {
         switch step {
         case 0:
-            AgeStepView(draft: $draft)
+            LanguageStepView()
         case 1:
-            JurisdictionStepView(draft: $draft)
+            AgeStepView(draft: $draft)
         case 2:
-            ResidenceStepView(draft: $draft)
+            JurisdictionStepView(draft: $draft)
         case 3:
-            ExperienceStepView(draft: $draft)
+            ResidenceStepView(draft: $draft)
         case 4:
+            ExperienceStepView(draft: $draft)
+        case 5:
             RulesStepView(draft: $draft, rule: rule)
         default:
             FirstPlantStepView(draft: $draft, rule: rule)
@@ -195,7 +194,100 @@ struct OnboardingFlow: View {
     }
 }
 
-// MARK: - Step 1: age and scope
+// MARK: - Step 1: language
+
+private struct LanguageStepView: View {
+    @Environment(AppLanguageStore.self) private var language
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 16) {
+            SectionHeader(String(localized: "Step 1 · Your language"))
+
+            Text("Which language should the app use?")
+                .font(Theme.serif(30))
+                .foregroundStyle(Theme.ink)
+                .fixedSize(horizontal: false, vertical: true)
+
+            Text("Grow Companion opens in English. Choose Español to read the interface in Spanish (Mexico); legal and rule text stays in English either way.")
+                .font(Theme.sans(13))
+                .foregroundStyle(Theme.secondaryInk)
+                .fixedSize(horizontal: false, vertical: true)
+
+            VStack(spacing: 10) {
+                ForEach(AppLanguage.allCases) { option in
+                    Button {
+                        language.select(option)
+                    } label: {
+                        LanguageOptionCard(
+                            language: option,
+                            isSelected: language.language == option
+                        )
+                    }
+                    .buttonStyle(.plain)
+                }
+            }
+
+            if language.needsRelaunch {
+                Text("The rest of the interface switches the next time you open the app.")
+                    .font(Theme.sans(11))
+                    .foregroundStyle(Theme.tertiaryInk)
+                    .fixedSize(horizontal: false, vertical: true)
+            }
+        }
+    }
+}
+
+/// One language in the list. The name is the language's own and is never
+/// translated, so it reads the same whichever interface is showing.
+private struct LanguageOptionCard: View {
+    let language: AppLanguage
+    let isSelected: Bool
+
+    var body: some View {
+        HStack(spacing: 12) {
+            Text(language.shortCode)
+                .font(Theme.sans(12, weight: .bold))
+                .tracking(0.8)
+                .foregroundStyle(isSelected ? Theme.onHero : Theme.secondaryInk)
+                .frame(width: 34, height: 34)
+                .background(
+                    Circle()
+                        .fill(isSelected ? Theme.primary : Theme.surfaceSunken)
+                )
+
+            VStack(alignment: .leading, spacing: 3) {
+                Text(language.endonym)
+                    .font(Theme.sans(15, weight: .semibold))
+                    .foregroundStyle(Theme.ink)
+                Text(language.detail)
+                    .font(Theme.sans(12))
+                    .foregroundStyle(Theme.secondaryInk)
+                    .fixedSize(horizontal: false, vertical: true)
+            }
+
+            Spacer(minLength: 0)
+
+            Image(systemName: isSelected ? "checkmark.circle.fill" : "circle")
+                .font(.system(size: 19))
+                .foregroundStyle(isSelected ? Theme.primary : Theme.tertiaryInk)
+        }
+        .padding(14)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .background(
+            RoundedRectangle(cornerRadius: 18, style: .continuous)
+                .fill(Theme.surface)
+        )
+        .overlay(
+            RoundedRectangle(cornerRadius: 18, style: .continuous)
+                .strokeBorder(isSelected ? Theme.primary.opacity(0.45) : Theme.hairline, lineWidth: 1.5)
+        )
+        .contentShape(Rectangle())
+        .accessibilityElement(children: .combine)
+        .accessibilityAddTraits(isSelected ? [.isSelected] : [])
+    }
+}
+
+// MARK: - Step 2: age and scope
 
 private struct AgeStepView: View {
     @Binding var draft: OnboardingDraft
@@ -276,7 +368,7 @@ private struct AgeStepView: View {
     }
 }
 
-// MARK: - Step 2: jurisdiction
+// MARK: - Step 3: jurisdiction
 
 private struct JurisdictionStepView: View {
     @Binding var draft: OnboardingDraft
@@ -287,7 +379,7 @@ private struct JurisdictionStepView: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 18) {
-            SectionHeader("Step 2 · Your jurisdiction")
+            SectionHeader(String(localized: "Step 3 · Your jurisdiction"))
 
             VStack(alignment: .leading, spacing: 8) {
                 Text("Where do you grow?")
@@ -403,14 +495,14 @@ private struct JurisdictionStepView: View {
     }
 }
 
-// MARK: - Step 3: residence
+// MARK: - Step 4: residence
 
 private struct ResidenceStepView: View {
     @Binding var draft: OnboardingDraft
 
     var body: some View {
         VStack(alignment: .leading, spacing: 16) {
-            SectionHeader("Step 3 · Your home")
+            SectionHeader(String(localized: "Step 4 · Your home"))
 
             Text("How is the space you grow in set up?")
                 .font(Theme.serif(30))
@@ -457,14 +549,14 @@ private struct ResidenceStepView: View {
     }
 }
 
-// MARK: - Step 4: experience
+// MARK: - Step 5: experience
 
 private struct ExperienceStepView: View {
     @Binding var draft: OnboardingDraft
 
     var body: some View {
         VStack(alignment: .leading, spacing: 16) {
-            SectionHeader("Step 4 · Your experience")
+            SectionHeader(String(localized: "Step 5 · Your experience"))
 
             Text("How much guidance do you want?")
                 .font(Theme.serif(30))
@@ -495,7 +587,7 @@ private struct ExperienceStepView: View {
     }
 }
 
-// MARK: - Step 5: rule summary
+// MARK: - Step 6: rule summary
 
 private struct RulesStepView: View {
     @Binding var draft: OnboardingDraft
@@ -503,7 +595,7 @@ private struct RulesStepView: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 16) {
-            SectionHeader("Step 5 · Your rules")
+            SectionHeader(String(localized: "Step 6 · Your rules"))
 
             Text("Check this is your jurisdiction")
                 .font(Theme.serif(30))
@@ -530,7 +622,7 @@ private struct RulesStepView: View {
     }
 }
 
-// MARK: - Step 6: first plant
+// MARK: - Step 7: first plant
 
 private struct FirstPlantStepView: View {
     @Binding var draft: OnboardingDraft
@@ -540,7 +632,7 @@ private struct FirstPlantStepView: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 16) {
-            SectionHeader("Step 6 · Your first plant")
+            SectionHeader(String(localized: "Step 7 · Your first plant"))
 
             if cultivable {
                 Text("Add a plant, or skip for now")

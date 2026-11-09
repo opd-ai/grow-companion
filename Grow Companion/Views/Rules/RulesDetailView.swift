@@ -182,6 +182,8 @@ struct FederalNoticeCard: View {
 }
 
 struct VerificationDutyCard: View {
+    @Environment(AppLanguageStore.self) private var language
+
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
             Text("Your verification duty")
@@ -191,7 +193,7 @@ struct VerificationDutyCard: View {
                 .font(Theme.sans(13))
                 .foregroundStyle(Theme.secondaryInk)
                 .fixedSize(horizontal: false, vertical: true)
-            if let notice = Localization.legalTextNotice {
+            if let notice = Localization.legalTextNotice(appLanguage: language.language) {
                 Text(notice)
                     .font(Theme.sans(12, weight: .semibold))
                     .foregroundStyle(Theme.amber)

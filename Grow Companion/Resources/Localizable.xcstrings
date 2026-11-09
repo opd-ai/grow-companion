@@ -1602,7 +1602,21 @@
     "We use this only to load your plant limits. Grow Companion does not send it anywhere, and no location permission is requested." : { "localizations" : { "es" : { "stringUnit" : { "state" : "translated", "value" : "Lo usamos solo para cargar tus límites de plantas. Grow Companion no lo envía a ningún sitio y no se pide permiso de ubicación." } } } },
     "On-device only, no account, no network" : { "localizations" : { "es" : { "stringUnit" : { "state" : "translated", "value" : "Solo en el dispositivo, sin cuenta ni red" } } } },
     "An export or backup you save to Files. Where that copy goes afterwards is outside the app." : { "localizations" : { "es" : { "stringUnit" : { "state" : "translated", "value" : "Una exportación o copia de seguridad que guardas en Archivos. A dónde va esa copia después queda fuera de la app." } } } },
-    "A device or iCloud backup made by iOS. Grow Companion does not control those copies, so delete-all cannot remove them." : { "localizations" : { "es" : { "stringUnit" : { "state" : "translated", "value" : "Una copia de seguridad del dispositivo o de iCloud hecha por iOS. Grow Companion no controla esas copias, así que borrar todo no puede eliminarlas." } } } }
+    "A device or iCloud backup made by iOS. Grow Companion does not control those copies, so delete-all cannot remove them." : { "localizations" : { "es" : { "stringUnit" : { "state" : "translated", "value" : "Una copia de seguridad del dispositivo o de iCloud hecha por iOS. Grow Companion no controla esas copias, así que borrar todo no puede eliminarlas." } } } },
+    "Language" : { "localizations" : { "es" : { "stringUnit" : { "state" : "translated", "value" : "Idioma" } } } },
+    "The language of the interface" : { "localizations" : { "es" : { "stringUnit" : { "state" : "translated", "value" : "El idioma de la interfaz" } } } },
+    "Which language should the app use?" : { "localizations" : { "es" : { "stringUnit" : { "state" : "translated", "value" : "¿En qué idioma quieres usar la app?" } } } },
+    "Grow Companion opens in English. Choose Español to read the interface in Spanish (Mexico); legal and rule text stays in English either way." : { "localizations" : { "es" : { "stringUnit" : { "state" : "translated", "value" : "Grow Companion se abre en inglés. Elige Español para leer la interfaz en español (México); el texto legal y de normas permanece en inglés en ambos casos." } } } },
+    "The rest of the interface switches the next time you open the app." : { "localizations" : { "es" : { "stringUnit" : { "state" : "translated", "value" : "El resto de la interfaz cambia la próxima vez que abras la app." } } } },
+    "Dates and numbers follow this language; legal and rule text stays in English." : { "localizations" : { "es" : { "stringUnit" : { "state" : "translated", "value" : "Las fechas y los números siguen este idioma; el texto legal y de normas permanece en inglés." } } } },
+    "Step 1 · Your language" : { "localizations" : { "es" : { "stringUnit" : { "state" : "translated", "value" : "Paso 1 · Tu idioma" } } } },
+    "Step 3 · Your jurisdiction" : { "localizations" : { "es" : { "stringUnit" : { "state" : "translated", "value" : "Paso 3 · Tu jurisdicción" } } } },
+    "Step 4 · Your home" : { "localizations" : { "es" : { "stringUnit" : { "state" : "translated", "value" : "Paso 4 · Tu hogar" } } } },
+    "Step 5 · Your experience" : { "localizations" : { "es" : { "stringUnit" : { "state" : "translated", "value" : "Paso 5 · Tu experiencia" } } } },
+    "Step 6 · Your rules" : { "localizations" : { "es" : { "stringUnit" : { "state" : "translated", "value" : "Paso 6 · Tus normas" } } } },
+    "Step 7 · Your first plant" : { "localizations" : { "es" : { "stringUnit" : { "state" : "translated", "value" : "Paso 7 · Tu primera planta" } } } },
+    "Interface, notices and reports in English" : { "localizations" : { "es" : { "stringUnit" : { "state" : "translated", "value" : "Interfaz, avisos e informes en inglés" } } } },
+    "Interface, notices and reports in Spanish (Mexico)" : { "localizations" : { "es" : { "stringUnit" : { "state" : "translated", "value" : "Interfaz, avisos e informes en español (México)" } } } }
   },
   "version" : "1.0"
 }

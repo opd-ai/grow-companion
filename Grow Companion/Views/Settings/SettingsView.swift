@@ -10,6 +10,7 @@ struct SettingsView: View {
     let profile: GrowProfile
 
     @Environment(AppLock.self) private var appLock
+    @Environment(AppLanguageStore.self) private var language
 
     @AppStorage(SettingsKey.unitSystem) private var unitRaw = "metric"
     @AppStorage(SettingsKey.warningThreshold) private var warningThreshold: Double = 0.8
@@ -39,6 +40,7 @@ struct SettingsView: View {
 
                 profileCard
                 unitsCard
+                languageCard
                 widgetsCard
                 alertsCard
                 privacyCard
@@ -100,6 +102,44 @@ struct SettingsView: View {
                 .foregroundStyle(Theme.tertiaryInk)
         }
         .growCard()
+    }
+
+    private var languageCard: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            SectionHeader("Language", subtitle: "The language of the interface")
+
+            // A menu shows the whole name at the largest Dynamic Type size,
+            // where a segmented control would clip "Español".
+            Picker("Language", selection: languageSelection) {
+                ForEach(AppLanguage.allCases) { option in
+                    Text(option.endonym).tag(option)
+                }
+            }
+            .pickerStyle(.menu)
+            .tint(Theme.primary)
+
+            Text(language.language.detail)
+                .font(Theme.sans(12))
+                .foregroundStyle(Theme.secondaryInk)
+                .fixedSize(horizontal: false, vertical: true)
+
+            Text(
+                language.needsRelaunch
+                    ? String(localized: "The rest of the interface switches the next time you open the app.")
+                    : String(localized: "Dates and numbers follow this language; legal and rule text stays in English.")
+            )
+            .font(Theme.sans(12))
+            .foregroundStyle(Theme.tertiaryInk)
+            .fixedSize(horizontal: false, vertical: true)
+        }
+        .growCard()
+    }
+
+    private var languageSelection: Binding<AppLanguage> {
+        Binding(
+            get: { language.language },
+            set: { language.select($0) }
+        )
     }
 
     private var widgetsCard: some View {
