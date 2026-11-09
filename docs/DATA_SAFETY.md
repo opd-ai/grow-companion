@@ -24,7 +24,7 @@ Each of those also gets a CSV. Room, plant, strain and environment-reading recor
 
 Before replacing, the restore dialog states what the backup holds: record count and format version for a v2 backup, or that an older backup carries no record manifest.
 
-**Verified delete-all.** Delete-all walks the inventory, throws instead of swallowing failures, rolls the context back when it cannot complete, and reports the record counts that remain. The completion message says what was removed and that Files copies, device backups and iCloud backups are outside the app.
+**Verified delete-all.** Delete-all walks the inventory, throws instead of swallowing failures, rolls the context back when it cannot complete, and reports the record counts that remain. The completion message says what was removed and that Files copies, device backups and iCloud backups are outside the app. It also clears the app's preferences from `SettingsKey.all`, which now includes the interface language and the education reading progress (the read lessons and the date each was read).
 
 **Compliance history is part of the data controls.** `ComplianceSnapshot` and `RuleEvaluationEvent` are in the same model inventory, so export, backup, restore and delete-all cover them without a separate path. Export writes `complianceSnapshots` and `ruleEvaluationEvents` sections plus two CSV files; restore reads them back; a v2 manifest can verify their counts. See `docs/COMPLIANCE_HISTORY.md`.
 

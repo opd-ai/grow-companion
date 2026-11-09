@@ -48,6 +48,7 @@ import so location metadata never survives.
 | Light-distance guidance with a grower-set target and re-measure prompts | Shipped | `Services/LightDistanceGuidance.swift`, `Views/Rooms/LightDistanceView.swift` |
 | Breeder reference library with claimed figures kept apart from your results, plus your own notes per breeder | Shipped | `Models/BreederProfile.swift`, `Models/GrowerBreeder.swift`, `Services/BreederLibrary.swift`, `Views/Strains/BreederProfileView.swift` |
 | Interface language: English by default, Español selectable in onboarding and Settings | Shipped | `Services/AppLanguage.swift`, `Views/Onboarding/OnboardingFlow.swift`, `Views/Settings/SettingsView.swift` |
+| Offline education library with reading progress and a rule-pack citation on the legal lesson | Shipped | `Services/EducationLibrary.swift`, `Services/EducationProgress.swift`, `Views/Education/EducationLibraryView.swift` |
 
 The shipped navigation and current feature surfaces are recorded in section 6.2.
 Future cloud, hardware, extension and community features remain explicitly
@@ -349,6 +350,26 @@ Reading progress is stored on device.
 Outdated advice, and advice that conflicts with product labels. Each lesson
 shows its review date, and content review is scheduled with the rule-pack
 review.
+
+**Shipped.** `Services/EducationLibrary.swift` bundles six lessons across the
+four topics (fundamentals, pest checks, drying and curing, compliance). Every
+lesson carries its review date, a four-item checklist, an apply destination and
+— for the compliance lesson — the rule pack it was written against, so the
+wording and the pack can be read together. The review date is the pack's
+verified date, which keeps content review on the rule review schedule. Copy
+limits are enforced by test: no product recommendation, no potency or health
+claim. `Services/EducationProgress.swift` stores reading progress locally —
+which lessons are read and when — in two preferences inside `SettingsKey.all`,
+so delete-all clears them. A lesson can be marked read and un-marked again, the
+date is shown on the row and on the lesson, and progress is summarised per topic
+and for the whole library. Lesson copy goes through `String(localized:)` with
+the rest of the interface, and the review date is rendered through
+`Format.shortDate`, so it follows the interface language.
+`Grow CompanionTests/EducationLibraryTests.swift` covers topic coverage, unique
+ids, copy and checklist completeness, the apply destinations, the rule-pack
+citation, the copy limits, the review date and the progress store's default,
+mark, un-mark, per-topic count, all-read rule and delete-all coverage. See
+`docs/EDUCATION_LIBRARY.md`.
 
 ---
 
@@ -878,6 +899,7 @@ TAB 5: SETTINGS
 │   ├── Backup and restore (password-protected local backup)
 │   └── Export and delete
 ├── Reports (performance trends, grow report PDF)
+├── Education library (offline lessons, reading progress)
 ├── Equipment
 ├── Legal notices
 └── About
@@ -915,8 +937,10 @@ PLANT DETAIL
   the current screen states that there is no account and no cloud sync. The
   protocol and its cryptographic foundation are recorded in
   `docs/E2EE_DESIGN.md`.
-- **Educational library:** a Settings row and contextual "Learn why" links from
-  rule and care cards.
+- **Educational library:** shipped as a Settings → Learn entry with four topics,
+  six lessons, a per-lesson checklist, an apply-to-my-grow destination, the rule
+  pack the legal lesson was written against, and local reading progress with the
+  date each lesson was read. See `docs/EDUCATION_LIBRARY.md`.
 
 ---
 
