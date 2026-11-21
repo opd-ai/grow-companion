@@ -26,6 +26,8 @@ Everything the app does is on the device that made the record:
 - the breeder reference, light-distance guidance and the education library;
 - journal search, lab report figures typed from a report the grower holds, and
   the per-room training screen (SCROG) planner;
+- the cultivar comparison, which puts the grower's own finished cycles side by
+  side with the sample size each average rests on;
 - interface text that follows the iOS text-size setting.
 
 ## Privacy boundary

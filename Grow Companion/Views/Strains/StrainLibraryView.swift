@@ -26,7 +26,7 @@ struct StrainLibraryView: View {
         ScrollView {
             VStack(alignment: .leading, spacing: 20) {
                 header
-                breederReferenceLink
+                libraryLinks
 
                 if strains.isEmpty {
                     emptyState
@@ -64,25 +64,50 @@ struct StrainLibraryView: View {
         }
     }
 
-    private var breederReferenceLink: some View {
+    private var libraryLinks: some View {
+        VStack(spacing: 10) {
+            referenceCard(
+                title: String(localized: "Breeder reference"),
+                systemImage: "person.2",
+                subtitle: String(localized: "Bundled profiles and claimed figures, kept apart from your results.")
+            ) {
+                BreederLibraryView()
+            }
+
+            referenceCard(
+                title: String(localized: "Compare cultivars"),
+                systemImage: "chart.bar.xaxis",
+                subtitle: String(localized: "Your own harvests side by side, with the sample sizes shown.")
+            ) {
+                StrainComparisonView()
+            }
+        }
+    }
+
+    private func referenceCard<Destination: View>(
+        title: String,
+        systemImage: String,
+        subtitle: String,
+        @ViewBuilder destination: () -> Destination
+    ) -> some View {
         NavigationLink {
-            BreederLibraryView()
+            destination()
         } label: {
             HStack(spacing: 12) {
                 ZStack {
                     RoundedRectangle(cornerRadius: 12, style: .continuous)
                         .fill(Theme.sageSoft)
                         .frame(width: 44, height: 44)
-                    Image(systemName: "person.2")
+                    Image(systemName: systemImage)
                         .font(.system(size: 16, weight: .semibold))
                         .foregroundStyle(Theme.primary)
                 }
 
                 VStack(alignment: .leading, spacing: 3) {
-                    Text("Breeder reference")
+                    Text(title)
                         .font(Theme.sans(15, weight: .semibold))
                         .foregroundStyle(Theme.ink)
-                    Text("Bundled profiles and claimed figures, kept apart from your results.")
+                    Text(subtitle)
                         .font(Theme.sans(12))
                         .foregroundStyle(Theme.secondaryInk)
                         .lineLimit(2)

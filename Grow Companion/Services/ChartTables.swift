@@ -64,6 +64,31 @@ enum ChartTables {
         )
     }
 
+    /// The cultivar comparison's bars, as the same values in a list.
+    static func cultivarComparison(
+        _ samples: [CultivarSample],
+        metric: CultivarMetric,
+        unit: UnitSystem,
+        summary: String
+    ) -> ChartTable {
+        let rows = samples.compactMap { sample -> ChartTableRow? in
+            guard let value = metric.value(of: sample) else { return nil }
+            return ChartTableRow(
+                id: sample.id,
+                label: sample.name,
+                value: metric.display(value, unit: unit),
+                isFlagged: false
+            )
+        }
+
+        return ChartTable(
+            id: "cultivar-\(metric.rawValue)",
+            title: "Data table",
+            summary: summary,
+            rows: rows
+        )
+    }
+
     /// The compliance ring's values, with the same levels it colours.
     static func compliance(
         report: ComplianceReport,

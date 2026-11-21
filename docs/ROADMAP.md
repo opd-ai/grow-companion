@@ -53,6 +53,7 @@ import so location metadata never survives.
 | Lab report figures typed from a report the grower holds, with their confirmation | Shipped | `Models/LabResult.swift`, `Services/LabResults.swift`, `Views/Plants/LabResultSection.swift` |
 | Dynamic Type across the design's own type scale | Shipped, capped at 145% | `Design/Theme.swift` |
 | Training screen (SCROG) planner with a per-room grid of placed branches | Shipped | `Models/ScreenPlan.swift`, `Services/ScreenPlanner.swift`, `Views/Rooms/ScreenPlanView.swift` |
+| Cultivar comparison: your own finished cycles side by side, with sample sizes | Shipped | `Services/StrainComparison.swift`, `Views/Strains/StrainComparisonView.swift` |
 
 The shipped navigation and current feature surfaces are recorded in section 6.2.
 Future cloud, hardware, extension and community features remain explicitly
@@ -388,7 +389,6 @@ experience is stable, and several require validation before they ship.
 | Home automation bridges | Connectors for Home Assistant and similar hubs for advanced automation. | Would add a network connection the product does not have. | None: outside the privacy boundary. | Credential exposure through third-party hubs. |
 | CO2 control automation | Schedules or triggers CO2 supplementation with safety limits. | Requires validated sensor data and a safety design. | On-device schedule. | Safety risk if sensors fail; requires interlocks. |
 | Lab PDF extraction with OCR | Automated extraction of values from lab reports. | Extraction errors are dangerous, so manual confirmation must be proven first. | Extracted values on-device. | Misread results. |
-| Strain comparison and cultivar analytics | Side-by-side charts across cultivars using the user's own data. | Needs enough history to be meaningful. | On-device. | Small-sample conclusions presented as facts. |
 | Household profiles | Separate profiles on one device for shared grows. | Adds permission complexity. | Per-profile encrypted stores. | Access-control bugs. |
 | visionOS or Vision Pro view | Spatial room view with live sensor overlays. | Small installed base. | On-device. | Limited value relative to effort. |
 | Additional languages | Expanded localization beyond the launch set. | Depends on rule coverage in each language. | Bundled strings. | Translation accuracy for legal text. |
@@ -410,7 +410,26 @@ with everything else. `Grow CompanionTests/ScreenPlannerTests.swift` covers the
 grid, the placement rules, the resize guard, the plant and room delete rules,
 and the data-control coverage. The risk the row named — visual complexity on an
 iPhone screen — is handled by a compact square grid with one green palette and a
-numbered legend rather than a free-form canvas.
+number legend rather than a free-form canvas.
+
+**Shipped: cultivar comparison.** The row that waited on "enough history to be
+meaningful" is now a screen that refuses to pretend. `StrainComparison` groups
+the grower's plants by cultivar name (case and accent insensitive, the strain
+record winning over the typed name), averages only harvested cycles, and carries
+the sample size for each figure. Flowering days come from the flower event to
+the harvest, dry yield from the weighed plant, and rating from the grower's own
+1–5. A missing figure stays blank — the breeder's label is never substituted —
+and a cultivar with no value for the chosen measure is left out of the chart
+rather than drawn at zero. One cycle is labelled "a single run, not a pattern",
+and the screen says so when only one cultivar has finished. The chart is a
+horizontal bar per cultivar with a value annotation, and every bar has a text
+equivalent through `ChartTables.cultivarComparison`, which is what VoiceOver
+reads. It is reachable from the strain library beside the breeder reference and
+each row opens that strain's history. Everything is computed from records
+already on the device: no model, no network and no stored aggregate.
+`Grow CompanionTests/StrainComparisonTests.swift` covers the grouping, the
+finished-only rule, the averages and their sample counts, the blank stays blank
+case, the ordering, the measure filtering, the unit formatting and the table.
 
 ---
 
