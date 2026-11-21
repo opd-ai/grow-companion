@@ -82,9 +82,10 @@ final class Room {
     @Relationship(deleteRule: .cascade, inverse: \EnvironmentAlert.room)
     var environmentAlerts: [EnvironmentAlert] = []
 
-    /// The room's training screen (a SCROG net) and the squares it holds.
+    /// The room's training screens (SCROG nets). The planner keeps one, so
+    /// `screenPlan` is what the card and the grid read.
     @Relationship(deleteRule: .cascade, inverse: \ScreenPlan.room)
-    var screenPlan: ScreenPlan?
+    var screenPlans: [ScreenPlan] = []
 
     init(
         name: String = "Grow Room",
@@ -182,6 +183,12 @@ final class Room {
     /// Most recent schedule change first.
     var sortedLightEvents: [LightScheduleEvent] {
         lightScheduleEvents.sorted { $0.date > $1.date }
+    }
+
+    /// The training screen the planner opens. A room keeps one, created the
+    /// first time the planner is opened.
+    var screenPlan: ScreenPlan? {
+        screenPlans.sorted { $0.createdAt < $1.createdAt }.first
     }
 
     var placementLabel: String {
