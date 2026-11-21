@@ -39,7 +39,37 @@ enum BackupService {
             _ = try arrays(key, in: root)
         }
 
+        try validatePhotoReferences(root)
         try validateManifest(root)
+    }
+
+    /// Photo filenames from a backup are used by the app's private file store.
+    /// Reject path components and malformed image data before replacing records.
+    private static func validatePhotoReferences(_ root: [String: Any]) throws {
+        var photoNames = Set<String>()
+        for photo in try arrays("photos", in: root) {
+            guard let name = photo["fileName"] as? String,
+                  PhotoStore.isSafeFileName(name) else {
+                throw ExportServiceError.invalidBackup("a photo has an unsafe file name")
+            }
+            guard photoNames.insert(name).inserted else {
+                throw ExportServiceError.invalidBackup("the photos section contains a duplicate file name")
+            }
+            guard let encoded = photo["data"] as? String,
+                  let data = Data(base64Encoded: encoded),
+                  !data.isEmpty else {
+                throw ExportServiceError.invalidBackup("a photo in the backup is not readable")
+            }
+        }
+
+        for (section, field) in [("journal", "photo"), ("scoutingChecks", "photo")] {
+            for record in try arrays(section, in: root) {
+                let name = string(record[field])
+                guard name.isEmpty || PhotoStore.isSafeFileName(name) else {
+                    throw ExportServiceError.invalidBackup("a photo has an unsafe file name")
+                }
+            }
+        }
     }
 
     /// Replaces the device's records with the backup's, after rehearsing the

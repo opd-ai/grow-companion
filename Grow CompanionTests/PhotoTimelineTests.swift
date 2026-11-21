@@ -100,6 +100,15 @@ struct PhotoTimelineTests {
         #expect(undated.stageLabel == "Stage not recorded")
     }
 
+    @Test func photoReferencesCannotEscapeThePrivateDirectory() {
+        let directory = PhotoStore.directory().standardizedFileURL
+        for name in ["../escape.jpg", "nested/escape.jpg", "..\\escape.jpg", "/tmp/escape.jpg"] {
+            let url = PhotoStore.url(for: name).standardizedFileURL
+            #expect(url.deletingLastPathComponent() == directory)
+            #expect(url.lastPathComponent == ".invalid-photo-reference")
+        }
+    }
+
     @Test func deletingAnEntryRemovesThePhotoThumbnailAndCache() throws {
         let context = try makeContext()
         let imageData = try #require(testImageData())

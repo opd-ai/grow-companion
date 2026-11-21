@@ -106,7 +106,8 @@ enum ExportService {
 
         if options.includeJournal && options.includePhotos {
             for entry in snapshot.journal {
-                guard let fileName = entry.photoFileName else { continue }
+                guard let fileName = entry.photoFileName,
+                      PhotoStore.isSafeFileName(fileName) else { continue }
                 guard let data = try? Data(contentsOf: PhotoStore.url(for: fileName)) else { continue }
                 archive.add(data, as: "photos/\(fileName)")
             }
@@ -1244,6 +1245,7 @@ enum ExportService {
         if includeJournal && includePhotos {
             let photos = snapshot.journal.compactMap { entry -> [String: Any]? in
                 guard let fileName = entry.photoFileName,
+                      PhotoStore.isSafeFileName(fileName),
                       let image = try? Data(contentsOf: PhotoStore.url(for: fileName)) else { return nil }
                 return ["fileName": fileName, "data": image.base64EncodedString()]
             }

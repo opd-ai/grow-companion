@@ -27,7 +27,21 @@ enum PhotoStore {
     }
 
     static func url(for fileName: String) -> URL {
-        directory().appendingPathComponent(fileName)
+        let storedName = isSafeFileName(fileName) ? fileName : ".invalid-photo-reference"
+        return directory().appendingPathComponent(storedName, isDirectory: false)
+    }
+
+    /// Photo references are basenames, never paths supplied by imported data.
+    static func isSafeFileName(_ fileName: String) -> Bool {
+        guard !fileName.isEmpty,
+              fileName != ".",
+              fileName != "..",
+              !fileName.contains("/"),
+              !fileName.contains("\\"),
+              !fileName.unicodeScalars.contains(where: { CharacterSet.controlCharacters.contains($0) }) else {
+            return false
+        }
+        return URL(fileURLWithPath: fileName).lastPathComponent == fileName
     }
 
     static func thumbnailName(for fileName: String) -> String {

@@ -9,7 +9,7 @@ The pipelines use Xcode's `xcodebuild` and macOS `security` commands for archive
 
 ## One-time Apple setup
 
-1. Enroll in the Apple Developer Program and choose the app's permanent, explicit bundle identifier. Register that identifier under Certificates, Identifiers & Profiles, then create the matching app record in App Store Connect.
+1. Enroll in the Apple Developer Program and choose the app's permanent, explicit bundle identifier. Configure a distinct identifier for the widget extension and register the App Group used by both targets. Register the identifiers under Certificates, Identifiers & Profiles, then create the matching app record in App Store Connect. The repository's current identifiers are placeholders, and the TestFlight workflow needs target-specific signing configuration before it can safely archive the app.
 2. Create an **Apple Distribution** certificate and export it from Keychain Access as a password-protected `.p12` that includes its private key.
 3. Create an **App Store Connect** provisioning profile for the explicit bundle identifier and the same team/certificate. The profile must include the app's required entitlements.
 4. In App Store Connect, create an API key with the **App Manager** role. Download its `.p8` private key once and store it securely; Apple does not offer another download of that key.
@@ -36,7 +36,9 @@ Also add this **repository variable** (it is configuration, not a credential):
 |---|---|---|
 | `IOS_BUNDLE_ID` | The exact explicit bundle identifier registered for the app, for example `com.example.growcompanion`. | Choose/register the identifier in Apple Developer and use the same identifier for the App Store Connect app and provisioning profile. |
 
-The workflow overrides the project's placeholder bundle identifier and version at archive time. Tag `v1.2.3` produces marketing version `1.2.3`; a manual run can provide a version or use the Xcode project's `MARKETING_VERSION`. The GitHub Actions run number is used as the build number.
+The workflow currently overrides `PRODUCT_BUNDLE_IDENTIFIER` globally at archive time. Because the app embeds a widget extension, that setting also applies to the extension target, assigning the app and extension the same identifier. The workflow likewise supplies one provisioning profile globally and maps only the app identifier in its export options. Treat TestFlight delivery as blocked until the project has a permanent app identifier, a distinct widget identifier, a registered App Group, and target-specific signing/profile mappings; the current `com.organizationName...` identifiers are placeholders. Do not use the workflow as evidence of a successful release archive until that signing setup is corrected and verified.
+
+Tag `v1.2.3` produces marketing version `1.2.3`; a manual run can provide a version or use the Xcode project's `MARKETING_VERSION`. The GitHub Actions run number is used as the build number.
 
 ## Release procedure
 

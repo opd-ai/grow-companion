@@ -189,4 +189,50 @@ struct BackupValidationTests {
             try BackupService.validate(document)
         }
     }
+
+    @Test func photoPathTraversalIsRejectedBeforeRestore() {
+        let document: [String: Any] = [
+            "backupVersion": 2,
+            "rooms": [],
+            "plants": [],
+            "photos": [["fileName": "../../GrowCompanion.sqlite", "data": "aGVsbG8="]]
+        ]
+        #expect(throws: ExportServiceError.self) {
+            try BackupService.validate(document)
+        }
+    }
+
+    @Test func unsafeJournalPhotoReferenceIsRejected() {
+        let document: [String: Any] = [
+            "backupVersion": 2,
+            "rooms": [],
+            "plants": [],
+            "journal": [["photo": "../private.jpg"]]
+        ]
+        #expect(throws: ExportServiceError.self) {
+            try BackupService.validate(document)
+        }
+    }
+
+    @Test func malformedPhotoDataIsRejectedBeforeRestore() {
+        let document: [String: Any] = [
+            "backupVersion": 2,
+            "rooms": [],
+            "plants": [],
+            "photos": [["fileName": "photo.jpg", "data": "not base64!"]]
+        ]
+        #expect(throws: ExportServiceError.self) {
+            try BackupService.validate(document)
+        }
+    }
+
+    @Test func safePhotoBasenameIsAccepted() throws {
+        let document: [String: Any] = [
+            "backupVersion": 2,
+            "rooms": [],
+            "plants": [],
+            "photos": [["fileName": "photo.jpg", "data": "aGVsbG8="]]
+        ]
+        try BackupService.validate(document)
+    }
 }
