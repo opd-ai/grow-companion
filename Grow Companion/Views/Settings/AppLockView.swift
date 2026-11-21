@@ -7,9 +7,12 @@
 //
 
 import SwiftUI
+import SwiftData
 
 struct AppLockView: View {
     @Environment(AppLock.self) private var appLock
+    @Query(sort: \CareReminder.nextDueDate) private var reminders: [CareReminder]
+    @Query(sort: \Room.createdAt) private var rooms: [Room]
 
     var body: some View {
         @Bindable var lock = appLock
@@ -28,7 +31,12 @@ struct AppLockView: View {
 
                 VStack(alignment: .leading, spacing: 12) {
                     SectionHeader("Lock")
-                    Toggle(isOn: $lock.isEnabled) {
+                    Toggle(
+                        isOn: Binding(
+                            get: { lock.isEnabled },
+                            set: { appLock.setEnabled($0) }
+                        )
+                    ) {
                         VStack(alignment: .leading, spacing: 2) {
                             Text("Require \(AppLock.biometryName)")
                                 .font(Theme.sans(15, weight: .semibold))
@@ -40,6 +48,14 @@ struct AppLockView: View {
                         }
                     }
                     .tint(Theme.primary)
+
+                    if lock.authenticationUnavailable {
+                        Text("Device authentication is unavailable. Set a device passcode in Settings before using app lock.")
+                            .font(Theme.sans(12))
+                            .foregroundStyle(Theme.amber)
+                            .fixedSize(horizontal: false, vertical: true)
+                            .accessibilityAddTraits(.isStaticText)
+                    }
                 }
                 .growCard()
 
@@ -69,7 +85,7 @@ struct AppLockView: View {
                     SectionHeader("How it behaves")
                     bullet("The app locks when it comes back from the background, once the grace period has passed.")
                     bullet("A neutral screen replaces the app-switcher snapshot, so no plant, room or strain appears there.")
-                    bullet("If the device has no passcode, the app cannot lock and stays open.")
+                    bullet("A device passcode is required. If device authentication becomes unavailable, the app stays covered until you can unlock it.")
                 }
                 .growCard()
             }
@@ -80,6 +96,12 @@ struct AppLockView: View {
         .background(Theme.background)
         .navigationTitle("App lock")
         .navigationBarTitleDisplayMode(.inline)
+        .onChange(of: lock.isEnabled) { _, _ in
+            // Pending notification content is captured when each request is
+            // scheduled, so update it immediately when the privacy boundary changes.
+            CareNotifications.refresh(reminders)
+            CareDigest.schedule(rooms: rooms)
+        }
     }
 
     private var fallbackText: String {

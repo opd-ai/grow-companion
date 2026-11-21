@@ -13,10 +13,10 @@ struct CareDigestPreviewView: View {
 
     @AppStorage(SettingsKey.unitSystem) private var unitRaw = "metric"
     @State private var selectedRoomIDs: Set<String> = []
-    @State private var digestDate = Calendar.current.startOfDay(for: Date())
+    @State private var digestDate = Format.calendar.startOfDay(for: Date())
 
     private var unit: UnitSystem { UnitSystem(rawValue: unitRaw) ?? .metric }
-    private var calendar: Calendar { Calendar.current }
+    private var calendar: Calendar { Format.calendar }
     private var selectedRooms: [Room] {
         CareDigest.selectedRooms(from: rooms, roomIDs: selectedRoomIDs)
     }
@@ -128,10 +128,17 @@ struct CareDigestPreviewView: View {
             digestDate = calendar.startOfDay(for: date)
         } label: {
             VStack(spacing: 5) {
-                Text(isToday ? "TODAY" : date.formatted(.dateTime.weekday(.abbreviated)).uppercased())
-                    .font(Theme.sans(9, weight: .semibold))
-                    .tracking(0.5)
-                Text(date.formatted(.dateTime.day()))
+                if isToday {
+                    Text("Today")
+                        .textCase(.uppercase)
+                        .font(Theme.sans(9, weight: .semibold))
+                        .tracking(0.5)
+                } else {
+                    Text(Format.date(date, template: "EEE").uppercased())
+                        .font(Theme.sans(9, weight: .semibold))
+                        .tracking(0.5)
+                }
+                Text(Format.number(Double(calendar.component(.day, from: date)), digits: 0))
                     .font(Theme.sans(17, weight: .semibold))
                     .monospacedDigit()
             }
@@ -143,7 +150,7 @@ struct CareDigestPreviewView: View {
             )
         }
         .buttonStyle(.plain)
-        .accessibilityLabel(isToday ? "Today, \(Format.shortDate(date))" : Format.shortDate(date))
+        .accessibilityLabel(Format.date(date, template: "EEEE d MMMM yyyy"))
         .accessibilityAddTraits(isSelected ? .isSelected : [])
     }
 

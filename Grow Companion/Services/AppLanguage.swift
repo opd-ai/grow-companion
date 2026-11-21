@@ -23,7 +23,14 @@ enum AppLanguage: String, CaseIterable, Identifiable, Hashable {
     var id: String { rawValue }
 
     /// The interface copy, together with the dates and numbers that go with it.
-    var locale: Locale { Locale(identifier: rawValue) }
+    /// The bundle still uses the two-letter language code; regional formatting
+    /// follows the language's promised conventions, including Mexican Spanish.
+    var locale: Locale {
+        switch self {
+        case .english: Locale(identifier: "en")
+        case .spanish: Locale(identifier: "es_MX")
+        }
+    }
 
     /// The two-letter code shown ahead of the name in the language list.
     var shortCode: String { rawValue.uppercased() }

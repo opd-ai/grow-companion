@@ -61,6 +61,10 @@ final class AppLock {
         }
     }
 
+    /// True when the device cannot currently authenticate, so the lock flow can
+    /// explain why access is unavailable instead of appearing unresponsive.
+    var authenticationUnavailable = false
+
     var grace: LockGrace {
         didSet {
             UserDefaults.standard.set(grace.rawValue, forKey: SettingsKey.appLockGrace)
@@ -79,6 +83,33 @@ final class AppLock {
         grace = storedGrace
         isLocked = storedEnabled
         isCovered = storedEnabled
+    }
+
+    // MARK: Configuration
+
+    /// Enabling the lock is only allowed when device-owner authentication can
+    /// actually run. This avoids locking the grow behind a device with no
+    /// available passcode or authentication policy.
+    func setEnabled(_ enabled: Bool, authenticationCheck: (() -> Bool)? = nil) {
+        guard enabled else {
+            authenticationUnavailable = false
+            isEnabled = false
+            return
+        }
+
+        let canAuthenticate = authenticationCheck?() ?? Self.deviceAuthenticationIsAvailable()
+        guard canAuthenticate else {
+            authenticationUnavailable = true
+            return
+        }
+
+        authenticationUnavailable = false
+        isEnabled = true
+    }
+
+    private static func deviceAuthenticationIsAvailable() -> Bool {
+        let context = LAContext()
+        return context.canEvaluatePolicy(.deviceOwnerAuthentication, error: nil)
     }
 
     // MARK: Lifecycle
@@ -134,14 +165,16 @@ final class AppLock {
 
         var error: NSError?
         guard context.canEvaluatePolicy(.deviceOwnerAuthentication, error: &error) else {
-            // Never fail open. The user must configure a device passcode before
-            // protected records can be unlocked.
+            // Never fail open. Keep the grow covered and explain how to restore
+            // authentication instead of silently rejecting every unlock tap.
+            authenticationUnavailable = true
             isLocked = true
             isCovered = true
             updateCover()
             return
         }
 
+        authenticationUnavailable = false
         isAuthenticating = true
         defer { isAuthenticating = false }
 
@@ -162,6 +195,7 @@ final class AppLock {
 
     /// Called by the delete-all flow: the lock and its settings go with the data.
     func resetForDataErase() {
+        authenticationUnavailable = false
         isLocked = false
         isCovered = false
         isEnabled = false

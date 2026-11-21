@@ -38,6 +38,14 @@ struct FormatLocaleTests {
         #expect(Format.volume(2.5, unit: .metric) == "2,50 L")
     }
 
+    @Test func appSpanishFormattingUsesMexicanNumberConventions() {
+        let restore = Format.locale
+        Format.locale = AppLanguage.spanish.locale
+        defer { Format.locale = restore }
+
+        #expect(Format.number(24.5, digits: 1) == "24.5")
+    }
+
     @Test func imperialUnitsAreConvertedBeforeFormatting() {
         let restore = Format.locale
         Format.locale = Locale(identifier: "en_US")
@@ -62,12 +70,35 @@ struct FormatLocaleTests {
         Format.locale = Locale(identifier: "en_US")
         let english = Format.shortDate(date)
 
-        Format.locale = Locale(identifier: "es_MX")
+        Format.locale = AppLanguage.spanish.locale
         let spanish = Format.shortDate(date)
 
         #expect(english.contains("2026"))
         #expect(spanish.contains("2026"))
         #expect(english != spanish)
+    }
+
+    @Test func calendarDateTemplatesFollowTheSelectedLanguage() throws {
+        let date = try #require(
+            Calendar(identifier: .gregorian).date(
+                from: DateComponents(year: 2026, month: 11, day: 7, hour: 12)
+            )
+        )
+        let restore = Format.locale
+        defer { Format.locale = restore }
+
+        Format.locale = Locale(identifier: "en_US")
+        let englishMonth = Format.date(date, template: "LLLL yyyy")
+        let englishDay = Format.date(date, template: "EEEE d MMMM")
+
+        Format.locale = AppLanguage.spanish.locale
+        let spanishMonth = Format.date(date, template: "LLLL yyyy")
+        let spanishDay = Format.date(date, template: "EEEE d MMMM")
+
+        #expect(englishMonth.contains("2026"))
+        #expect(spanishMonth.contains("2026"))
+        #expect(englishMonth != spanishMonth)
+        #expect(englishDay != spanishDay)
     }
 
     @Test func percentagesAlreadyScaledKeepTheLocaleSeparator() {

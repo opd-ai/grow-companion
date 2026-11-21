@@ -61,7 +61,7 @@ struct AppLanguageTests {
 
     @Test func eachLanguageCarriesItsOwnLocaleAndName() {
         #expect(AppLanguage.english.locale.identifier == "en")
-        #expect(AppLanguage.spanish.locale.identifier == "es")
+        #expect(AppLanguage.spanish.locale.identifier == "es_MX")
         #expect(AppLanguage.english.endonym == "English")
         #expect(AppLanguage.spanish.endonym == "Español")
     }

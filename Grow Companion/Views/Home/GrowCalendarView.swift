@@ -18,11 +18,11 @@ struct GrowCalendarView: View {
     @Query(sort: \DryingSession.startedAt, order: .reverse) private var dryingSessions: [DryingSession]
     @Query(sort: \Equipment.name) private var equipment: [Equipment]
 
-    @State private var visibleMonth = Calendar.current.dateInterval(of: .month, for: Date())?.start ?? Date()
-    @State private var selectedDay = Calendar.current.startOfDay(for: Date())
+    @State private var visibleMonth = Format.calendar.dateInterval(of: .month, for: Date())?.start ?? Date()
+    @State private var selectedDay = Format.calendar.startOfDay(for: Date())
     @State private var editingReminder: CareReminder?
 
-    private var calendar: Calendar { Calendar.current }
+    private var calendar: Calendar { Format.calendar }
 
     private var entries: [GrowCalendarEntry] {
         GrowCalendarService.entries(
@@ -356,15 +356,11 @@ struct GrowCalendarView: View {
     }
 
     private var monthLabel: String {
-        let formatter = DateFormatter()
-        formatter.dateFormat = "LLLL yyyy"
-        return formatter.string(from: visibleMonth)
+        Format.date(visibleMonth, template: "LLLL yyyy")
     }
 
     private var selectedDayLabel: String {
-        let formatter = DateFormatter()
-        formatter.dateFormat = "EEEE d MMMM"
-        return formatter.string(from: selectedDay)
+        Format.date(selectedDay, template: "EEEE d MMMM")
     }
 
     private func shiftMonth(by months: Int) {

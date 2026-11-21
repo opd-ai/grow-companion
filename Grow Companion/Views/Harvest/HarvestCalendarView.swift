@@ -20,6 +20,8 @@ struct HarvestCalendarView: View {
 
     private let columns = Array(repeating: GridItem(.flexible(), spacing: 0), count: 7)
 
+    private var calendar: Calendar { Format.calendar }
+
     private var forecasts: [HarvestForecast] {
         HarvestCalendar.forecasts(for: plants, now: now)
     }
@@ -29,7 +31,7 @@ struct HarvestCalendarView: View {
     }
 
     private var monthDays: [Date?] {
-        let calendar = Calendar.current
+        let calendar = self.calendar
         guard let interval = calendar.dateInterval(of: .month, for: monthAnchor) else { return [] }
         guard let range = calendar.range(of: .day, in: .month, for: monthAnchor) else { return [] }
 
@@ -48,14 +50,14 @@ struct HarvestCalendarView: View {
     }
 
     private var weekdaySymbols: [String] {
-        let calendar = Calendar.current
         let symbols = calendar.veryShortWeekdaySymbols
         let first = calendar.firstWeekday - 1
+        guard symbols.count == 7, (0..<7).contains(first) else { return symbols }
         return Array(symbols[first...]) + Array(symbols[..<first])
     }
 
     private var monthTitle: String {
-        Self.monthFormatter.string(from: monthAnchor)
+        Format.date(monthAnchor, template: "MMMM yyyy")
     }
 
     var body: some View {
@@ -156,7 +158,7 @@ struct HarvestCalendarView: View {
     }
 
     private func dayCell(for day: Date) -> some View {
-        let calendar = Calendar.current
+        let calendar = self.calendar
         let number = calendar.component(.day, from: day)
         let dayForecasts = forecasts.filter { covers(day, $0) }
         let hasSession = activeSessions.contains { sessionCovers(day, $0) }
@@ -285,7 +287,7 @@ struct HarvestCalendarView: View {
             }
 
             HStack(alignment: .firstTextBaseline, spacing: 8) {
-                Text(Self.dayMonthFormatter.string(from: forecast.mostLikelyDate))
+                Text(Format.date(forecast.mostLikelyDate, template: "d MMM"))
                     .font(Theme.sans(15, weight: .semibold))
                     .foregroundStyle(Theme.ink)
                 Text(forecast.timingText)
@@ -436,20 +438,20 @@ struct HarvestCalendarView: View {
         forecasts: [HarvestForecast],
         hasSession: Bool
     ) -> String {
-        var parts = [Self.dayMonthFormatter.string(from: day)]
+        var parts = [Format.date(day, template: "d MMM")]
         if forecasts.isEmpty {
-            parts.append("No harvest window")
+            parts.append(String(localized: "No harvest window"))
         } else {
             parts.append(forecasts.map { $0.plant.displayName }.joined(separator: ", "))
         }
         if hasSession {
-            parts.append("Drying or curing in progress")
+            parts.append(String(localized: "Drying or curing in progress"))
         }
         return parts.joined(separator: ". ")
     }
 
     private func shiftMonth(_ value: Int) {
-        guard let next = Calendar.current.date(byAdding: .month, value: value, to: monthAnchor) else {
+        guard let next = calendar.date(byAdding: .month, value: value, to: monthAnchor) else {
             return
         }
         withAnimation(.easeInOut(duration: 0.18)) {
@@ -457,15 +459,4 @@ struct HarvestCalendarView: View {
         }
     }
 
-    private static let monthFormatter: DateFormatter = {
-        let formatter = DateFormatter()
-        formatter.dateFormat = "MMMM yyyy"
-        return formatter
-    }()
-
-    private static let dayMonthFormatter: DateFormatter = {
-        let formatter = DateFormatter()
-        formatter.dateFormat = "d MMM"
-        return formatter
-    }()
 }

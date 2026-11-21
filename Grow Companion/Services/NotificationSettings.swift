@@ -137,6 +137,12 @@ enum NotificationSettings {
         UserDefaults.standard.set(value, forKey: SettingsKey.genericNotificationContent)
     }
 
+    /// App lock always wins over a preference for detailed notification text.
+    /// This is shared by care reminders and the daily digest.
+    static var shouldUseGenericContent: Bool {
+        usesGenericContent || UserDefaults.standard.bool(forKey: SettingsKey.appLockEnabled)
+    }
+
     // MARK: Quiet hours
 
     static var quietHoursEnabled: Bool {
@@ -213,8 +219,7 @@ enum NotificationSettings {
         let priority = priority(for: category)
         let content = UNMutableNotificationContent()
 
-        let appLockEnabled = UserDefaults.standard.bool(forKey: SettingsKey.appLockEnabled)
-        if usesGenericContent || appLockEnabled {
+        if shouldUseGenericContent {
             content.title = "Grow Companion"
             content.body = "A care task is due. Open the app to see it."
         } else {

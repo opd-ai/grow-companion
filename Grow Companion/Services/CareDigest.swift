@@ -57,7 +57,7 @@ enum CareDigest {
         let content = UNMutableNotificationContent()
         let summary = summary(for: selectedRooms, now: Date())
 
-        if NotificationSettings.usesGenericContent || UserDefaults.standard.bool(forKey: SettingsKey.appLockEnabled) {
+        if NotificationSettings.shouldUseGenericContent {
             content.title = "Grow Companion"
             content.body = "Your daily care digest is ready. Open the app to see it."
         } else {

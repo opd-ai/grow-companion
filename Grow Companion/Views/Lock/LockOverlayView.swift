@@ -40,7 +40,7 @@ struct LockOverlayView: View {
                     .font(Theme.serif(24))
                     .foregroundStyle(Theme.ink)
 
-                Text(appLock.isLocked ? lockedMessage : neutralMessage)
+                Text(appLock.isLocked ? (appLock.authenticationUnavailable ? unavailableMessage : lockedMessage) : neutralMessage)
                     .font(Theme.sans(13))
                     .foregroundStyle(Theme.secondaryInk)
                     .multilineTextAlignment(.center)
@@ -48,7 +48,10 @@ struct LockOverlayView: View {
                     .frame(maxWidth: 300)
 
                 if appLock.isLocked {
-                    PrimaryButton("Unlock with \(biometryName)", systemImage: biometrySymbol) {
+                    PrimaryButton(
+                        appLock.authenticationUnavailable ? "Try again" : "Unlock with \(biometryName)",
+                        systemImage: appLock.authenticationUnavailable ? "arrow.clockwise" : biometrySymbol
+                    ) {
                         Task { await appLock.requestUnlock() }
                     }
                     .frame(maxWidth: 300)
@@ -71,6 +74,10 @@ struct LockOverlayView: View {
 
     private var lockedMessage: String {
         "Your grow records are locked. Unlock to continue."
+    }
+
+    private var unavailableMessage: String {
+        "Authentication is unavailable. Set or check a device passcode in Settings, then try again."
     }
 
     private var neutralMessage: String {

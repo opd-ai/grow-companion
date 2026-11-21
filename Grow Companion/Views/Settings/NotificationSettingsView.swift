@@ -166,6 +166,7 @@ struct NotificationSettingsView: View {
                     priorities[category] = priority
                     NotificationSettings.setPriority(priority, for: category)
                     CareNotifications.refresh(reminders)
+                    CareDigest.schedule(rooms: rooms)
                 } label: {
                     if currentPriority(category) == priority {
                         Label(priority.title, systemImage: "checkmark")

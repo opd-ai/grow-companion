@@ -1834,7 +1834,14 @@
     "1 cycle" : { "localizations" : { "es" : { "stringUnit" : { "state" : "translated", "value" : "1 ciclo" } } } },
     "%lld cycles" : { "localizations" : { "es" : { "stringUnit" : { "state" : "translated", "value" : "%lld ciclos" } } } },
     "1 in progress" : { "localizations" : { "es" : { "stringUnit" : { "state" : "translated", "value" : "1 en curso" } } } },
-    "Breeder %@" : { "localizations" : { "es" : { "stringUnit" : { "state" : "translated", "value" : "Criador %@" } } } }
+    "Breeder %@" : { "localizations" : { "es" : { "stringUnit" : { "state" : "translated", "value" : "Criador %@" } } } },
+    "A device passcode is required. If device authentication becomes unavailable, the app stays covered until you can unlock it." : { "localizations" : { "es" : { "stringUnit" : { "state" : "translated", "value" : "Se requiere un código del dispositivo. Si la autenticación deja de estar disponible, la app permanece cubierta hasta que puedas desbloquearla." } } } },
+    "Authentication is unavailable. Set or check a device passcode in Settings, then try again." : { "localizations" : { "es" : { "stringUnit" : { "state" : "translated", "value" : "La autenticación no está disponible. Configura o comprueba un código del dispositivo en Ajustes y vuelve a intentarlo." } } } },
+    "Device authentication is unavailable. Set a device passcode in Settings before using app lock." : { "localizations" : { "es" : { "stringUnit" : { "state" : "translated", "value" : "La autenticación del dispositivo no está disponible. Configura un código del dispositivo en Ajustes antes de usar el bloqueo de la app." } } } },
+    "Try again" : { "localizations" : { "es" : { "stringUnit" : { "state" : "translated", "value" : "Volver a intentar" } } } },
+    "Today" : { "localizations" : { "es" : { "stringUnit" : { "state" : "translated", "value" : "Hoy" } } } },
+    "No harvest window" : { "localizations" : { "es" : { "stringUnit" : { "state" : "translated", "value" : "Sin ventana de cosecha" } } } },
+    "Drying or curing in progress" : { "localizations" : { "es" : { "stringUnit" : { "state" : "translated", "value" : "Secado o curado en curso" } } } }
   },
   "version" : "1.0"
 }

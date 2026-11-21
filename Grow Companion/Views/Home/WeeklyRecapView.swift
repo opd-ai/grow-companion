@@ -17,7 +17,7 @@ struct WeeklyRecapView: View {
 
     @AppStorage(SettingsKey.unitSystem) private var unitRaw = "metric"
 
-    @State private var weekStart = Calendar.current.dateInterval(of: .weekOfYear, for: Date())?.start ?? Date()
+    @State private var weekStart = Format.calendar.dateInterval(of: .weekOfYear, for: Date())?.start ?? Date()
 
     private var unit: UnitSystem { UnitSystem(rawValue: unitRaw) ?? .metric }
 
@@ -27,7 +27,7 @@ struct WeeklyRecapView: View {
         GrowGoalSources(plants: plants, rooms: rooms, journal: journalEntries)
     }
 
-    private var calendar: Calendar { Calendar.current }
+    private var calendar: Calendar { Format.calendar }
     private var weekEnd: Date { calendar.date(byAdding: .day, value: 7, to: weekStart) ?? weekStart }
     private var nextWeekEnd: Date { calendar.date(byAdding: .day, value: 7, to: weekEnd) ?? weekEnd }
     private var weekRange: Range<Date> { weekStart..<weekEnd }
@@ -345,12 +345,13 @@ struct WeeklyRecapView: View {
 
     private var weekLabel: String {
         let end = calendar.date(byAdding: .day, value: -1, to: weekEnd) ?? weekStart
-        let startDay = calendar.component(.day, from: weekStart)
-        let endDay = calendar.component(.day, from: end)
-        let startMonth = DateFormatter.monthFormatter.string(from: weekStart)
-        let endMonth = DateFormatter.monthFormatter.string(from: end)
-        if startMonth == endMonth { return "\(startDay)–\(endDay) \(startMonth)" }
-        return "\(startDay) \(startMonth)–\(endDay) \(endMonth)"
+        let sameMonth = calendar.isDate(weekStart, equalTo: end, toGranularity: .month)
+        if sameMonth {
+            let startDay = Format.number(Double(calendar.component(.day, from: weekStart)), digits: 0)
+            let endDay = Format.number(Double(calendar.component(.day, from: end)), digits: 0)
+            return "\(startDay)–\(endDay) \(Format.date(weekStart, template: "MMM yyyy"))"
+        }
+        return "\(Format.date(weekStart, template: "d MMM"))–\(Format.date(end, template: "d MMM yyyy"))"
     }
 
     private func moveWeek(by days: Int) {
@@ -374,10 +375,3 @@ private struct RangeEvent: Identifiable {
     let date: Date
 }
 
-private extension DateFormatter {
-    static let monthFormatter: DateFormatter = {
-        let formatter = DateFormatter()
-        formatter.dateFormat = "d MMM yyyy"
-        return formatter
-    }()
-}

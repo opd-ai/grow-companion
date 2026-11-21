@@ -95,6 +95,13 @@ enum Format {
     /// tests set it to prove that a language is honoured.
     static var locale: Locale = .current
 
+    /// A calendar using the chosen interface locale for week starts and weekday names.
+    static var calendar: Calendar {
+        var calendar = Calendar.current
+        calendar.locale = locale
+        return calendar
+    }
+
     static func weight(_ grams: Double, unit: UnitSystem) -> String {
         switch unit {
         case .metric:
@@ -169,6 +176,15 @@ enum Format {
         return dateFormatter.string(from: date)
     }
 
+    /// Formats a date using a localized skeleton, so both its ordering and its
+    /// month or weekday names follow the selected interface language.
+    static func date(_ date: Date, template: String) -> String {
+        let formatter = DateFormatter()
+        formatter.locale = locale
+        formatter.setLocalizedDateFormatFromTemplate(template)
+        return formatter.string(from: date)
+    }
+
     static func time(_ date: Date) -> String {
         timeFormatter.locale = locale
         return timeFormatter.string(from: date)
@@ -192,8 +208,8 @@ enum Format {
             + "%"
     }
 
-    /// A number in the current locale: a Spanish (Spain) device sees `24,5`
-    /// and an English one `24.5`, and neither is hard-coded here.
+    /// A number in the selected interface locale: Spanish (Mexico) and English
+    /// use their own separators, neither of which is hard-coded here.
     static func number(_ value: Double, digits: Int) -> String {
         numberFormatter.locale = locale
         numberFormatter.minimumFractionDigits = digits
