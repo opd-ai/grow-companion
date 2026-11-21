@@ -3,9 +3,9 @@
 //  Grow Companion
 //
 //  One month view of everything the grow has a date for: care reminders,
-//  stage windows, harvest forecast windows and drying or curing checks. The
-//  only write is an explicit reminder move, which re-schedules one
-//  notification and cancels the old one.
+//  stage windows, harvest forecast windows, equipment service dates and drying
+//  or curing checks. The only write is an explicit reminder move, which
+//  re-schedules one notification and cancels the old one.
 //
 
 import Foundation
@@ -17,6 +17,7 @@ enum GrowCalendarKind: String, CaseIterable, Identifiable {
     case harvestWindow
     case dryingCheck
     case cureCheck
+    case equipmentService
 
     var id: String { rawValue }
 
@@ -27,6 +28,7 @@ enum GrowCalendarKind: String, CaseIterable, Identifiable {
         case .harvestWindow: return String(localized: "Harvest window")
         case .dryingCheck: return String(localized: "Drying check")
         case .cureCheck: return String(localized: "Curing check")
+        case .equipmentService: return String(localized: "Equipment service")
         }
     }
 
@@ -37,6 +39,7 @@ enum GrowCalendarKind: String, CaseIterable, Identifiable {
         case .harvestWindow: return "scissors"
         case .dryingCheck: return "wind"
         case .cureCheck: return "hourglass"
+        case .equipmentService: return "wrench.and.screwdriver"
         }
     }
 }
@@ -59,6 +62,7 @@ struct GrowCalendarSources {
     var reminders: [CareReminder] = []
     var plants: [Plant] = []
     var dryingSessions: [DryingSession] = []
+    var equipment: [Equipment] = []
 }
 
 /// The one side effect a reminder move has, kept behind a protocol so the
@@ -208,6 +212,21 @@ enum GrowCalendarService {
             case .finished:
                 continue
             }
+        }
+
+        for item in sources.equipment {
+            entries.append(
+                GrowCalendarEntry(
+                    id: "equipment-\(String(describing: item.persistentModelID))",
+                    date: item.nextServiceDate,
+                    kind: .equipmentService,
+                    title: "\(item.name) · \(String(localized: "service due"))",
+                    detail: "\(EquipmentLog.intervalText(item.serviceIntervalDays)) · \(String(localized: "Last serviced \(Format.shortDate(item.lastServicedAt))"))",
+                    roomName: item.room?.name,
+                    reminder: nil,
+                    plant: nil
+                )
+            )
         }
 
         return entries.sorted { lhs, rhs in

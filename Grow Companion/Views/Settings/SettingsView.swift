@@ -45,6 +45,7 @@ struct SettingsView: View {
                 alertsCard
                 privacyCard
                 educationCard
+                equipmentCard
                 performanceCard
                 anomalyCard
                 harvestPlanningCard
@@ -290,6 +291,23 @@ struct SettingsView: View {
                     icon: "book.closed",
                     title: "Education library",
                     value: "Fundamentals, pest checks, curing and compliance"
+                )
+            }
+            .buttonStyle(.plain)
+        }
+        .growCard()
+    }
+
+    private var equipmentCard: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            SectionHeader("Grow", subtitle: "What keeps the grow running")
+            NavigationLink {
+                EquipmentView()
+            } label: {
+                SettingsLinkRow(
+                    icon: "wrench.and.screwdriver",
+                    title: "Equipment",
+                    value: "Service intervals, due dates and service history"
                 )
             }
             .buttonStyle(.plain)

@@ -14,7 +14,6 @@ struct MainTabView: View {
         case journal
         case strains
         case rules
-        case equipment
         case settings
     }
 
@@ -82,12 +81,6 @@ struct MainTabView: View {
             }
             .tag(Tab.rules)
             .tabItem { Label("Rules", systemImage: "checkmark.shield") }
-
-            NavigationStack {
-                EquipmentView()
-            }
-            .tag(Tab.equipment)
-            .tabItem { Label("Equipment", systemImage: "wrench.and.screwdriver") }
 
             NavigationStack {
                 SettingsView(profile: profile)

@@ -16,6 +16,6 @@ enum EquipmentLog {
     }
 
     static func intervalText(_ days: Int) -> String {
-        "Every \(days) days"
+        String(localized: "Every \(days) days")
     }
 }

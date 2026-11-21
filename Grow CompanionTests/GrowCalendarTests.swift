@@ -66,6 +66,38 @@ struct GrowCalendarEntryTests {
         #expect(dates == dates.sorted())
     }
 
+    @Test func equipmentServiceDatesAppearOnce() throws {
+        let context = try calendarContext()
+        let calendar = Calendar.current
+        let now = Date()
+
+        let room = Room(name: "Tent")
+        context.insert(room)
+
+        let lastService = calendar.date(byAdding: .day, value: -30, to: now) ?? now
+        let item = Equipment(
+            name: "Extractor fan",
+            serviceIntervalDays: 90,
+            lastServicedAt: lastService,
+            room: room
+        )
+        context.insert(item)
+        try context.save()
+
+        let entries = GrowCalendarService.entries(
+            from: GrowCalendarSources(equipment: [item]),
+            now: now
+        )
+
+        let entry = try #require(entries.first { $0.kind == .equipmentService })
+        #expect(entries.count == 1)
+        #expect(entry.id == "equipment-\(String(describing: item.persistentModelID))")
+        #expect(calendar.isDate(entry.date, inSameDayAs: item.nextServiceDate))
+        #expect(entry.roomName == "Tent")
+        #expect(entry.title.contains("Extractor fan"))
+        #expect(entry.reminder == nil)
+    }
+
     @Test func disabledRemindersDoNotAppear() throws {
         let context = try calendarContext()
         let reminder = CareReminder(title: "Water", isEnabled: false)

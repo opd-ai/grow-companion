@@ -49,6 +49,8 @@ reinserts it. `producer` now reports `cultivation-v3` / schema version 3.
   span, labelled as a nudge, not a deadline),
 - the harvest forecast window of every flowering plant (from
   `HarvestCalendar.forecast`),
+- the next service date of every item of equipment, from its last service and
+  its interval,
 - the next drying check (one day after the last check) or curing burp (the burp
   mode's interval), per active drying session.
 

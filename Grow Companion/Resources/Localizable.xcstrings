@@ -1698,7 +1698,27 @@
     "Read on %@" : { "localizations" : { "es" : { "stringUnit" : { "state" : "translated", "value" : "Leída el %@" } } } },
     "Not read yet" : { "localizations" : { "es" : { "stringUnit" : { "state" : "translated", "value" : "Sin leer" } } } },
     "Marks this lesson unread again." : { "localizations" : { "es" : { "stringUnit" : { "state" : "translated", "value" : "Vuelve a marcar esta lección como no leída." } } } },
-    "Marks this lesson as read and records the date." : { "localizations" : { "es" : { "stringUnit" : { "state" : "translated", "value" : "Marca esta lección como leída y guarda la fecha." } } } }
+    "Marks this lesson as read and records the date." : { "localizations" : { "es" : { "stringUnit" : { "state" : "translated", "value" : "Marca esta lección como leída y guarda la fecha." } } } },
+    "Equipment service" : { "localizations" : { "es" : { "stringUnit" : { "state" : "translated", "value" : "Servicio del equipo" } } } },
+    "service due" : { "localizations" : { "es" : { "stringUnit" : { "state" : "translated", "value" : "servicio pendiente" } } } },
+    "Last serviced %@" : { "localizations" : { "es" : { "stringUnit" : { "state" : "translated", "value" : "Último servicio %@" } } } },
+    "Delete %@?" : { "localizations" : { "es" : { "stringUnit" : { "state" : "translated", "value" : "¿Eliminar %@?" } } } },
+    "Delete equipment" : { "localizations" : { "es" : { "stringUnit" : { "state" : "translated", "value" : "Eliminar equipo" } } } },
+    "The item leaves your equipment list. Nothing else in your grow is changed." : { "localizations" : { "es" : { "stringUnit" : { "state" : "translated", "value" : "El elemento sale de tu lista de equipos. Nada más de tu cultivo cambia." } } } },
+    "The item and its 1 service record leave your equipment list. Nothing else in your grow is changed." : { "localizations" : { "es" : { "stringUnit" : { "state" : "translated", "value" : "El elemento y su único registro de servicio salen de tu lista de equipos. Nada más de tu cultivo cambia." } } } },
+    "The item and its %lld service records leave your equipment list. Nothing else in your grow is changed." : { "localizations" : { "es" : { "stringUnit" : { "state" : "translated", "value" : "El elemento y sus %lld registros de servicio salen de tu lista de equipos. Nada más de tu cultivo cambia." } } } },
+    "Delete this service" : { "localizations" : { "es" : { "stringUnit" : { "state" : "translated", "value" : "Eliminar este servicio" } } } },
+    "Delete this service?" : { "localizations" : { "es" : { "stringUnit" : { "state" : "translated", "value" : "¿Eliminar este servicio?" } } } },
+    "Deleting the record moves “last serviced” back to the latest service still on record." : { "localizations" : { "es" : { "stringUnit" : { "state" : "translated", "value" : "Eliminar el registro devuelve «último servicio» al servicio más reciente que siga registrado." } } } },
+    "Edit service" : { "localizations" : { "es" : { "stringUnit" : { "state" : "translated", "value" : "Editar servicio" } } } },
+    "The equipment was not changed: %@" : { "localizations" : { "es" : { "stringUnit" : { "state" : "translated", "value" : "El equipo no se modificó: %@" } } } },
+    "Service intervals, due dates and service history" : { "localizations" : { "es" : { "stringUnit" : { "state" : "translated", "value" : "Intervalos de servicio, fechas de vencimiento e historial" } } } },
+    "Grow" : { "localizations" : { "es" : { "stringUnit" : { "state" : "translated", "value" : "Cultivo" } } } },
+    "Opens this service so you can change or remove it." : { "localizations" : { "es" : { "stringUnit" : { "state" : "translated", "value" : "Abre este servicio para cambiarlo o eliminarlo." } } } },
+    "No equipment matches this filter" : { "localizations" : { "es" : { "stringUnit" : { "state" : "translated", "value" : "Ningún equipo coincide con este filtro" } } } },
+    "Everything you have added is still here. Clear a filter to see the rest." : { "localizations" : { "es" : { "stringUnit" : { "state" : "translated", "value" : "Todo lo que has añadido sigue aquí. Quita un filtro para ver el resto." } } } },
+    "Reminders, stage windows, harvest windows, equipment service dates and drying or curing checks in one month. Moving a reminder asks first and re-schedules exactly one notification." : { "localizations" : { "es" : { "stringUnit" : { "state" : "translated", "value" : "Recordatorios, ventanas de etapa, ventanas de cosecha, fechas de servicio del equipo y controles de secado o curado en un solo mes. Mover un recordatorio pide confirmación y vuelve a programar exactamente una notificación." } } } },
+    "Stage and harvest windows are nudges from your own history and the breeder's figure, and an equipment date comes from its service interval; none of them is a deadline. Nothing on this screen leaves the device." : { "localizations" : { "es" : { "stringUnit" : { "state" : "translated", "value" : "Las ventanas de etapa y de cosecha son avisos basados en tu propio historial y en la cifra del criador, y la fecha de un equipo sale de su intervalo de servicio; ninguna es una fecha límite. Nada de esta pantalla sale del dispositivo." } } } }
   },
   "version" : "1.0"
 }

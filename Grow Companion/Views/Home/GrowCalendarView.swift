@@ -2,9 +2,9 @@
 //  GrowCalendarView.swift
 //  Grow Companion
 //
-//  One month of reminders, stage windows, harvest windows and drying or curing
-//  checks. Everything is dated from the grower's own records; the only write
-//  is a reminder move, confirmed with both dates named.
+//  One month of reminders, stage windows, harvest windows, equipment service
+//  dates and drying or curing checks. Everything is dated from the grower's own
+//  records; the only write is a reminder move, confirmed with both dates named.
 //
 
 import SwiftUI
@@ -16,6 +16,7 @@ struct GrowCalendarView: View {
     @Query(sort: \CareReminder.nextDueDate) private var reminders: [CareReminder]
     @Query(sort: \Plant.plantedAt, order: .reverse) private var plants: [Plant]
     @Query(sort: \DryingSession.startedAt, order: .reverse) private var dryingSessions: [DryingSession]
+    @Query(sort: \Equipment.name) private var equipment: [Equipment]
 
     @State private var visibleMonth = Calendar.current.dateInterval(of: .month, for: Date())?.start ?? Date()
     @State private var selectedDay = Calendar.current.startOfDay(for: Date())
@@ -28,7 +29,8 @@ struct GrowCalendarView: View {
             from: GrowCalendarSources(
                 reminders: reminders,
                 plants: plants,
-                dryingSessions: dryingSessions
+                dryingSessions: dryingSessions,
+                equipment: equipment
             )
         )
     }
@@ -77,7 +79,7 @@ struct GrowCalendarView: View {
             Text("Grow calendar")
                 .font(Theme.serif(30))
                 .foregroundStyle(Theme.ink)
-            Text("Reminders, stage windows, harvest windows and drying or curing checks in one month. Moving a reminder asks first and re-schedules exactly one notification.")
+            Text("Reminders, stage windows, harvest windows, equipment service dates and drying or curing checks in one month. Moving a reminder asks first and re-schedules exactly one notification.")
                 .font(Theme.sans(13))
                 .foregroundStyle(Theme.secondaryInk)
                 .fixedSize(horizontal: false, vertical: true)
@@ -320,7 +322,7 @@ struct GrowCalendarView: View {
     }
 
     private var footnote: some View {
-        Text("Stage and harvest windows are nudges from your own history and the breeder's figure, not deadlines. Nothing on this screen leaves the device.")
+        Text("Stage and harvest windows are nudges from your own history and the breeder's figure, and an equipment date comes from its service interval; none of them is a deadline. Nothing on this screen leaves the device.")
             .font(Theme.sans(12))
             .foregroundStyle(Theme.tertiaryInk)
             .fixedSize(horizontal: false, vertical: true)

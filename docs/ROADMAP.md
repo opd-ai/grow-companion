@@ -31,7 +31,7 @@ import so location metadata never survives.
 | Strain library, breeder figures, observed flowering time, ratings | Shipped | `Views/Strains/`, `Services/StrainInsights.swift` |
 | Training sessions and lineage | Shipped | `Views/Plants/TrainingSessionEditor.swift`, `Models/TrainingSession.swift` |
 | Treatments and withdrawal periods | Shipped | `Views/Plants/TreatmentSection.swift`, `Models/Treatment.swift` |
-| Equipment and service reminders | Shipped | `Views/EquipmentView.swift`, `Models/Equipment.swift` |
+| Equipment and service reminders | Shipped | `Views/EquipmentView.swift`, `Views/EquipmentDetailView.swift`, `Services/EquipmentService.swift`, `Models/Equipment.swift`, and its service dates in the grow calendar |
 | Plant and room scouting checks | Shipped | `Views/Plants/ScoutingCheckSection.swift`, `Models/ScoutingCheck.swift` |
 | Weekly recap, room comparison and cycle archive | Shipped | `Views/Home/` |
 | Password-protected local backup and restore | Shipped | `Views/Settings/BackupView.swift`, `Services/BackupService.swift` |
@@ -621,7 +621,9 @@ part of the current app:
 - **Treatments and withdrawal — Shipped:** plant or room treatment history with
   product, dose, date, note and optional withdrawal end date.
 - **Equipment and service reminders — Shipped:** room equipment, service
-  interval, due/overdue state and service history.
+  interval, due/overdue state, service history, the next service date on the
+  grow calendar, correction or removal of a single service, and removal of the
+  item with its history. Reached from Settings, beside the rest of the grow.
 - **Weekly recap — Shipped:** a read-only date-stepped summary of stage moves,
   feeds and waterings, out-of-range readings, journal/photos and upcoming tasks.
 - **Encrypted backup and restore — Shipped:** password-protected local backup
@@ -1097,11 +1099,13 @@ preference. See `docs/V2_3_CALENDAR_GOALS_WIDGETS.md`.
 so conflicts are easy to miss.
 
 **What ships.** A month calendar combining reminders, stage windows, harvest
-forecast windows and drying or curing check dates. A reminder can be moved to
-another day after an explicit confirmation that names the old and new date.
+forecast windows, equipment service dates and drying or curing check dates. A
+reminder can be moved to another day after an explicit confirmation that names
+the old and new date.
 
 **Shipped:** `Services/GrowCalendar.swift` merges enabled reminders, per-plant
-stage windows, harvest forecast windows and the next drying check or curing burp
+stage windows, harvest forecast windows, each item of equipment's next service
+date and the next drying check or curing burp
 into one date-ordered list, each entry once. `GrowCalendarService.reschedule`
 writes one new due date, keeping the time of day, then cancels the old
 notification and schedules exactly one new one; a failed save leaves both

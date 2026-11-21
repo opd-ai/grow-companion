@@ -46,7 +46,11 @@ struct EquipmentView: View {
                 header
                 roomFilters
                 dueFilters
-                if filteredEquipment.isEmpty { emptyState } else { equipmentList }
+                if filteredEquipment.isEmpty {
+                    if equipment.isEmpty { emptyState } else { filteredEmptyState }
+                } else {
+                    equipmentList
+                }
                 addButton
             }
             .padding(.horizontal, 20)
@@ -56,22 +60,22 @@ struct EquipmentView: View {
         .scrollIndicators(.hidden)
         .background(Theme.background)
         .navigationTitle("")
-        .toolbar(.hidden, for: .navigationBar)
+        .navigationBarTitleDisplayMode(.inline)
         .sheet(isPresented: $showingEditor) { EquipmentEditor() }
         .sheet(item: $editingEquipment) { item in EquipmentEditor(equipment: item) }
         .sheet(item: $selectedEquipment) { item in
             NavigationStack { EquipmentDetailView(equipment: item) }
         }
-        .sheet(item: $loggingEquipment) { item in ServiceLogEditor(equipment: item) }
+        .sheet(item: $loggingEquipment) { item in ServiceRecordEditor(equipment: item) }
     }
 
     private var header: some View {
-        VStack(alignment: .leading, spacing: 2) {
+        VStack(alignment: .leading, spacing: 6) {
             Text("Equipment")
-                .font(Theme.serif(42))
+                .font(Theme.serif(30))
                 .foregroundStyle(Theme.ink)
             Text("What keeps the grow running.")
-                .font(Theme.sans(22))
+                .font(Theme.sans(13))
                 .foregroundStyle(Theme.secondaryInk)
         }
         .padding(.top, 8)
@@ -187,6 +191,28 @@ struct EquipmentView: View {
         }
         .frame(maxWidth: .infinity)
         .padding(.vertical, 26)
+    }
+
+    /// Equipment exists but the filters hide all of it, so the list says that
+    /// rather than claiming there is nothing here.
+    private var filteredEmptyState: some View {
+        VStack(spacing: 10) {
+            Text("No equipment matches this filter")
+                .font(Theme.sans(17, weight: .semibold))
+                .foregroundStyle(Theme.ink)
+            Text("Everything you have added is still here. Clear a filter to see the rest.")
+                .font(Theme.sans(14))
+                .foregroundStyle(Theme.secondaryInk)
+                .multilineTextAlignment(.center)
+                .fixedSize(horizontal: false, vertical: true)
+            SecondaryButton("Show everything", systemImage: "arrow.counterclockwise") {
+                roomFilter = nil
+                dueFilter = .all
+            }
+        }
+        .frame(maxWidth: .infinity)
+        .padding(.vertical, 20)
+        .growCard(fill: Theme.surfaceSunken, padding: 16)
     }
 
     private var addButton: some View {
