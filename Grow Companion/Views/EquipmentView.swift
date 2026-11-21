@@ -142,7 +142,7 @@ struct EquipmentView: View {
                     Text("Last serviced \(Format.shortDate(item.lastServicedAt)) · next \(Format.shortDate(item.nextServiceDate))")
                         .font(Theme.sans(13))
                         .foregroundStyle(Theme.secondaryInk)
-                        .lineLimit(1)
+                        .lineLimit(2)
                 }
                 Spacer(minLength: 4)
             }

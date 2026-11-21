@@ -43,6 +43,8 @@ struct ExportSnapshot {
     var ruleEvaluationEvents: [RuleEvaluationEvent] = []
     var goals: [GrowGoal] = []
     var breeders: [GrowerBreeder] = []
+    var labResults: [LabResult] = []
+    var screenPlans: [ScreenPlan] = []
     var counts: [String: Int] = [:]
 }
 
@@ -88,7 +90,8 @@ enum ExportService {
         "DryingSession", "DryingCheck", "CureBurp", "TrainingSession",
         "Treatment", "Equipment", "ServiceRecord", "ScoutingCheck",
         "FeedSchedule", "FeedWeek", "FeedProduct",
-        "ComplianceSnapshot", "RuleEvaluationEvent", "GrowGoal", "GrowerBreeder"
+        "ComplianceSnapshot", "RuleEvaluationEvent", "GrowGoal", "GrowerBreeder",
+        "LabResult", "ScreenPlan", "ScreenCell"
     ]
 
     static func build(snapshot: ExportSnapshot, options: ExportOptions) throws -> ExportPayload {
@@ -201,6 +204,12 @@ enum ExportService {
             "breeders": snapshot.breeders
                 .sorted { $0.name.localizedCaseInsensitiveCompare($1.name) == .orderedAscending }
                 .map(breederDictionary),
+            "labResults": snapshot.labResults
+                .sorted { $0.reportDate < $1.reportDate }
+                .map(labResultDictionary),
+            "screenPlans": snapshot.screenPlans
+                .sorted { $0.createdAt < $1.createdAt }
+                .map(screenPlanDictionary),
             "journal": options.includeJournal ? snapshot.journal.map(journalDictionary) : []
         ]
 
@@ -214,8 +223,48 @@ enum ExportService {
             "version": info?["CFBundleShortVersionString"] as? String ?? "unknown",
             "build": info?["CFBundleVersion"] as? String ?? "unknown",
             // The explicit versioned SwiftData schema this build writes.
-            "recordSchema": "cultivation-v3",
-            "recordSchemaVersion": 3
+            "recordSchema": "cultivation-v7",
+            "recordSchemaVersion": 7
+        ]
+    }
+
+    private static func labResultDictionary(_ result: LabResult) -> [String: Any] {
+        [
+            "reportDate": iso(result.reportDate),
+            "recordedAt": iso(result.recordedAt),
+            "lab": result.labName,
+            "notes": result.notes,
+            "userConfirmed": result.userConfirmed,
+            "plant": result.plant?.name ?? "",
+            "analytes": result.analytes.map { analyte in
+                [
+                    "name": analyte.name,
+                    "value": analyte.value,
+                    "unit": analyte.unit,
+                    "flagged": analyte.flagged
+                ]
+            }
+        ]
+    }
+
+    private static func screenPlanDictionary(_ plan: ScreenPlan) -> [String: Any] {
+        [
+            "name": plan.name,
+            "room": plan.room?.name ?? "",
+            "columns": plan.columns,
+            "rows": plan.rows,
+            "note": plan.note,
+            "startedAt": iso(plan.startedAt),
+            "createdAt": iso(plan.createdAt),
+            "updatedAt": iso(plan.updatedAt),
+            "cells": plan.sortedCells.map { cell in
+                [
+                    "column": cell.column,
+                    "row": cell.row,
+                    "plant": cell.plant?.name ?? "",
+                    "filledAt": cell.filledAt.map(iso) ?? ""
+                ]
+            }
         ]
     }
 

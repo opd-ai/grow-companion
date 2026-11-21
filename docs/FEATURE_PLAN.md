@@ -23,7 +23,10 @@ Everything the app does is on the device that made the record:
 - per-cycle goals, the grow calendar and the widget, all fed from local data;
 - a password-protected local backup, a verified export and delete-all;
 - encrypted share files the grower writes and sends themselves;
-- the breeder reference, light-distance guidance and the education library.
+- the breeder reference, light-distance guidance and the education library;
+- journal search, lab report figures typed from a report the grower holds, and
+  the per-room training screen (SCROG) planner;
+- interface text that follows the iOS text-size setting.
 
 ## Privacy boundary
 

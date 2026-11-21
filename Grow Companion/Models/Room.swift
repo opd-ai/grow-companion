@@ -82,6 +82,10 @@ final class Room {
     @Relationship(deleteRule: .cascade, inverse: \EnvironmentAlert.room)
     var environmentAlerts: [EnvironmentAlert] = []
 
+    /// The room's training screen (a SCROG net) and the squares it holds.
+    @Relationship(deleteRule: .cascade, inverse: \ScreenPlan.room)
+    var screenPlan: ScreenPlan?
+
     init(
         name: String = "Grow Room",
         type: RoomType = .tent,

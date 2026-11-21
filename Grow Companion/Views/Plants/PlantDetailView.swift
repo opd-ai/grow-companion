@@ -59,6 +59,7 @@ struct PlantDetailView: View {
                 if plant.stage == .flower { floweringCard }
                 PlantTrainingSection(plant: plant)
                 ScoutingCheckSection(plant: plant, room: nil)
+                LabResultSection(plant: plant)
                 TreatmentSection(plant: plant)
                 if harvestSectionVisible || plant.activeDryingSession != nil {
                     dryCureSection

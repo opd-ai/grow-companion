@@ -49,6 +49,10 @@ import so location metadata never survives.
 | Breeder reference library with claimed figures kept apart from your results, plus your own notes per breeder | Shipped | `Models/BreederProfile.swift`, `Models/GrowerBreeder.swift`, `Services/BreederLibrary.swift`, `Views/Strains/BreederProfileView.swift` |
 | Interface language: English by default, Español selectable in onboarding and Settings | Shipped | `Services/AppLanguage.swift`, `Views/Onboarding/OnboardingFlow.swift`, `Views/Settings/SettingsView.swift` |
 | Offline education library with reading progress and a rule-pack citation on the legal lesson | Shipped | `Services/EducationLibrary.swift`, `Services/EducationProgress.swift`, `Views/Education/EducationLibraryView.swift` |
+| Journal search by note, tag, plant, strain, room or entry kind | Shipped | `Services/JournalSearch.swift`, `Views/Journal/JournalView.swift` |
+| Lab report figures typed from a report the grower holds, with their confirmation | Shipped | `Models/LabResult.swift`, `Services/LabResults.swift`, `Views/Plants/LabResultSection.swift` |
+| Dynamic Type across the design's own type scale | Shipped, capped at 145% | `Design/Theme.swift` |
+| Training screen (SCROG) planner with a per-room grid of placed branches | Shipped | `Models/ScreenPlan.swift`, `Services/ScreenPlanner.swift`, `Views/Rooms/ScreenPlanView.swift` |
 
 The shipped navigation and current feature surfaces are recorded in section 6.2.
 Future cloud, hardware, extension and community features remain explicitly
@@ -380,7 +384,6 @@ experience is stable, and several require validation before they ship.
 
 | Feature | Description | Why it waits | Data and storage | Key risk |
 | --- | --- | --- | --- | --- |
-| SCROG layout planner | Interactive net-and-canopy planner for placing branches in a screen grid. | Depends on the training log and the light-distance feature. | On-device layout records. | Visual complexity on iPhone screens. |
 | Mac companion | Mac Catalyst or native app for detailed reports and bulk data entry. | Needs a stable data model, and there is no sync layer to carry records between devices. | Local only; no sync. | Doubles the test surface. |
 | Home automation bridges | Connectors for Home Assistant and similar hubs for advanced automation. | Would add a network connection the product does not have. | None: outside the privacy boundary. | Credential exposure through third-party hubs. |
 | CO2 control automation | Schedules or triggers CO2 supplementation with safety limits. | Requires validated sensor data and a safety design. | On-device schedule. | Safety risk if sensors fail; requires interlocks. |
@@ -392,6 +395,22 @@ experience is stable, and several require validation before they ship.
 
 Tier 4 is reviewed once Tier 3 is complete. Nothing here may add an account, a
 server or a network request; that boundary is fixed for the product.
+
+**Shipped: SCROG layout planner.** The row that waited on the training log and
+the light-distance feature is done, because both shipped. Each room keeps one
+training screen: a grid of 2–12 columns by 2–12 rows (`ScreenPlan`, `ScreenCell`,
+schema V7). The grower picks a plant, taps the squares its branches sit in, and
+gets a fill count, a percentage and a per-plant legend; tapping a filled square
+again empties it, another plant can take it, and the size can be changed — a
+smaller grid asks before it drops placed branches. Removing a plant empties its
+squares and keeps the grid; removing a room deletes the plan with it. The plan
+lives on the device with the rest of the room's records, is exported and backed
+up as the `screenPlans` section, and is counted, labelled, restored and deleted
+with everything else. `Grow CompanionTests/ScreenPlannerTests.swift` covers the
+grid, the placement rules, the resize guard, the plant and room delete rules,
+and the data-control coverage. The risk the row named — visual complexity on an
+iPhone screen — is handled by a compact square grid with one green palette and a
+numbered legend rather than a free-form canvas.
 
 ---
 
@@ -631,6 +650,17 @@ part of the current app:
   local restore; nothing is uploaded.
 - **Cycle archive — Shipped:** completed plants can be grouped into a named
   archive without deleting history, and reopening requires confirmation.
+- **Journal search — Shipped:** `Services/JournalSearch.swift` is a pure filter
+  over the entries a view already holds: every word of the query has to appear
+  in the note, tag, plant, strain, room or kind, case and accents are ignored,
+  and an empty query never hides a record. The journal shows a search field
+  above the room filter, and says plainly when nothing matches rather than
+  looking empty. Tests cover folding, multi-word matching, the tag, plant, room
+  and kind haystack, and that filtering keeps only what matches.
+- **Full record history — Shipped:** a room dashboard shows the last four
+  feeds and the last three calibrations, and now links to the whole list behind
+  a "See all" that states how many records there are. `RecordHistorySheet` is
+  read-only and shared by both lists.
 
 ---
 
@@ -871,6 +901,8 @@ TAB 1: HOME
 
 TAB 2: JOURNAL
 ├── Day-grouped timeline with room filter
+├── Text search over the note, tag, plant, strain, room and kind, matching
+│   every word and ignoring case and accents
 ├── Entry detail with linked plant or room, and delete that removes its photo
 └── New entry (note, observation, photo; linked to plant, room or grow)
 

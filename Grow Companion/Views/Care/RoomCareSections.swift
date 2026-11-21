@@ -39,12 +39,12 @@ struct RoomEnvironmentSection: View {
                     )
                     valueCell(
                         "RH",
-                        value: latest.humidityPercent.map { String(format: "%.0f%%", $0) } ?? "—",
+                        value: latest.humidityPercent.map { Format.percentValue($0) } ?? "—",
                         out: isOut(latest.humidityPercent, range: room.targetHumidityRange)
                     )
                     valueCell(
                         "Light",
-                        value: latest.lightPPFD.map { String(format: "%.0f", $0) } ?? "—",
+                        value: latest.lightPPFD.map { Format.number($0, digits: 0) } ?? "—",
                         out: false
                     )
                 }
@@ -57,7 +57,7 @@ struct RoomEnvironmentSection: View {
             }
 
             if let temperature = room.targetTemperatureRange, let humidity = room.targetHumidityRange {
-                Text("Target for \(room.dominantStage?.title.lowercased() ?? "veg"): \(Format.temperatureRange(temperature, unit: unit)) · \(String(format: "%.0f–%.0f%%", humidity.lowerBound, humidity.upperBound)) humidity")
+                Text("Target for \(room.dominantStage?.title.lowercased() ?? "veg"): \(Format.temperatureRange(temperature, unit: unit)) · \(Format.percentRange(humidity)) humidity")
                     .font(Theme.sans(11))
                     .foregroundStyle(Theme.tertiaryInk)
                     .fixedSize(horizontal: false, vertical: true)
@@ -144,11 +144,14 @@ struct RoomFeedingSection: View {
     @State private var showingLog = false
     @State private var logKind: FeedKind = .water
     @State private var showingTargets = false
+    @State private var showingHistory = false
 
     private var unit: UnitSystem { UnitSystem(rawValue: unitRaw) ?? .metric }
 
+    private var allEvents: [FeedEvent] { room.sortedFeedEvents }
+
     private var events: [FeedEvent] {
-        Array(room.sortedFeedEvents.prefix(4))
+        Array(allEvents.prefix(4))
     }
 
     var body: some View {
@@ -157,10 +160,10 @@ struct RoomFeedingSection: View {
 
             HStack(spacing: 8) {
                 if let ph = room.feedTargetPH {
-                    Pill(text: "pH \(String(format: "%.1f", ph))", systemImage: "paintpalette")
+                    Pill(text: "pH \(Format.number(ph, digits: 1))", systemImage: "paintpalette")
                 }
                 if let ec = room.feedTargetEC {
-                    Pill(text: "EC \(String(format: "%.2f", ec))", systemImage: "bolt.horizontal")
+                    Pill(text: "EC \(Format.number(ec, digits: 2))", systemImage: "bolt.horizontal")
                 }
                 Spacer(minLength: 0)
                 Button(room.feedTargetPH == nil && room.feedTargetEC == nil ? "Set target" : "Edit target") {
@@ -185,6 +188,10 @@ struct RoomFeedingSection: View {
                     }
                 }
                 .growCard(padding: 14)
+
+                if allEvents.count > events.count {
+                    SeeAllRecordsLink(count: allEvents.count) { showingHistory = true }
+                }
             }
 
             HStack(spacing: 10) {
@@ -204,6 +211,21 @@ struct RoomFeedingSection: View {
         }
         .sheet(isPresented: $showingTargets) {
             FeedTargetSheet(room: room)
+        }
+        .sheet(isPresented: $showingHistory) {
+            RecordHistorySheet(
+                title: String(localized: "Watering and feeding"),
+                subtitle: String(localized: "Every watering and feed recorded in this room, newest first."),
+                emptyMessage: String(localized: "No waterings or feeds logged for this room yet."),
+                recordCount: allEvents.count
+            ) {
+                ForEach(allEvents) { event in
+                    FeedEventRow(event: event, room: room, unit: unit)
+                    if event.id != allEvents.last?.id {
+                        Divider().overlay(Theme.hairline)
+                    }
+                }
+            }
         }
     }
 
@@ -249,16 +271,16 @@ struct FeedEventRow: View {
                         Text(Format.volume(volume, unit: unit))
                     }
                     if let ph = event.phIn {
-                        Text("pH in \(String(format: "%.1f", ph))")
+                        Text("pH in \(Format.number(ph, digits: 1))")
                     }
                     if let ec = event.ecIn {
-                        Text("EC in \(String(format: "%.2f", ec))")
+                        Text("EC in \(Format.number(ec, digits: 2))")
                     }
                     if let runoffPH = event.phRunoff {
-                        Text("runoff pH \(String(format: "%.1f", runoffPH))")
+                        Text("runoff pH \(Format.number(runoffPH, digits: 1))")
                     }
                     if let runoffEC = event.ecRunoff {
-                        Text("runoff EC \(String(format: "%.2f", runoffEC))")
+                        Text("runoff EC \(Format.number(runoffEC, digits: 2))")
                     }
                 }
                 .font(Theme.sans(12))
@@ -291,9 +313,12 @@ struct RoomCalibrationSection: View {
     let room: Room
 
     @State private var showingLog = false
+    @State private var showingHistory = false
+
+    private var allEvents: [CalibrationEvent] { room.sortedCalibrationEvents }
 
     private var events: [CalibrationEvent] {
-        Array(room.sortedCalibrationEvents.prefix(3))
+        Array(allEvents.prefix(3))
     }
 
     private var nextDue: Date? { room.nextCalibrationDue }
@@ -316,41 +341,17 @@ struct RoomCalibrationSection: View {
             } else {
                 VStack(spacing: 0) {
                     ForEach(events) { event in
-                        HStack(alignment: .top, spacing: 12) {
-                            Image(systemName: event.meter.systemImage)
-                                .font(.system(size: 14, weight: .semibold))
-                                .foregroundStyle(Theme.primary)
-                                .frame(width: 22)
-                            VStack(alignment: .leading, spacing: 3) {
-                                Text(event.meter.title)
-                                    .font(Theme.sans(14, weight: .semibold))
-                                    .foregroundStyle(Theme.ink)
-                                Text("Calibrated \(Format.shortDate(event.date))" + (event.reading.map { " · reading \(String(format: "%.2f", $0))" } ?? ""))
-                                    .font(Theme.sans(12))
-                                    .foregroundStyle(Theme.secondaryInk)
-                                if let due = event.nextDueDate {
-                                    Text(due <= Date() ? "Was due \(Format.shortDate(due))" : "Next due \(Format.shortDate(due))")
-                                        .font(Theme.sans(11, weight: .semibold))
-                                        .foregroundStyle(due <= Date() ? Theme.amber : Theme.primary)
-                                }
-                                if !event.note.isEmpty {
-                                    Text(event.note)
-                                        .font(Theme.sans(12))
-                                        .foregroundStyle(Theme.tertiaryInk)
-                                        .fixedSize(horizontal: false, vertical: true)
-                                }
-                            }
-                            Spacer(minLength: 0)
-                        }
-                        .padding(.vertical, 9)
-                        .accessibilityElement(children: .combine)
-
+                        calibrationRow(event)
                         if event.id != events.last?.id {
                             Divider().overlay(Theme.hairline)
                         }
                     }
                 }
                 .growCard(padding: 14)
+
+                if allEvents.count > events.count {
+                    SeeAllRecordsLink(count: allEvents.count) { showingHistory = true }
+                }
             }
 
             PrimaryButton("Log calibration", systemImage: "gauge.with.dots.needle.50percent") {
@@ -361,6 +362,52 @@ struct RoomCalibrationSection: View {
         .sheet(isPresented: $showingLog) {
             CalibrationLogSheet(room: room)
         }
+        .sheet(isPresented: $showingHistory) {
+            RecordHistorySheet(
+                title: String(localized: "Calibration history"),
+                subtitle: String(localized: "Every meter calibration recorded in this room, newest first."),
+                emptyMessage: String(localized: "No meter calibrations are logged for this room yet."),
+                recordCount: allEvents.count
+            ) {
+                ForEach(allEvents) { event in
+                    calibrationRow(event)
+                    if event.id != allEvents.last?.id {
+                        Divider().overlay(Theme.hairline)
+                    }
+                }
+            }
+        }
+    }
+
+    private func calibrationRow(_ event: CalibrationEvent) -> some View {
+        HStack(alignment: .top, spacing: 12) {
+            Image(systemName: event.meter.systemImage)
+                .font(.system(size: 14, weight: .semibold))
+                .foregroundStyle(Theme.primary)
+                .frame(width: 22)
+            VStack(alignment: .leading, spacing: 3) {
+                Text(event.meter.title)
+                    .font(Theme.sans(14, weight: .semibold))
+                    .foregroundStyle(Theme.ink)
+                Text("Calibrated \(Format.shortDate(event.date))" + (event.reading.map { " · reading \(Format.number($0, digits: 2))" } ?? ""))
+                    .font(Theme.sans(12))
+                    .foregroundStyle(Theme.secondaryInk)
+                if let due = event.nextDueDate {
+                    Text(due <= Date() ? "Was due \(Format.shortDate(due))" : "Next due \(Format.shortDate(due))")
+                        .font(Theme.sans(11, weight: .semibold))
+                        .foregroundStyle(due <= Date() ? Theme.amber : Theme.primary)
+                }
+                if !event.note.isEmpty {
+                    Text(event.note)
+                        .font(Theme.sans(12))
+                        .foregroundStyle(Theme.tertiaryInk)
+                        .fixedSize(horizontal: false, vertical: true)
+                }
+            }
+            Spacer(minLength: 0)
+        }
+        .padding(.vertical, 9)
+        .accessibilityElement(children: .combine)
     }
 
     private var subtitle: String {

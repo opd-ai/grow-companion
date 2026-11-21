@@ -888,18 +888,18 @@ struct PlantRow: View {
                 Text(secondaryText)
                     .font(Theme.sans(12))
                     .foregroundStyle(Theme.secondaryInk)
-                    .lineLimit(1)
+                    .lineLimit(2)
                 if let treatment = TreatmentLog.activeWithdrawal(for: plant), let endDate = treatment.withdrawalEndDate {
                     Label("Withdrawal ends \(Format.shortDate(endDate))", systemImage: "flag.fill")
                         .font(.system(size: 11, weight: .semibold))
                         .foregroundStyle(Theme.amber)
-                        .lineLimit(1)
+                        .lineLimit(2)
                 }
                 if showsTraining {
                     Text(trainingText)
                         .font(.system(size: 11))
                         .foregroundStyle(Theme.tertiaryInk)
-                        .lineLimit(1)
+                        .lineLimit(2)
                 }
             }
             Spacer(minLength: 6)
@@ -1048,7 +1048,7 @@ struct RoomRow: View {
                 Text("\(room.type.title) · \(room.plants.count) plant\(room.plants.count == 1 ? "" : "s") · \(room.lightScheduleSummary)")
                     .font(Theme.sans(12))
                     .foregroundStyle(Theme.secondaryInk)
-                    .lineLimit(1)
+                    .lineLimit(2)
             }
 
             Spacer(minLength: 6)

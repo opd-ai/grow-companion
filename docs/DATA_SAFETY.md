@@ -8,7 +8,7 @@ Status of the local data-safety work (the SAFE-01 slice of the safe-release plan
 
 **One model inventory.** `DataInventory` lists every `@Model` in the schema and provides counts, deletions and human labels for each. Export, backup, restore, delete-all and the tests read the same list, so a model added later cannot stay out of the data controls unnoticed.
 
-**Export format v2.** The JSON archive now carries a manifest (format version, model list, per-model counts, total, whether the journal and photos were included), a producer block (app version, build, `recordSchema: cultivation-v3`, record schema version 3) and the record types that were previously missing:
+**Export format v2.** The JSON archive now carries a manifest (format version, model list, per-model counts, total, whether the journal and photos were included), a producer block (app version, build, `recordSchema: cultivation-v7`, record schema version 7) and the record types that were previously missing:
 
 - training sessions
 - feed schedules with their weeks and products
@@ -31,6 +31,10 @@ Before replacing, the restore dialog states what the backup holds: record count 
 **Cycle goals are part of the data controls.** `GrowGoal` (schema V3) is in the model inventory and in `ExportService.exportedModelNames`, so it is counted, labelled, exported as the JSON `goals` section, verified by the backup manifest, restored and deleted with everything else. Delete-all also clears the widget's shared snapshot and its preference. See `docs/V2_3_CALENDAR_GOALS_WIDGETS.md`.
 
 **Your own breeder notes are part of the data controls.** `GrowerBreeder` (schema V5) holds the notes and optional https link a grower keeps for a breeder, matched to the bundled reference by name. It is in the model inventory and in `ExportService.exportedModelNames`, so it is counted, labelled, exported as the JSON `breeders` section, verified by the backup manifest, restored and deleted with everything else. A save with no notes and no link removes the record, so nothing empty is exported. See `docs/BREEDER_REFERENCE.md`.
+
+**Lab report figures are part of the data controls.** `LabResult` (schema V6) keeps the figures from a report the grower holds, exactly as the report printed them, together with their written confirmation that they copied it. It is counted, labelled, exported as the JSON `labResults` section, verified by the manifest, restored and deleted with the plant. Nothing in it is parsed or interpreted. See `Grow CompanionTests/LabResultTests.swift`.
+
+**The training screen is part of the data controls.** `ScreenPlan` and `ScreenCell` (schema V7) hold the per-room SCROG grid and the plant placed in each square. Both are in the model inventory and in `ExportService.exportedModelNames`, exported as the JSON `screenPlans` section with their squares, verified by the manifest, restored after the rooms and plants they point at, and deleted with everything else. Removing a plant empties its squares instead of deleting the grid, and removing a room deletes its plan. See `Grow CompanionTests/ScreenPlannerTests.swift`.
 
 ## Corrections to earlier planning assumptions
 

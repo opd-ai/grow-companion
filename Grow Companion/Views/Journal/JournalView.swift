@@ -16,6 +16,7 @@ struct JournalView: View {
 
     @State private var showingAdd = false
     @State private var selectedRoom: Room?
+    @State private var query = ""
 
     private var filteredEntries: [JournalEntry] {
         guard let selectedRoom else { return entries }
@@ -25,9 +26,15 @@ struct JournalView: View {
         }
     }
 
+    /// The room filter first, then the search, so a query only ever narrows
+    /// what the grower is already looking at.
+    private var visibleEntries: [JournalEntry] {
+        JournalSearch.filter(filteredEntries, query: query)
+    }
+
     private var sections: [(day: Date, entries: [JournalEntry])] {
         let calendar = Calendar.current
-        let groups = Dictionary(grouping: filteredEntries) { calendar.startOfDay(for: $0.createdAt) }
+        let groups = Dictionary(grouping: visibleEntries) { calendar.startOfDay(for: $0.createdAt) }
         return groups.keys.sorted(by: >).map { key in
             let dayEntries = (groups[key] ?? []).sorted { $0.createdAt > $1.createdAt }
             return (key, dayEntries)
@@ -41,23 +48,27 @@ struct JournalView: View {
                     Text("Journal")
                         .font(Theme.serif(30))
                         .foregroundStyle(Theme.ink)
-                    Text(entries.isEmpty ? "Photos and notes build the record you learn from." : "\(entries.count) entr\(entries.count == 1 ? "y" : "ies") on this device")
+                    Text(subtitle)
                         .font(Theme.sans(13))
                         .foregroundStyle(Theme.secondaryInk)
                 }
+
+                searchField
 
                 if !rooms.isEmpty {
                     RoomFilterChips(rooms: rooms, selectedRoom: $selectedRoom)
                 }
 
-                if filteredEntries.isEmpty {
+                if visibleEntries.isEmpty {
                     if entries.isEmpty {
                         emptyState
-                    } else {
+                    } else if filteredEntries.isEmpty {
                         Text("No journal entries for this room yet.")
                             .font(Theme.sans(13))
                             .foregroundStyle(Theme.secondaryInk)
                             .growCard(padding: 16)
+                    } else {
+                        noResultsState
                     }
                 } else {
                     ForEach(sections, id: \.day) { section in
@@ -106,6 +117,75 @@ struct JournalView: View {
                 selectedRoom = nil
             }
         }
+    }
+
+    private var subtitle: String {
+        if entries.isEmpty {
+            return String(localized: "Photos and notes build the record you learn from.")
+        }
+        if !query.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
+            return String(localized: "\(visibleEntries.count) of \(entries.count) entries")
+        }
+        if entries.count == 1 {
+            return String(localized: "1 entry on this device")
+        }
+        return String(localized: "\(entries.count) entries on this device")
+    }
+
+    private var searchField: some View {
+        HStack(spacing: 8) {
+            Image(systemName: "magnifyingglass")
+                .font(.system(size: 13, weight: .semibold))
+                .foregroundStyle(Theme.secondaryInk)
+
+            TextField("Search notes, tags, plants and rooms", text: $query)
+                .textFieldStyle(.plain)
+                .font(Theme.sans(15))
+                .foregroundStyle(Theme.ink)
+                .autocorrectionDisabled()
+                .textInputAutocapitalization(.never)
+                .submitLabel(.search)
+
+            if !query.isEmpty {
+                Button {
+                    query = ""
+                } label: {
+                    Image(systemName: "xmark.circle.fill")
+                        .font(.system(size: 15))
+                        .foregroundStyle(Theme.tertiaryInk)
+                }
+                .buttonStyle(.plain)
+                .accessibilityLabel("Clear the search")
+            }
+        }
+        .padding(.horizontal, 14)
+        .padding(.vertical, 13)
+        .background(
+            RoundedRectangle(cornerRadius: 14, style: .continuous)
+                .fill(Theme.surface)
+        )
+        .overlay(
+            RoundedRectangle(cornerRadius: 14, style: .continuous)
+                .strokeBorder(Theme.hairline, lineWidth: 1)
+        )
+        .accessibilityElement(children: .contain)
+    }
+
+    private var noResultsState: some View {
+        VStack(alignment: .leading, spacing: 10) {
+            Text("Nothing matches “\(query)”")
+                .font(Theme.sans(15, weight: .semibold))
+                .foregroundStyle(Theme.ink)
+                .fixedSize(horizontal: false, vertical: true)
+            Text("Every entry is still here. Try a different word, or clear the search.")
+                .font(Theme.sans(13))
+                .foregroundStyle(Theme.secondaryInk)
+                .fixedSize(horizontal: false, vertical: true)
+            SecondaryButton("Clear the search", systemImage: "xmark.circle") {
+                query = ""
+            }
+        }
+        .growCard()
     }
 
     private var emptyState: some View {

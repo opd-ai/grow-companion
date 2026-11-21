@@ -70,6 +70,25 @@ struct FormatLocaleTests {
         #expect(english != spanish)
     }
 
+    @Test func percentagesAlreadyScaledKeepTheLocaleSeparator() {
+        let restore = Format.locale
+        Format.locale = Locale(identifier: "en_US")
+        defer { Format.locale = restore }
+
+        #expect(Format.percentValue(58) == "58%")
+        #expect(Format.percentValue(58.46, digits: 1) == "58.5%")
+        #expect(Format.percentRange(55...65) == "55–65%")
+    }
+
+    @Test func percentagesReadCorrectlyInSpanish() {
+        let restore = Format.locale
+        Format.locale = Locale(identifier: "es_ES")
+        defer { Format.locale = restore }
+
+        #expect(Format.percentValue(58.46, digits: 1) == "58,5%")
+        #expect(Format.percentRange(55.46...65.46, digits: 1) == "55,5–65,5%")
+    }
+
     @Test func dayCountsAreSingularised() {
         #expect(Format.dayCount(1) == "1 day")
         #expect(Format.dayCount(3) == "3 days")

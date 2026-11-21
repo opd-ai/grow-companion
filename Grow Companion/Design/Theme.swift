@@ -7,6 +7,7 @@
 //
 
 import SwiftUI
+import UIKit
 
 enum Theme {
     static let background = Color(hex: 0xF3EFE6)
@@ -33,12 +34,31 @@ enum Theme {
 
     static let cornerRadius: CGFloat = 24
 
+    /// The design uses its own type scale, so the point sizes set here are the
+    /// base sizes: they are scaled by the grower's Dynamic Type setting, which
+    /// is what makes a reading, a stage or a plant name readable without
+    /// zooming. The scale is capped because the densest cards — the compliance
+    /// ring, the month grid, the metric strips — have a fixed shape to keep.
+    static let maximumTypeScale: CGFloat = 1.45
+
     static func serif(_ size: CGFloat, weight: Font.Weight = .semibold) -> Font {
-        .system(size: size, weight: weight, design: .serif)
+        .system(size: scaled(size), weight: weight, design: .serif)
     }
 
     static func sans(_ size: CGFloat, weight: Font.Weight = .regular) -> Font {
-        .system(size: size, weight: weight, design: .default)
+        .system(size: scaled(size), weight: weight, design: .default)
+    }
+
+    /// The scaled point size for a base size at the current text-size setting.
+    /// At the default setting it is the base size, so nothing moves for a
+    /// grower who has not changed it.
+    static func scaled(_ size: CGFloat) -> CGFloat {
+        capped(UIFontMetrics(forTextStyle: .body).scaledValue(for: size), base: size)
+    }
+
+    /// Pure, so the cap is testable without a screen.
+    static func capped(_ scaled: CGFloat, base: CGFloat) -> CGFloat {
+        min(scaled, base * maximumTypeScale)
     }
 }
 

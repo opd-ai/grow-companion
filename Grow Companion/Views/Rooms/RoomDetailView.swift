@@ -61,6 +61,7 @@ struct RoomDetailView: View {
                 if !photos.isEmpty { photoTimelineCard }
                 scheduleCard
                 lightDistanceCard
+                ScreenPlanCard(room: room)
                 complianceCard
                 RoomEnvironmentSection(room: room)
                 EnvironmentAlertSection(room: room)
@@ -121,7 +122,7 @@ struct RoomDetailView: View {
             }
             Button("Keep room", role: .cancel) {}
         } message: {
-            Text("Its plants are kept and lose their room assignment. The schedule history is deleted.")
+            Text("Its plants are kept and lose their room assignment. The schedule history and the training screen are deleted.")
         }
     }
 

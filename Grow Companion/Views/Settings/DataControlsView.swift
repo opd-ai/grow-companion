@@ -34,6 +34,8 @@ struct DataControlsView: View {
     private var ruleEvaluationEvents: [RuleEvaluationEvent]
     @Query(sort: \GrowGoal.updatedAt, order: .reverse) private var goals: [GrowGoal]
     @Query(sort: \GrowerBreeder.name) private var breeders: [GrowerBreeder]
+    @Query(sort: \ScreenPlan.createdAt, order: .reverse) private var screenPlans: [ScreenPlan]
+    @Query(sort: \LabResult.reportDate, order: .reverse) private var labResults: [LabResult]
 
     @State private var includeJournal = false
     @State private var includePhotos = false
@@ -296,6 +298,8 @@ struct DataControlsView: View {
                     ruleEvaluationEvents: ruleEvaluationEvents,
                     goals: goals,
                     breeders: breeders,
+                    labResults: labResults,
+                    screenPlans: screenPlans,
                     counts: recordCounts.isEmpty ? DataInventory.counts(in: context) : recordCounts
                 ),
                 options: ExportOptions(

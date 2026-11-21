@@ -90,6 +90,26 @@ enum CultivationSchemaV5: VersionedSchema {
     }
 }
 
+/// V6 adds the figures from a lab report the grower had done, as one additive
+/// model on a plant. Nothing existing is rewritten.
+enum CultivationSchemaV6: VersionedSchema {
+    static let versionIdentifier = Schema.Version(6, 0, 0)
+
+    static var models: [any PersistentModel.Type] {
+        CultivationSchemaV5.models + [LabResult.self]
+    }
+}
+
+/// V7 adds the training screen a room keeps — the plan and its squares — as two
+/// additive models. No existing model, relationship or value is rewritten.
+enum CultivationSchemaV7: VersionedSchema {
+    static let versionIdentifier = Schema.Version(7, 0, 0)
+
+    static var models: [any PersistentModel.Type] {
+        CultivationSchemaV6.models + [ScreenPlan.self, ScreenCell.self]
+    }
+}
+
 enum CultivationMigrationPlan: SchemaMigrationPlan {
     static var schemas: [any VersionedSchema.Type] {
         [
@@ -97,7 +117,9 @@ enum CultivationMigrationPlan: SchemaMigrationPlan {
             CultivationSchemaV2.self,
             CultivationSchemaV3.self,
             CultivationSchemaV4.self,
-            CultivationSchemaV5.self
+            CultivationSchemaV5.self,
+            CultivationSchemaV6.self,
+            CultivationSchemaV7.self
         ]
     }
 
@@ -118,6 +140,14 @@ enum CultivationMigrationPlan: SchemaMigrationPlan {
             .lightweight(
                 fromVersion: CultivationSchemaV4.self,
                 toVersion: CultivationSchemaV5.self
+            ),
+            .lightweight(
+                fromVersion: CultivationSchemaV5.self,
+                toVersion: CultivationSchemaV6.self
+            ),
+            .lightweight(
+                fromVersion: CultivationSchemaV6.self,
+                toVersion: CultivationSchemaV7.self
             )
         ]
     }

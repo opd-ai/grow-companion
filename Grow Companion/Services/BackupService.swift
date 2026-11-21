@@ -20,6 +20,7 @@ enum BackupService {
         "equipment", "serviceRecords", "scoutingChecks", "environmentAlerts",
         "trainingSessions", "feedSchedules", "cycleArchives", "sensors",
         "shareGrants", "complianceSnapshots", "ruleEvaluationEvents", "goals",
+        "breeders", "labResults", "screenPlans",
         "journal", "photos"
     ]
 
@@ -109,7 +110,9 @@ enum BackupService {
             ("ComplianceSnapshot", try arrays("complianceSnapshots", in: root).count),
             ("RuleEvaluationEvent", try arrays("ruleEvaluationEvents", in: root).count),
             ("GrowGoal", try arrays("goals", in: root).count),
-            ("GrowerBreeder", try arrays("breeders", in: root).count)
+            ("GrowerBreeder", try arrays("breeders", in: root).count),
+            ("LabResult", try arrays("labResults", in: root).count),
+            ("ScreenPlan", try arrays("screenPlans", in: root).count)
         ]
 
         for check in checks {
@@ -298,6 +301,34 @@ enum BackupService {
             guard let plant = plantByName[string(value["name"])] else { continue }
             if let mother = plantByName[string(value["mother"])] {
                 plant.mother = mother
+            }
+        }
+
+        // Training screens, now that the rooms and plants they place exist.
+        for value in try arrays("screenPlans", in: root) {
+            let plan = ScreenPlan(
+                name: string(value["name"]),
+                columns: value["columns"] as? Int ?? ScreenPlanner.Limits.defaultColumns,
+                rows: value["rows"] as? Int ?? ScreenPlanner.Limits.defaultRows,
+                note: string(value["note"]),
+                startedAt: date(value["startedAt"]) ?? Date(),
+                room: roomByName[string(value["room"])]
+            )
+            plan.createdAt = date(value["createdAt"]) ?? plan.createdAt
+            plan.updatedAt = date(value["updatedAt"]) ?? plan.updatedAt
+            context.insert(plan)
+            count("ScreenPlan")
+
+            for cellValue in value["cells"] as? [[String: Any]] ?? [] {
+                let cell = ScreenCell(
+                    column: cellValue["column"] as? Int ?? 0,
+                    row: cellValue["row"] as? Int ?? 0,
+                    plant: plantByName[string(cellValue["plant"])],
+                    filledAt: date(cellValue["filledAt"]),
+                    plan: plan
+                )
+                context.insert(cell)
+                count("ScreenCell")
             }
         }
 
@@ -669,6 +700,29 @@ enum BackupService {
             breeder.updatedAt = date(value["updatedAt"]) ?? breeder.createdAt
             context.insert(breeder)
             count("GrowerBreeder")
+        }
+
+        // The figures from a lab report
+        for value in try arrays("labResults", in: root) {
+            let figures = (value["analytes"] as? [[String: Any]] ?? []).map { row in
+                LabAnalyte(
+                    name: string(row["name"]),
+                    value: string(row["value"]),
+                    unit: string(row["unit"]),
+                    flagged: row["flagged"] as? Bool ?? false
+                )
+            }
+            let result = LabResult(
+                reportDate: date(value["reportDate"]) ?? Date(),
+                recordedAt: date(value["recordedAt"]) ?? Date(),
+                labName: string(value["lab"]),
+                notes: string(value["notes"]),
+                analytes: figures,
+                userConfirmed: value["userConfirmed"] as? Bool ?? true,
+                plant: plantByName[string(value["plant"])]
+            )
+            context.insert(result)
+            count("LabResult")
         }
 
         // Journal

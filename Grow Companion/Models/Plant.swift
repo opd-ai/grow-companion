@@ -55,6 +55,14 @@ final class Plant {
     @Relationship(deleteRule: .cascade, inverse: \ScoutingCheck.plant)
     var scoutingChecks: [ScoutingCheck] = []
 
+    @Relationship(deleteRule: .cascade, inverse: \LabResult.plant)
+    var labResults: [LabResult] = []
+
+    /// The squares this plant's branches hold on a room's training screen.
+    /// Removing the plant empties them rather than deleting the grid.
+    @Relationship(deleteRule: .nullify, inverse: \ScreenCell.plant)
+    var screenCells: [ScreenCell] = []
+
     init(
         name: String = "",
         strainName: String = "",

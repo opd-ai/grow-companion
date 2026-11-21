@@ -25,9 +25,10 @@ struct PlantRemovalSummary: Equatable {
     let treatments: Int
     let scoutingChecks: Int
     let dryingSessions: Int
+    let labResults: Int
 
     var recordsRemoved: Int {
-        stageEvents + trainingSessions + treatments + scoutingChecks + dryingSessions
+        stageEvents + trainingSessions + treatments + scoutingChecks + dryingSessions + labResults
     }
 }
 
@@ -50,7 +51,8 @@ enum PlantRemovalService {
             trainingSessions: plant.trainingSessions.count,
             treatments: plant.treatments.count,
             scoutingChecks: plant.scoutingChecks.count,
-            dryingSessions: plant.dryingSessions.count
+            dryingSessions: plant.dryingSessions.count,
+            labResults: plant.labResults.count
         )
     }
 
@@ -83,8 +85,11 @@ enum PlantRemovalService {
     }
 
     /// Deletes the plant and the records that belong to it. Journal entries are
-    /// nullified by the model's delete rule, so they survive without a link.
+    /// nullified by the model's delete rule, so they survive without a link. A
+    /// branch placed on a room's training screen is a position, not a record: it
+    /// is emptied, so the grid keeps its shape.
     static func delete(_ plant: Plant, in context: ModelContext) throws {
+        ScreenPlanner.clearPositions(of: plant)
         context.delete(plant)
         do {
             try context.save()

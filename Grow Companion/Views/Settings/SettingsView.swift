@@ -413,6 +413,11 @@ struct SettingsView: View {
                     .font(Theme.sans(12))
             }
             .foregroundStyle(Theme.primary)
+
+            Text("Text follows the text size set in iOS Accessibility settings, so a reading or a stage is never too small to read.")
+                .font(Theme.sans(12))
+                .foregroundStyle(Theme.tertiaryInk)
+                .fixedSize(horizontal: false, vertical: true)
         }
         .growCard()
     }

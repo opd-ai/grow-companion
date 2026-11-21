@@ -29,10 +29,10 @@ struct ModelCount: Identifiable, Hashable {
 
 enum DataInventory {
     /// Every model registered in the container, in the order the versioned
-    /// schema lists it. `CultivationSchemaV5` is the single source for the list.
-    static var models: [any PersistentModel.Type] { CultivationSchemaV5.models }
+    /// schema lists it. `CultivationSchemaV7` is the single source for the list.
+    static var models: [any PersistentModel.Type] { CultivationSchemaV7.models }
 
-    static var schema: Schema { Schema(versionedSchema: CultivationSchemaV5.self) }
+    static var schema: Schema { Schema(versionedSchema: CultivationSchemaV7.self) }
 
     /// The name each model is counted, exported and reported under.
     static var modelNames: [String] {
@@ -49,6 +49,8 @@ enum DataInventory {
     static let probes: [ModelProbe] = [
         probe(GrowGoal.self),
         probe(GrowerBreeder.self),
+        probe(ScreenCell.self),
+        probe(ScreenPlan.self),
         probe(ComplianceSnapshot.self),
         probe(RuleEvaluationEvent.self),
         probe(DryingCheck.self),
@@ -56,6 +58,7 @@ enum DataInventory {
         probe(DryingSession.self),
         probe(TrainingSession.self),
         probe(ScoutingCheck.self),
+        probe(LabResult.self),
         probe(EnvironmentAlert.self),
         probe(ServiceRecord.self),
         probe(Equipment.self),
@@ -148,6 +151,9 @@ enum DataInventory {
         "Equipment": "Equipment",
         "ServiceRecord": "Service history",
         "ScoutingCheck": "Scouting checks",
+        "LabResult": "Lab report figures",
+        "ScreenPlan": "Screen plans",
+        "ScreenCell": "Screen positions",
         "FeedSchedule": "Feed schedules",
         "FeedWeek": "Feed schedule weeks",
         "FeedProduct": "Feed schedule products"

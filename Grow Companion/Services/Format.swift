@@ -178,6 +178,20 @@ enum Format {
         number(value * 100, digits: 0) + "%"
     }
 
+    /// A percentage already expressed as 0–100, such as relative humidity, so
+    /// a Spanish interface reads it with Spanish separators rather than a
+    /// hard-coded decimal point.
+    static func percentValue(_ value: Double, digits: Int = 0) -> String {
+        number(value, digits: digits) + "%"
+    }
+
+    static func percentRange(_ range: ClosedRange<Double>, digits: Int = 0) -> String {
+        number(range.lowerBound, digits: digits)
+            + "–"
+            + number(range.upperBound, digits: digits)
+            + "%"
+    }
+
     /// A number in the current locale: a Spanish (Spain) device sees `24,5`
     /// and an English one `24.5`, and neither is hard-coded here.
     static func number(_ value: Double, digits: Int) -> String {
