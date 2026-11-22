@@ -1,20 +1,27 @@
 # iOS CI and TestFlight delivery
 
-## What the workflows do
+## Workflows
 
-- `.github/workflows/ios-ci.yml` runs for pushes and pull requests targeting `main`. It uses a GitHub-hosted `macos-26` runner, selects Xcode `26.4.1`, resolves Swift packages, then builds and runs the unit and UI test targets on an iPhone 17 simulator. The same `Grow Companion` scheme embeds the `Grow CompanionWidgetExtension` target, so CI compiles the widget with the app. It does not use signing credentials, so pull requests can run without secrets.
-- `.github/workflows/testflight.yml` runs for tags named `v*` and can also be started from the Actions tab. It archives and signs the iOS app, exports an IPA, and uploads it to App Store Connect for TestFlight processing.
+- `.github/workflows/ios-ci.yml` runs for pushes and pull requests targeting `main`. It selects Xcode `26.4.1` on `macos-26`, resolves packages, and runs the unit and UI tests on an iPhone 17 simulator. It needs no signing credentials.
+- `.github/workflows/testflight.yml` runs for `v*` tags or manually from Actions. It validates the configured app, widget, and App Group identifiers, uses Xcode automatic signing and the Team API key for both archive and export, then uploads the IPA with `altool`.
 
-The pipelines use Xcode's `xcodebuild` and macOS `security` commands for archive, signing, and export. `xcrun altool` (included with Xcode) uploads the IPA using an App Store Connect API key. This avoids adding a signing/upload dependency to the app and does not use an Apple ID password. The distribution keychain, profile copy, certificate, API key file, archive, and exported IPA are temporary runner files; cleanup runs on success and failure.
+The project uses these identifiers, chosen from the repository owner and not yet confirmed registered or available with Apple:
 
-## One-time Apple setup
+- App: `com.opdai.growcompanion`
+- Widget extension: `com.opdai.growcompanion.growcompanionwidgetextension`
+- Shared App Group: `group.com.opdai.growcompanion.shared`
 
-1. Enroll in the Apple Developer Program and choose the app's permanent, explicit bundle identifier. Configure a distinct identifier for the widget extension and register the App Group used by both targets. Register the identifiers under Certificates, Identifiers & Profiles, then create the matching app record in App Store Connect. The repository's current identifiers are placeholders, and the TestFlight workflow needs target-specific signing configuration before it can safely archive the app.
-2. Create an **Apple Distribution** certificate and export it from Keychain Access as a password-protected `.p12` that includes its private key.
-3. Create an **App Store Connect** provisioning profile for the explicit bundle identifier and the same team/certificate. The profile must include the app's required entitlements.
-4. In App Store Connect, create an API key with the **App Manager** role. Download its `.p8` private key once and store it securely; Apple does not offer another download of that key.
-5. Add the repository secrets and variable below in GitHub: **Settings → Secrets and variables → Actions**. Do not add certificate, profile, API-key, or `.env` files to the repository.
-6. Ensure GitHub Actions and macOS hosted runners are enabled for the repository/account. The selected `macos-26` image provides Xcode `26.4.1` and the iOS 26.4 simulator runtime used by CI.
+The workflow does not override `PRODUCT_BUNDLE_IDENTIFIER` or pass one provisioning profile to every target. Xcode reads distinct app and widget identifiers from the project and automatically provisions each. It fails before archiving if the repository variables do not match the project settings and both entitlements.
+
+## Apple setup still required
+
+1. Confirm the identifiers above are available for the Apple Developer team, register the app and widget Bundle IDs, and create the App Store Connect app record for the app ID.
+2. Register `group.com.opdai.growcompanion.shared` as an App Group and enable it for both Bundle IDs. Confirm the app's time-sensitive-notification entitlement is permitted for the app ID.
+3. Use a Team API key with the **Admin** role for CI signing. Creating a Team key requires an App Store Connect Admin account. Apple documents the Admin role as having the Certificates, Identifiers & Profiles access and cloud-managed certificate permissions this workflow needs. An App Manager may be granted those permissions as a user, but Apple does not clarify whether those grants apply to API keys; do not assume an App Manager key can provision. Individual API keys cannot use provisioning endpoints.
+4. Keep the API key's `.p8` private key secure. Add the secrets and repository variables below in GitHub under **Settings → Secrets and variables → Actions**. Do not add credentials, profiles, or certificates to the repository.
+5. Ensure GitHub Actions billing and macOS runner access are active. Hosted runner capacity, account policy, and billing are external to the repository.
+
+Both archive and export use `-allowProvisioningUpdates` with the Team key's `-authenticationKeyPath`, `-authenticationKeyID`, and `-authenticationKeyIssuerID` arguments so Xcode can manage signing assets on a clean runner. The workflow does not need a manually supplied `.p12` or `.mobileprovision` secret; cloud-managed signing keeps private certificate keys on Apple's servers. The App Group must already be registered and enabled as above; this repository cannot do that on the user's Apple account.
 
 ## GitHub Actions configuration
 
@@ -23,27 +30,25 @@ Add these **repository secrets**:
 | Name | Expected value | How to obtain it |
 |---|---|---|
 | `APPLE_TEAM_ID` | The 10-character Apple Developer Team ID. | Apple Developer account → Membership details. |
-| `APPLE_DISTRIBUTION_CERTIFICATE_BASE64` | Base64 text of the `.p12` distribution certificate; line breaks are accepted. | Export the Apple Distribution identity, including its private key, from Keychain Access. On macOS, copy `base64 -i AppleDistribution.p12` output into the secret. |
-| `APPLE_DISTRIBUTION_CERTIFICATE_PASSWORD` | The password used when exporting that `.p12`. | Set it during export from Keychain Access. |
-| `APPLE_PROVISIONING_PROFILE_BASE64` | Base64 text of the App Store `.mobileprovision` file. | Download the matching profile from Apple Developer → Certificates, Identifiers & Profiles. On macOS, copy `base64 -i AppStore.mobileprovision` output into the secret. |
-| `APP_STORE_CONNECT_API_KEY_ID` | The key ID shown when creating the App Store Connect API key. | App Store Connect → Users and Access → Integrations → App Store Connect API. |
-| `APP_STORE_CONNECT_ISSUER_ID` | The issuer UUID shown for the App Store Connect API key. | The same Integrations page. |
-| `APP_STORE_CONNECT_API_PRIVATE_KEY` | The full contents of the downloaded `.p8` file, including its `BEGIN` and `END` lines. | The one-time `.p8` download from App Store Connect. Store it securely before adding it as a GitHub secret. |
+| `APP_STORE_CONNECT_API_KEY_ID` | The key ID for a Team API key. | App Store Connect → Users and Access → Integrations → App Store Connect API. |
+| `APP_STORE_CONNECT_ISSUER_ID` | The issuer UUID for that Team key. | The same Integrations page. |
+| `APP_STORE_CONNECT_API_PRIVATE_KEY` | The full contents of the downloaded `.p8` file, including its `BEGIN` and `END` lines. | The one-time download for the Team API key. Store it securely before adding it as a secret. |
 
-Also add this **repository variable** (it is configuration, not a credential):
+Add these **repository variables** (not credentials):
 
-| Name | Expected value | How to obtain it |
-|---|---|---|
-| `IOS_BUNDLE_ID` | The exact explicit bundle identifier registered for the app, for example `com.example.growcompanion`. | Choose/register the identifier in Apple Developer and use the same identifier for the App Store Connect app and provisioning profile. |
+| Name | Required value |
+|---|---|
+| `IOS_BUNDLE_ID` | `com.opdai.growcompanion` |
+| `IOS_WIDGET_BUNDLE_ID` | `com.opdai.growcompanion.growcompanionwidgetextension` |
+| `IOS_APP_GROUP_ID` | `group.com.opdai.growcompanion.shared` |
 
-The workflow currently overrides `PRODUCT_BUNDLE_IDENTIFIER` globally at archive time. Because the app embeds a widget extension, that setting also applies to the extension target, assigning the app and extension the same identifier. The workflow likewise supplies one provisioning profile globally and maps only the app identifier in its export options. Treat TestFlight delivery as blocked until the project has a permanent app identifier, a distinct widget identifier, a registered App Group, and target-specific signing/profile mappings; the current `com.organizationName...` identifiers are placeholders. Do not use the workflow as evidence of a successful release archive until that signing setup is corrected and verified.
-
-Tag `v1.2.3` produces marketing version `1.2.3`; a manual run can provide a version or use the Xcode project's `MARKETING_VERSION`. The GitHub Actions run number is used as the build number.
+The workflow checks these values against the Xcode build settings and both entitlement files. A mismatch fails before signing. If Apple reports that an identifier is unavailable, stop and choose a replacement with the account owner; update it using the Xcode project settings tool and update the matching registrations and GitHub variables. Do not try to work around a mismatch by passing a global bundle-ID override.
 
 ## Release procedure
 
-1. Add all the Apple secrets and the `IOS_BUNDLE_ID` variable.
-2. Push a version tag such as `v1.0.1`, or open **Actions → TestFlight delivery → Run workflow** and optionally enter a marketing version.
-3. Check the workflow run. After Apple's processing finishes, the build appears in the app's TestFlight area in App Store Connect.
+1. Complete the Apple setup and verify the Team API key has signing permissions.
+2. Add the four secrets and three variables above.
+3. Push a version tag such as `v1.0.1`, or open **Actions → TestFlight delivery → Run workflow** and optionally enter a marketing version. The workflow uses the tag version or the Xcode project version and the GitHub Actions run number as the build number.
+4. Confirm automatic signing, archive/export, and the upload step succeeded. Apple processing may take additional time before the build appears in TestFlight.
 
-The CI workflow runs on pull requests without any of these secrets. The TestFlight workflow requires the secrets and a matching Apple team, bundle ID, certificate, profile, and App Store Connect app. An upload to TestFlight does not by itself submit the app for App Store review or release it publicly.
+An upload to TestFlight does not submit the app for App Store review or release it publicly. Device-level privacy, notification, widget, migration, accessibility, localization, and App Store review checks remain necessary before public release.

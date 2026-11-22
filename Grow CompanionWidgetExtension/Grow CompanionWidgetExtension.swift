@@ -17,7 +17,7 @@ struct CareWidgetSnapshot: Codable, Equatable {
 }
 
 enum CareWidgetStore {
-    static let appGroupIdentifier = "group.com.organizationName.Grow-Companion.shared"
+    static let appGroupIdentifier = "group.com.opdai.growcompanion.shared"
     static let fileName = "care-snapshot.json"
 
     static func read() -> CareWidgetSnapshot? {

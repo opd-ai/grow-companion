@@ -39,10 +39,9 @@ jobs:
       - name: Sign, archive, export, and upload to TestFlight
         env:
           IOS_BUNDLE_ID: ${{ vars.IOS_BUNDLE_ID }}
+          IOS_WIDGET_BUNDLE_ID: ${{ vars.IOS_WIDGET_BUNDLE_ID }}
+          IOS_APP_GROUP_ID: ${{ vars.IOS_APP_GROUP_ID }}
           APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
-          APPLE_DISTRIBUTION_CERTIFICATE_BASE64: ${{ secrets.APPLE_DISTRIBUTION_CERTIFICATE_BASE64 }}
-          APPLE_DISTRIBUTION_CERTIFICATE_PASSWORD: ${{ secrets.APPLE_DISTRIBUTION_CERTIFICATE_PASSWORD }}
-          APPLE_PROVISIONING_PROFILE_BASE64: ${{ secrets.APPLE_PROVISIONING_PROFILE_BASE64 }}
           APP_STORE_CONNECT_API_KEY_ID: ${{ secrets.APP_STORE_CONNECT_API_KEY_ID }}
           APP_STORE_CONNECT_ISSUER_ID: ${{ secrets.APP_STORE_CONNECT_ISSUER_ID }}
           APP_STORE_CONNECT_API_PRIVATE_KEY: ${{ secrets.APP_STORE_CONNECT_API_PRIVATE_KEY }}
@@ -52,88 +51,67 @@ jobs:
           set -euo pipefail
 
           : "${IOS_BUNDLE_ID:?Add the IOS_BUNDLE_ID repository variable}"
+          : "${IOS_WIDGET_BUNDLE_ID:?Add the IOS_WIDGET_BUNDLE_ID repository variable}"
+          : "${IOS_APP_GROUP_ID:?Add the IOS_APP_GROUP_ID repository variable}"
           : "${APPLE_TEAM_ID:?Add the APPLE_TEAM_ID repository secret}"
-          : "${APPLE_DISTRIBUTION_CERTIFICATE_BASE64:?Add the APPLE_DISTRIBUTION_CERTIFICATE_BASE64 repository secret}"
-          : "${APPLE_DISTRIBUTION_CERTIFICATE_PASSWORD:?Add the APPLE_DISTRIBUTION_CERTIFICATE_PASSWORD repository secret}"
-          : "${APPLE_PROVISIONING_PROFILE_BASE64:?Add the APPLE_PROVISIONING_PROFILE_BASE64 repository secret}"
           : "${APP_STORE_CONNECT_API_KEY_ID:?Add the APP_STORE_CONNECT_API_KEY_ID repository secret}"
           : "${APP_STORE_CONNECT_ISSUER_ID:?Add the APP_STORE_CONNECT_ISSUER_ID repository secret}"
           : "${APP_STORE_CONNECT_API_PRIVATE_KEY:?Add the APP_STORE_CONNECT_API_PRIVATE_KEY repository secret}"
 
+          if [[ "$IOS_BUNDLE_ID:$IOS_WIDGET_BUNDLE_ID:$IOS_APP_GROUP_ID" == *organizationName* ]]; then
+            echo "::error::Placeholder identifiers remain. Register and configure the app, widget, and App Group identifiers first."
+            exit 1
+          fi
+          case "$IOS_WIDGET_BUNDLE_ID" in
+            "$IOS_BUNDLE_ID".?*) ;;
+            *) echo "::error::IOS_WIDGET_BUNDLE_ID must be distinct and start with IOS_BUNDLE_ID followed by a dot and a suffix."; exit 1 ;;
+          esac
+
+          APP_PROJECT_BUNDLE_ID="$(xcodebuild -showBuildSettings -project "Grow Companion.xcodeproj" -target "Grow Companion" -configuration Release | awk -F ' = ' '/^[[:space:]]*PRODUCT_BUNDLE_IDENTIFIER = / && !value { value = $2 } END { print value }')"
+          WIDGET_PROJECT_BUNDLE_ID="$(xcodebuild -showBuildSettings -project "Grow Companion.xcodeproj" -target "Grow CompanionWidgetExtension" -configuration Release | awk -F ' = ' '/^[[:space:]]*PRODUCT_BUNDLE_IDENTIFIER = / && !value { value = $2 } END { print value }')"
+          APP_GROUP_IN_APP="$(/usr/libexec/PlistBuddy -c 'Print :com.apple.security.application-groups:0' "Grow Companion/Grow Companion.entitlements")"
+          APP_GROUP_IN_WIDGET="$(/usr/libexec/PlistBuddy -c 'Print :com.apple.security.application-groups:0' "Grow CompanionWidgetExtension/Grow CompanionWidgetExtension.entitlements")"
+
+          if [[ "$APP_PROJECT_BUNDLE_ID" != "$IOS_BUNDLE_ID" ]]; then
+            echo "::error::IOS_BUNDLE_ID does not match the app target's configured PRODUCT_BUNDLE_IDENTIFIER ($APP_PROJECT_BUNDLE_ID)."
+            exit 1
+          fi
+          if [[ "$WIDGET_PROJECT_BUNDLE_ID" != "$IOS_WIDGET_BUNDLE_ID" ]]; then
+            echo "::error::IOS_WIDGET_BUNDLE_ID does not match the widget target's configured PRODUCT_BUNDLE_IDENTIFIER ($WIDGET_PROJECT_BUNDLE_ID)."
+            exit 1
+          fi
+          if [[ "$APP_GROUP_IN_APP" != "$IOS_APP_GROUP_ID" || "$APP_GROUP_IN_WIDGET" != "$IOS_APP_GROUP_ID" ]]; then
+            echo "::error::IOS_APP_GROUP_ID must match the App Group entitlement in both targets."
+            exit 1
+          fi
+
           SIGNING_DIR="$RUNNER_TEMP/grow-companion-signing-${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}"
-          KEYCHAIN_PATH="$SIGNING_DIR/signing.keychain-db"
-          CERTIFICATE_PATH="$SIGNING_DIR/distribution.p12"
-          PROFILE_SOURCE_PATH="$SIGNING_DIR/distribution.mobileprovision"
-          PROFILE_PLIST_PATH="$SIGNING_DIR/profile.plist"
-          PROFILE_INSTALL_DIR="$HOME/Library/MobileDevice/Provisioning Profiles"
+          API_KEY_PATH="$SIGNING_DIR/private_keys/AuthKey_${APP_STORE_CONNECT_API_KEY_ID}.p8"
           ARCHIVE_PATH="$SIGNING_DIR/Grow Companion.xcarchive"
           EXPORT_PATH="$SIGNING_DIR/export"
           EXPORT_OPTIONS_PATH="$SIGNING_DIR/ExportOptions.plist"
-          PROFILE_UUID=""
 
           cleanup() {
-            set +e
-            if [[ -n "$PROFILE_UUID" ]]; then
-              rm -f "$PROFILE_INSTALL_DIR/$PROFILE_UUID.mobileprovision"
-            elif [[ -f "$SIGNING_DIR/profile-uuid" ]]; then
-              PROFILE_UUID="$(cat "$SIGNING_DIR/profile-uuid")"
-              rm -f "$PROFILE_INSTALL_DIR/$PROFILE_UUID.mobileprovision"
-            fi
-            security default-keychain -d user -s "$HOME/Library/Keychains/login.keychain-db" >/dev/null 2>&1 || true
-            security list-keychains -d user -s "$HOME/Library/Keychains/login.keychain-db" /Library/Keychains/System.keychain >/dev/null 2>&1 || true
-            security delete-keychain "$KEYCHAIN_PATH" >/dev/null 2>&1 || true
             rm -rf "$SIGNING_DIR"
           }
           trap cleanup EXIT
 
-          mkdir -p "$SIGNING_DIR" "$PROFILE_INSTALL_DIR"
-          printf '%s' "$APPLE_DISTRIBUTION_CERTIFICATE_BASE64" | base64 -D > "$CERTIFICATE_PATH"
-          printf '%s' "$APPLE_PROVISIONING_PROFILE_BASE64" | base64 -D > "$PROFILE_SOURCE_PATH"
-          security cms -D -i "$PROFILE_SOURCE_PATH" > "$PROFILE_PLIST_PATH"
-
-          PROFILE_UUID="$(/usr/libexec/PlistBuddy -c 'Print :UUID' "$PROFILE_PLIST_PATH")"
-          PROFILE_NAME="$(/usr/libexec/PlistBuddy -c 'Print :Name' "$PROFILE_PLIST_PATH")"
-          PROFILE_TEAM_ID="$(/usr/libexec/PlistBuddy -c 'Print :TeamIdentifier:0' "$PROFILE_PLIST_PATH")"
-          PROFILE_APP_ID="$(/usr/libexec/PlistBuddy -c 'Print :Entitlements:application-identifier' "$PROFILE_PLIST_PATH")"
-          printf '%s' "$PROFILE_UUID" > "$SIGNING_DIR/profile-uuid"
-
-          if [[ "$PROFILE_TEAM_ID" != "$APPLE_TEAM_ID" ]]; then
-            echo "::error::The provisioning profile belongs to a different Apple Developer team."
-            exit 1
-          fi
-          case "$PROFILE_APP_ID" in
-            *."$IOS_BUNDLE_ID") ;;
-            *) echo "::error::The provisioning profile does not match IOS_BUNDLE_ID."; exit 1 ;;
-          esac
-
-          cp "$PROFILE_SOURCE_PATH" "$PROFILE_INSTALL_DIR/$PROFILE_UUID.mobileprovision"
-
-          KEYCHAIN_PASSWORD="$(openssl rand -hex 24)"
-          security create-keychain -p "$KEYCHAIN_PASSWORD" "$KEYCHAIN_PATH"
-          security set-keychain-settings -lut 21600 "$KEYCHAIN_PATH"
-          security unlock-keychain -p "$KEYCHAIN_PASSWORD" "$KEYCHAIN_PATH"
-          security import "$CERTIFICATE_PATH" -k "$KEYCHAIN_PATH" -P "$APPLE_DISTRIBUTION_CERTIFICATE_PASSWORD" -T /usr/bin/codesign -T /usr/bin/security
-          security set-key-partition-list -S apple-tool:,apple:,codesign: -s -k "$KEYCHAIN_PASSWORD" "$KEYCHAIN_PATH"
-          security list-keychains -d user -s "$KEYCHAIN_PATH" "$HOME/Library/Keychains/login.keychain-db" /Library/Keychains/System.keychain
-          security default-keychain -d user -s "$KEYCHAIN_PATH"
+          mkdir -p "$(dirname "$API_KEY_PATH")"
+          printf '%s' "$APP_STORE_CONNECT_API_PRIVATE_KEY" > "$API_KEY_PATH"
+          chmod 600 "$API_KEY_PATH"
 
           if [[ "$EVENT_REF_TYPE" == "tag" ]]; then
             APP_VERSION="${GITHUB_REF_NAME#v}"
           else
             APP_VERSION="$RELEASE_VERSION"
             if [[ -z "$APP_VERSION" ]]; then
-              APP_VERSION="$(xcodebuild -showBuildSettings -project "Grow Companion.xcodeproj" -scheme "Grow Companion" -configuration Release | awk -F ' = ' '/MARKETING_VERSION = / { print $2; exit }')"
+              APP_VERSION="$(xcodebuild -showBuildSettings -project "Grow Companion.xcodeproj" -scheme "Grow Companion" -configuration Release | awk -F ' = ' '/MARKETING_VERSION = / && !value { value = $2 } END { print value }')"
             fi
           fi
           if [[ ! "$APP_VERSION" =~ ^[0-9]+(\.[0-9]+){1,2}$ ]]; then
             echo "::error::Version must be numeric, such as 1.2.3. Got '$APP_VERSION'."
             exit 1
           fi
-
-          mkdir -p "$SIGNING_DIR/private_keys"
-          API_KEY_PATH="$SIGNING_DIR/private_keys/AuthKey_${APP_STORE_CONNECT_API_KEY_ID}.p8"
-          printf '%s' "$APP_STORE_CONNECT_API_PRIVATE_KEY" > "$API_KEY_PATH"
-          chmod 600 "$API_KEY_PATH"
 
           cat > "$EXPORT_OPTIONS_PATH" <<EOF
           <?xml version="1.0" encoding="UTF-8"?>
@@ -142,10 +120,8 @@ jobs:
           <dict>
             <key>destination</key><string>export</string>
             <key>method</key><string>app-store-connect</string>
-            <key>signingStyle</key><string>manual</string>
+            <key>signingStyle</key><string>automatic</string>
             <key>teamID</key><string>${APPLE_TEAM_ID}</string>
-            <key>provisioningProfiles</key>
-            <dict><key>${IOS_BUNDLE_ID}</key><string>${PROFILE_UUID}</string></dict>
             <key>manageAppVersionAndBuildNumber</key><false/>
             <key>stripSwiftSymbols</key><true/>
             <key>uploadSymbols</key><true/>
@@ -159,11 +135,11 @@ jobs:
             -configuration Release \
             -destination "generic/platform=iOS" \
             -archivePath "$ARCHIVE_PATH" \
-            CODE_SIGN_STYLE=Manual \
-            CODE_SIGN_IDENTITY="Apple Distribution" \
+            -allowProvisioningUpdates \
+            -authenticationKeyPath "$API_KEY_PATH" \
+            -authenticationKeyID "$APP_STORE_CONNECT_API_KEY_ID" \
+            -authenticationKeyIssuerID "$APP_STORE_CONNECT_ISSUER_ID" \
             DEVELOPMENT_TEAM="$APPLE_TEAM_ID" \
-            PRODUCT_BUNDLE_IDENTIFIER="$IOS_BUNDLE_ID" \
-            PROVISIONING_PROFILE_SPECIFIER="$PROFILE_UUID" \
             MARKETING_VERSION="$APP_VERSION" \
             CURRENT_PROJECT_VERSION="$GITHUB_RUN_NUMBER" \
             CODE_SIGNING_REQUIRED=YES
@@ -171,7 +147,11 @@ jobs:
           xcodebuild -exportArchive \
             -archivePath "$ARCHIVE_PATH" \
             -exportPath "$EXPORT_PATH" \
-            -exportOptionsPlist "$EXPORT_OPTIONS_PATH"
+            -exportOptionsPlist "$EXPORT_OPTIONS_PATH" \
+            -allowProvisioningUpdates \
+            -authenticationKeyPath "$API_KEY_PATH" \
+            -authenticationKeyID "$APP_STORE_CONNECT_API_KEY_ID" \
+            -authenticationKeyIssuerID "$APP_STORE_CONNECT_ISSUER_ID"
 
           IPA_PATH="$(find "$EXPORT_PATH" -name '*.ipa' -print -quit)"
           if [[ -z "$IPA_PATH" ]]; then
@@ -186,18 +166,8 @@ jobs:
             --api-key "$APP_STORE_CONNECT_API_KEY_ID" \
             --api-issuer "$APP_STORE_CONNECT_ISSUER_ID"
 
-      - name: Clean up signing material (always)
+      - name: Clean up signing key (always)
         if: always()
         run: |
-          set +e
           SIGNING_DIR="$RUNNER_TEMP/grow-companion-signing-${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}"
-          KEYCHAIN_PATH="$SIGNING_DIR/signing.keychain-db"
-          PROFILE_INSTALL_DIR="$HOME/Library/MobileDevice/Provisioning Profiles"
-          if [[ -f "$SIGNING_DIR/profile-uuid" ]]; then
-            PROFILE_UUID="$(cat "$SIGNING_DIR/profile-uuid")"
-            rm -f "$PROFILE_INSTALL_DIR/$PROFILE_UUID.mobileprovision"
-          fi
-          security default-keychain -d user -s "$HOME/Library/Keychains/login.keychain-db" >/dev/null 2>&1 || true
-          security list-keychains -d user -s "$HOME/Library/Keychains/login.keychain-db" /Library/Keychains/System.keychain >/dev/null 2>&1 || true
-          security delete-keychain "$KEYCHAIN_PATH" >/dev/null 2>&1 || true
           rm -rf "$SIGNING_DIR"

@@ -31,7 +31,7 @@ enum DeviceKeyStore {
     private static let signingAccount = "identity.signing.v1"
 
     private static var service: String {
-        (Bundle.main.bundleIdentifier ?? "com.organizationName.Grow-Companion") + ".e2ee"
+        (Bundle.main.bundleIdentifier ?? "com.opdai.growcompanion") + ".e2ee"
     }
 
     /// Loads the device identity, creating it on first use.

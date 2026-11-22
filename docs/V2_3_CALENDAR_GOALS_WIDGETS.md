@@ -75,7 +75,7 @@ Reachable from Home's quick actions.
 ## Counts-first widget (7.5)
 
 `Grow CompanionWidgetExtension/` is a WidgetKit extension on the app group
-`group.com.organizationName.Grow-Companion.shared`, supporting the Home Screen
+`group.com.opdai.growcompanion.shared`, supporting the Home Screen
 (systemSmall) and Lock Screen (accessoryRectangular) families.
 
 The app writes a small snapshot (`Services/WidgetSnapshot.swift`) whenever a

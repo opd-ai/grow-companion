@@ -1127,7 +1127,7 @@ Defaults are generic. Widget content never shows harvest weights, compliance
 numbers or journal text.
 
 **Shipped:** `Grow CompanionWidgetExtension/` adds a WidgetKit extension on the
-app group `group.com.organizationName.Grow-Companion.shared`, for the systemSmall
+app group `group.com.opdai.growcompanion.shared`, for the systemSmall
 and accessoryRectangular families. `Services/WidgetSnapshot.swift` writes the
 shared snapshot whenever a reminder's date, title or state changes: counts always,
 task names only when **Settings → Home Screen widget → Show task names** is on,
